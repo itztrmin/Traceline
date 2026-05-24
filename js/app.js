@@ -1,4 +1,3 @@
-
 const trapBtn = document.getElementById('trap-button');
 const backBtn = document.getElementById('back-btn');
 const heroContainer = document.getElementById('hero-container');
