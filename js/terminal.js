@@ -3,22 +3,59 @@ let typeAborter = false;
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+function buildLogoLines() {
+    const dots = [
+        [1,1,1,1,1,1,1],
+        [0,0,1,1,1,0,0],
+        [0,0,1,1,1,0,0],
+        [0,0,1,1,1,0,0],
+        [0,0,1,1,1,0,0],
+        [0,0,1,1,1,0,0],
+        [0,0,1,1,1,0,0],
+    ];
+    const on  = '██';
+    const off = '  ';
+    return dots.map(row => row.map(c => c ? on : off).join(''));
+}
+
+async function printLogo(element) {
+    const lines = buildLogoLines();
+    const width = lines[0].length;
+    const pad = '  ';
+
+    if (!await typeLine(element, '', 0)) return false;
+    for (const line of lines) {
+        if (typeAborter) return false;
+        element.textContent += pad + line + '\n';
+        element.scrollTop = element.scrollHeight;
+        await sleep(35);
+    }
+    if (!await typeLine(element, '', 0)) return false;
+    return true;
+}
+
 async function typeText(element, text) {
+    let lastScroll = 0;
     for (let i = 0; i < text.length; i++) {
         if (typeAborter) return false;
         element.textContent += text[i];
         const ch = text[i];
         let delay;
         if (ch === '\n') {
-            delay = 18 + Math.random() * 30;
+            delay = 14 + Math.random() * 22;
         } else if (ch === ' ') {
-            delay = 4 + Math.random() * 8;
+            delay = 3 + Math.random() * 6;
         } else {
-            delay = 8 + Math.random() * 18;
+            delay = 6 + Math.random() * 14;
+        }
+        const now = Date.now();
+        if (now - lastScroll > 60) {
+            element.scrollTop = element.scrollHeight;
+            lastScroll = now;
         }
         await sleep(delay);
-        element.scrollTop = element.scrollHeight;
     }
+    element.scrollTop = element.scrollHeight;
     return true;
 }
 
@@ -38,13 +75,4 @@ async function typeSection(element, lines, interDelay = 0) {
         if (interDelay > 0) await sleep(interDelay);
     }
     return true;
-}
-
-async function typeTerminal(element, text, clear = false) {
-    if (clear) element.textContent = '';
-    element.classList.remove('typing-complete');
-    isTyping = true;
-    const ok = await typeText(element, text);
-    if (ok) element.classList.add('typing-complete');
-    isTyping = false;
 }
