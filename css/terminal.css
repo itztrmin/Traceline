@@ -1,0 +1,138 @@
+#terminal-wrapper {
+    position: relative;
+    width: 100%;
+    margin-bottom: 40px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 0 0 1px var(--border-color), 0 16px 48px rgba(0, 0, 0, 0.4);
+}
+
+#terminal-titlebar {
+    background-color: #1e1e1e;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid #2a2a2a;
+    flex-shrink: 0;
+}
+
+body.light-mode #terminal-titlebar {
+    background-color: #d0d0d0;
+    border-bottom-color: #b8b8b8;
+}
+
+.term-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.term-dot-red    { background: #ff5f57; }
+.term-dot-yellow { background: #febc2e; }
+.term-dot-green  { background: #28c840; }
+
+#terminal-title-text {
+    flex: 1;
+    text-align: center;
+    font-size: 11px;
+    color: #666;
+    letter-spacing: 1px;
+    font-family: monospace;
+    margin-right: 36px;
+}
+
+body.light-mode #terminal-title-text {
+    color: #888;
+}
+
+#terminal-output {
+    background-color: var(--term-bg);
+    padding: 16px 18px 22px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+    font-size: clamp(10px, 2.2vw, 13px);
+    line-height: 1.7;
+    color: var(--term-text);
+    min-height: 260px;
+    height: 60vh;
+    max-height: 600px;
+    overflow-y: auto;
+    width: 100%;
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-color) transparent;
+    transition: background-color var(--transition-med), color var(--transition-med);
+}
+
+#terminal-output::-webkit-scrollbar {
+    width: 6px;
+}
+
+#terminal-output::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#terminal-output::-webkit-scrollbar-thumb {
+    background-color: var(--border-color);
+    border-radius: 3px;
+}
+
+#terminal-output::after {
+    content: '█';
+    animation: blink 1s step-start infinite;
+    color: var(--term-cursor);
+    margin-left: 2px;
+}
+
+.typing-complete::after {
+    display: none;
+}
+
+.term-divider {
+    color: #555;
+    opacity: 0.85;
+}
+
+body.light-mode .term-divider {
+    color: #aaa;
+}
+
+.copy-log-btn {
+    position: absolute;
+    top: 10px;
+    right: 16px;
+    background: transparent;
+    color: var(--link-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    font-size: 11px;
+    font-family: inherit;
+    letter-spacing: 1px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+    z-index: 10;
+}
+
+.copy-log-btn:hover {
+    color: var(--link-hover);
+    border-color: var(--link-hover);
+}
+
+@keyframes blink {
+    50% { opacity: 0; }
+}
+
+@media (max-width: 480px) {
+    #terminal-output {
+        font-size: 10px;
+        padding: 12px 12px 18px;
+        height: 55vh;
+        max-height: 480px;
+        line-height: 1.6;
+    }
+}
