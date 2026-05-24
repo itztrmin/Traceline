@@ -6,35 +6,39 @@ TL.network = (function () {
 
     var apis = [
         async function () {
-            var r = await TL.fetchWithTimeout('https://ipapi.co/json/', 5000);
-            var d = await r.json();
-            if (d.error) throw new Error('Rate limited');
-            return { ip: d.ip, city: d.city, country: d.country_name, org: d.org, timezone: d.timezone };
+            var d = await TL.fetchWithTimeout('https://ipapi.co/json/', 6000);
+            var j = await d.json();
+            if (j.error) throw new Error('rate limited');
+            return { ip: j.ip, city: j.city, country: j.country_name, org: j.org, timezone: j.timezone };
         },
         async function () {
-            var r = await TL.fetchWithTimeout('https://ipinfo.io/json', 5000);
-            var d = await r.json();
-            return { ip: d.ip, city: d.city, country: d.country, org: d.org, timezone: d.timezone };
+            var d = await TL.fetchWithTimeout('https://ipinfo.io/json', 6000);
+            var j = await d.json();
+            return { ip: j.ip, city: j.city, country: j.country, org: j.org, timezone: j.timezone };
         },
         async function () {
-            var r = await TL.fetchWithTimeout('https://freeipapi.com/api/json', 5000);
-            var d = await r.json();
-            return { ip: d.ipAddress, city: d.cityName, country: d.countryName, org: 'Masked by Network Shield', timezone: d.timeZone };
+            var d = await TL.fetchWithTimeout('https://ipwho.is/', 5000);
+            var j = await d.json();
+            if (!j.success) throw new Error('failed');
+            return { ip: j.ip, city: j.city, country: j.country, org: (j.connection && j.connection.isp) || 'Unknown', timezone: (j.timezone && j.timezone.id) || '' };
         },
         async function () {
-            var r = await TL.fetchWithTimeout('https://api.ipify.org?format=json', 4000);
-            var d = await r.json();
-            return Object.assign({}, empty, { ip: d.ip, org: 'Extended data blocked by shield/AdBlocker' });
+            var d = await TL.fetchWithTimeout('https://api.seeip.org/geoip', 5000);
+            var j = await d.json();
+            return { ip: j.ip, city: j.city, country: j.country, org: j.organization || 'Unknown', timezone: j.timezone || '' };
+        },
+        async function () {
+            var d = await TL.fetchWithTimeout('https://api.ipify.org?format=json', 4000);
+            var j = await d.json();
+            return Object.assign({}, empty, { ip: j.ip, org: 'Geo blocked by Privacy Shield / AdBlocker' });
         }
     ];
 
     async function getIPData() {
         for (var i = 0; i < apis.length; i++) {
-            try {
-                return await apis[i]();
-            } catch (_) {}
+            try { return await apis[i](); } catch (_) {}
         }
-        return Object.assign({}, empty, { ip: 'CONNECTION BLOCKED' });
+        return Object.assign({}, empty, { ip: 'ALL RESOLVERS BLOCKED' });
     }
 
     var DC_KEYWORDS = [
@@ -47,17 +51,13 @@ TL.network = (function () {
         var ispLower = (ipData.org || '').toLowerCase();
         var isSuspicious = DC_KEYWORDS.some(function (k) { return ispLower.indexOf(k) !== -1; });
         var tzMismatch = ipData.timezone && systemTimezone && ipData.timezone !== systemTimezone;
-
         if (isSuspicious && tzMismatch) return 'HIGH RISK: VPN/Proxy + Timezone Mismatch';
         if (isSuspicious) return 'WARNING: Datacenter/VPN ISP Detected';
         if (tzMismatch) return 'WARNING: Timezone Mismatch (' + systemTimezone + ' vs ' + ipData.timezone + ')';
         return 'Not Detected';
     }
 
-    return {
-        getIPData: getIPData,
-        detectVPN: detectVPN
-    };
+    return { getIPData: getIPData, detectVPN: detectVPN };
 })();
 
 window.TL = TL;
