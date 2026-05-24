@@ -1,3 +1,4 @@
+
 const trapBtn = document.getElementById('trap-button');
 const backBtn = document.getElementById('back-btn');
 const heroContainer = document.getElementById('hero-container');
@@ -53,8 +54,8 @@ trapBtn.addEventListener('click', async () => {
 
     const dataPromise = collectAllData();
 
-    if (!await printLogo(terminalEl)) return;
-    if (!await appendBlank(280)) return;
+    if (!await printHeader(terminalEl)) return;
+    if (!await appendBlank(180)) return;
 
     if (!await appendLine('[SYS] Initializing scan engine...', 180)) return;
     if (!await appendLine('[SYS] Establishing data collection context...', 160)) return;
@@ -138,9 +139,14 @@ trapBtn.addEventListener('click', async () => {
     if (!await revealField('AdBlocker', data.adBlock, 560)) return;
     if (!await appendBlank(360)) return;
 
-    if (!await appendLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 90)) return;
-    if (!await appendLine('  SCAN COMPLETE — FINGERPRINT ASSEMBLED', 110)) return;
-    if (!await appendLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 0)) return;
+    const scanLabel = 'SCAN COMPLETE — FINGERPRINT ASSEMBLED';
+    const scanCols = getTerminalCols();
+    const scanBarLen = Math.max(scanLabel.length, Math.min(scanCols - 2, 45));
+    const scanBar = '━'.repeat(scanBarLen);
+    const scanLabelPadded = scanLabel.padStart(Math.floor((scanBarLen + scanLabel.length) / 2)).padEnd(scanBarLen);
+    if (!await appendLine(scanBar, 90)) return;
+    if (!await appendLine(scanLabelPadded, 110)) return;
+    if (!await appendLine(scanBar, 0)) return;
 
     terminalEl.classList.add('typing-complete');
     isTyping = false;
