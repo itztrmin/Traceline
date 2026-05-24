@@ -53,10 +53,6 @@ trapBtn.addEventListener('click', async () => {
     const dataPromise = collectAllData();
 
     if (!await printLogo(terminalEl)) return;
-
-    if (!await appendLine('┌─────────────────────────────────────────────┐', 40)) return;
-    if (!await appendLine('│     TRACELINE DIAGNOSTIC // TELEMETRY LOG   │', 30)) return;
-    if (!await appendLine('└─────────────────────────────────────────────┘', 60)) return;
     if (!await appendBlank(280)) return;
 
     if (!await appendLine('[SYS] Initializing scan engine...', 180)) return;
