@@ -65,8 +65,8 @@
             padding: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
             min-height: 100vh;
+            max-width: 100vw; /* Fixes horizontal overflow displacing the toggler */
             overflow-x: hidden;
             box-sizing: border-box;
             transition: background-color 0.3s ease, color 0.3s ease;
@@ -121,7 +121,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            /* justify-content: center; REMOVED: Stops the layout from vertically jumping */
             width: 100%;
             margin-top: 60px; 
             padding: 20px;
@@ -136,6 +136,7 @@
             text-align: center;
             max-width: 700px;
             width: 100%;
+            margin: auto; /* Vertically centers the intro content naturally */
             padding: 20px 0;
         }
 
@@ -196,6 +197,8 @@
             display: none;
             width: 100%;
             max-width: 900px;
+            box-sizing: border-box;
+            margin: 0 auto;
         }
 
         #terminal-output {
@@ -204,14 +207,17 @@
             border-radius: 6px;
             padding: 20px;
             white-space: pre-wrap;
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            font-size: clamp(11px, 3vw, 14px); /* Scales down aggressively for phones */
+            overflow-wrap: anywhere; /* STRICT WRAP: Stops hashes from breaking the screen width */
+            font-size: clamp(11px, 3vw, 14px); 
             line-height: 1.6;
             color: var(--term-text); 
             margin-bottom: 40px;
             min-height: 300px;
+            max-height: 60vh; /* Keeps terminal from taking over screen */
+            overflow-y: auto; /* Adds internal scrollbar for logs */
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            width: 100%;
+            box-sizing: border-box;
         }
 
         #terminal-output::after {
@@ -317,6 +323,7 @@
             border-top: 1px solid var(--border-color);
             margin-top: auto;
             background-color: var(--nav-bg);
+            box-sizing: border-box;
         }
 
         footer a {
@@ -454,7 +461,6 @@
     async function checkAdBlocker() {
         let isBlocked = false;
         
-        // Network Check (Silently fails on strict blockers)
         try {
             await fetch('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', {
                 method: 'HEAD',
@@ -465,7 +471,6 @@
             isBlocked = true; 
         }
 
-        // DOM Verification Check (Catches uBlock/AdGuard cosmetic filters)
         return new Promise(resolve => {
             setTimeout(() => {
                 const testAd = document.getElementById('ad-test');
@@ -476,7 +481,7 @@
                     }
                 }
                 resolve(isBlocked ? "Detected (Active)" : "Not Detected");
-            }, 250); // Small delay lets the adblocker inject its rules
+            }, 250); 
         });
     }
 
@@ -580,6 +585,7 @@
                 await new Promise(r => setTimeout(r, 1 + Math.random() * 5));
             }
             
+            // This now scrolls the terminal natively instead of aggressively stretching the whole page
             element.scrollTop = element.scrollHeight;
         }
         
@@ -606,14 +612,12 @@
         await typeTerminal(outputElement, "--- TRACELINE DIAGNOSTIC // TELEMETRY LOG ---\n\n[+] INITIALIZING...\n", true);
         if (typeAborter) return;
 
-        // Run AdBlock check first while API fetches
         const adBlockPromise = checkAdBlocker();
         const systemTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         
         let networkString = "";
         let vpnStatus = "Not Detected";
 
-        // Aggressive multi-layered IP fetching to beat browser shields
         let ipData = { ip: "Unknown", city: "Unknown", country: "Unknown", org: "Unknown", timezone: "" };
         
         try {
@@ -657,7 +661,6 @@
             if (isTimezoneMismatch) vpnStatus += ` (Timezone Mismatch)`;
         }
 
-        // Clean up location formatting (Just City, Country) to fix the redundancy bug
         const locString = (ipData.city && ipData.city !== "Unknown" && ipData.city !== "-") ? 
             `${ipData.city}, ${ipData.country}` : 
             "Masked by Privacy Shield";
