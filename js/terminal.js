@@ -3,20 +3,6 @@ let typeAborter = false;
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-const BANNER_ROWS = [
-    '   .:+***+:.',
-    '  :*#######*:',
-    ' +###########+',
-    '+#####TTT#####*',
-    '*#####TTT######',
-    '*######T#######',
-    '*######T#######',
-    '+#####TTT######',
-    ' +###########*',
-    '  :*########:',
-    '   .:+***+:.',
-];
-
 function getTerminalCols() {
     const el = document.getElementById('terminal-output');
     if (!el) return 60;
@@ -30,59 +16,38 @@ function getTerminalCols() {
     return Math.floor((el.clientWidth - padL - padR) / charW);
 }
 
-async function printLogo(element) {
+function centerLine(str, cols) {
+    if (str.length >= cols) return str;
+    const pad = Math.floor((cols - str.length) / 2);
+    return ' '.repeat(pad) + str;
+}
+
+async function printHeader(element) {
     if (typeAborter) return false;
 
-    const LOGO_INDENT = '  ';
-
-    for (const row of BANNER_ROWS) {
-        if (typeAborter) return false;
-        const span = document.createElement('span');
-        span.className = 'logo-white';
-        span.textContent = LOGO_INDENT + row + '\n';
-        element.appendChild(span);
-        element.scrollTop = element.scrollHeight;
-        await sleep(32);
-    }
-
-    element.appendChild(document.createTextNode('\n'));
-
+    const cols = getTerminalCols();
     const label = 'TRACELINE // DIAGNOSTIC SHELL';
-    const barLen = label.length + 2;
+    const barLen = Math.max(label.length, Math.min(cols - 2, 45));
     const bar = '━'.repeat(barLen);
+    const labelPadded = label.padStart(Math.floor((barLen + label.length) / 2)).padEnd(barLen);
 
-    const lines = [
-        LOGO_INDENT + bar,
-        LOGO_INDENT + ' ' + label,
-        LOGO_INDENT + bar,
-    ];
-
-    for (const line of lines) {
+    for (const line of [bar, labelPadded, bar]) {
         if (typeAborter) return false;
-        const span = document.createElement('span');
-        span.className = 'logo-white';
-        span.textContent = line + '\n';
-        element.appendChild(span);
+        element.textContent += centerLine(line, cols) + '\n';
         element.scrollTop = element.scrollHeight;
         await sleep(45);
     }
 
-    element.appendChild(document.createTextNode('\n'));
+    element.textContent += '\n';
     element.scrollTop = element.scrollHeight;
     return true;
 }
 
 async function typeText(element, text) {
     let lastScroll = 0;
-    let tail = element._tail;
-    if (!tail || tail.parentNode !== element) {
-        tail = document.createTextNode('');
-        element.appendChild(tail);
-        element._tail = tail;
-    }
     for (let i = 0; i < text.length; i++) {
         if (typeAborter) return false;
-        tail.textContent += text[i];
+        element.textContent += text[i];
         const ch = text[i];
         let delay;
         if (ch === '\n') {
