@@ -3,34 +3,50 @@ let typeAborter = false;
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-function buildLogoLines() {
-    const dots = [
-        [1,1,1,1,1,1,1],
-        [0,0,1,1,1,0,0],
-        [0,0,1,1,1,0,0],
-        [0,0,1,1,1,0,0],
-        [0,0,1,1,1,0,0],
-        [0,0,1,1,1,0,0],
-        [0,0,1,1,1,0,0],
-    ];
-    const on  = '██';
-    const off = '  ';
-    return dots.map(row => row.map(c => c ? on : off).join(''));
-}
+const T_GRID = [
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+];
 
 async function printLogo(element) {
-    const lines = buildLogoLines();
-    const width = lines[0].length;
-    const pad = '  ';
+    const ON  = '. ';
+    const OFF = '  ';
 
-    if (!await typeLine(element, '', 0)) return false;
-    for (const line of lines) {
+    if (typeAborter) return false;
+
+    for (const row of T_GRID) {
         if (typeAborter) return false;
-        element.textContent += pad + line + '\n';
+        element.textContent += row.map(c => c ? ON : OFF).join('') + '\n';
         element.scrollTop = element.scrollHeight;
-        await sleep(35);
+        await sleep(28);
     }
-    if (!await typeLine(element, '', 0)) return false;
+
+    element.textContent += '\n';
+
+    const box = [
+        '┌─────────────────────────────────────────────┐',
+        '│     TRACELINE DIAGNOSTIC // TELEMETRY LOG   │',
+        '└─────────────────────────────────────────────┘',
+    ];
+    for (const line of box) {
+        if (typeAborter) return false;
+        element.textContent += line + '\n';
+        element.scrollTop = element.scrollHeight;
+        await sleep(40);
+    }
+
+    element.textContent += '\n';
+    element.scrollTop = element.scrollHeight;
     return true;
 }
 
