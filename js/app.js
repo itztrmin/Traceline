@@ -145,10 +145,59 @@ trapBtn.addEventListener('click', async () => {
     isTyping = false;
 
     if (!typeAborter) {
+        // Show copy button
+        showCopyBtn(terminalEl.textContent);
         docsSection.style.display = 'block';
         window.scrollBy({ top: 150, behavior: 'smooth' });
     }
 });
+
+function showCopyBtn(text) {
+    const existing = document.getElementById('copy-log-btn');
+    if (existing) existing.remove();
+
+    const btn = document.createElement('button');
+    btn.id = 'copy-log-btn';
+    btn.textContent = 'Copy Log';
+    btn.className = 'copy-log-btn';
+    btn.addEventListener('click', () => {
+        navigator.clipboard.writeText(text).then(() => {
+            btn.textContent = 'Copied ✓';
+            setTimeout(() => { btn.textContent = 'Copy Log'; }, 2000);
+        }).catch(() => {
+            // Fallback for browsers without clipboard API
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            btn.textContent = 'Copied ✓';
+            setTimeout(() => { btn.textContent = 'Copy Log'; }, 2000);
+        });
+    });
+
+    const wrapper = document.getElementById('terminal-wrapper');
+    wrapper.appendChild(btn);
+}
+
+function getPlatform() {
+    const ua = navigator.userAgent;
+    // Use modern userAgentData if available (Chrome 90+)
+    if (navigator.userAgentData?.platform) {
+        return navigator.userAgentData.platform;
+    }
+    // Fallback: parse UA string
+    if (/Android/i.test(ua)) return 'Android';
+    if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
+    if (/Win/i.test(ua)) return 'Windows';
+    if (/Mac/i.test(ua)) return 'macOS';
+    if (/Linux/i.test(ua)) return 'Linux';
+    // Last resort: deprecated but still works
+    return navigator.platform || 'Unknown';
+}
 
 async function collectAllData() {
     const systemTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -187,7 +236,7 @@ async function collectAllData() {
         adBlock,
         battery,
         sys: {
-            platform: navigator.platform || 'Unknown',
+            platform: getPlatform(),
             cpu: navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Logical Cores` : 'Masked',
             ram: navigator.deviceMemory ? `~${navigator.deviceMemory} GB` : 'Masked',
             display: `${window.screen.width}x${window.screen.height}`,
