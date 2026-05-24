@@ -145,7 +145,6 @@ trapBtn.addEventListener('click', async () => {
     isTyping = false;
 
     if (!typeAborter) {
-        // Show copy button
         showCopyBtn(terminalEl.textContent);
         docsSection.style.display = 'block';
         window.scrollBy({ top: 150, behavior: 'smooth' });
@@ -165,7 +164,6 @@ function showCopyBtn(text) {
             btn.textContent = 'Copied ✓';
             setTimeout(() => { btn.textContent = 'Copy Log'; }, 2000);
         }).catch(() => {
-            // Fallback for browsers without clipboard API
             const ta = document.createElement('textarea');
             ta.value = text;
             ta.style.position = 'fixed';
@@ -185,17 +183,14 @@ function showCopyBtn(text) {
 
 function getPlatform() {
     const ua = navigator.userAgent;
-    // Use modern userAgentData if available (Chrome 90+)
     if (navigator.userAgentData?.platform) {
         return navigator.userAgentData.platform;
     }
-    // Fallback: parse UA string
     if (/Android/i.test(ua)) return 'Android';
     if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
     if (/Win/i.test(ua)) return 'Windows';
     if (/Mac/i.test(ua)) return 'macOS';
     if (/Linux/i.test(ua)) return 'Linux';
-    // Last resort: deprecated but still works
     return navigator.platform || 'Unknown';
 }
 
