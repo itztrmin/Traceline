@@ -164,23 +164,23 @@ async function getIPData() {
 
     const apis = [
         async () => {
-            const r = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(5000) });
+            const r = await fetchWithTimeout('https://ipapi.co/json/', 5000);
             const d = await r.json();
             if (d.error) throw new Error('Rate limited');
             return { ip: d.ip, city: d.city, country: d.country_name, org: d.org, timezone: d.timezone };
         },
         async () => {
-            const r = await fetch('https://ipinfo.io/json', { signal: AbortSignal.timeout(5000) });
+            const r = await fetchWithTimeout('https://ipinfo.io/json', 5000);
             const d = await r.json();
             return { ip: d.ip, city: d.city, country: d.country, org: d.org, timezone: d.timezone };
         },
         async () => {
-            const r = await fetch('https://freeipapi.com/api/json', { signal: AbortSignal.timeout(5000) });
+            const r = await fetchWithTimeout('https://freeipapi.com/api/json', 5000);
             const d = await r.json();
             return { ip: d.ipAddress, city: d.cityName, country: d.countryName, org: 'Masked by Network Shield', timezone: d.timeZone };
         },
         async () => {
-            const r = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(4000) });
+            const r = await fetchWithTimeout('https://api.ipify.org?format=json', 4000);
             const d = await r.json();
             return { ...empty, ip: d.ip, org: 'Extended data blocked by shield/AdBlocker' };
         }
