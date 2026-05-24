@@ -279,14 +279,16 @@ body.light-mode #terminal-title-text {
 
 #terminal-output {
     background-color: var(--term-bg);
-    padding: 20px 22px 24px;
+    padding: 16px 18px 22px;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
-    font-size: clamp(11px, 2.5vw, 13px);
-    line-height: 1.75;
+    word-break: break-all;
+    font-size: clamp(10px, 2.2vw, 13px);
+    line-height: 1.7;
     color: var(--term-text);
-    min-height: 320px;
-    max-height: 65vh;
+    min-height: 260px;
+    height: 60vh;
+    max-height: 600px;
     overflow-y: auto;
     width: 100%;
     box-sizing: border-box;
@@ -481,5 +483,15 @@ footer a:hover {
 
     nav {
         padding: 0 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    #terminal-output {
+        font-size: 10px;
+        padding: 12px 12px 18px;
+        height: 55vh;
+        max-height: 480px;
+        line-height: 1.6;
     }
 }
