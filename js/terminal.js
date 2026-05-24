@@ -4,23 +4,17 @@ let typeAborter = false;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 const BANNER_ROWS = [
-    '.+ooo+.',
-    ':+sssssssss+:',
-    '-+sssssssssssss+-',
-    '.ossssssNMMMMNssssso.',
-    '/sssssssNMd++dMNsssss/',
-    '+sssssssNMy    yMNsssss+',
-    '+ssssssssMMo    oMMssssss+',
-    'sssssssssMMdddddMMNsssssss',
-    'sssssssssNMMMMMMMNssssssss',
-    'sssssssssNMy   yMNssssssss',
-    '+ssssssssNMo   oMNsssssss+',
-    '+sssssssNMd+ +dMNssssss+',
-    '/sssssssNMMMMMNsssssss/',
-    '.osssssssNNNsssssssso.',
-    '-+sssssssssssssss+-',
-    ':+sssssssssss+:',
-    '.+ooo+.',
+    '   .:+***+:.',
+    '  :*#######*:',
+    ' +###########+',
+    '+#####TTT#####*',
+    '*#####TTT######',
+    '*######T#######',
+    '*######T#######',
+    '+#####TTT######',
+    ' +###########*',
+    '  :*########:',
+    '   .:+***+:.',
 ];
 
 function getTerminalCols() {
@@ -36,49 +30,59 @@ function getTerminalCols() {
     return Math.floor((el.clientWidth - padL - padR) / charW);
 }
 
-function centerLine(str, cols) {
-    if (str.length >= cols) return str;
-    const pad = Math.floor((cols - str.length) / 2);
-    return ' '.repeat(pad) + str;
-}
-
 async function printLogo(element) {
     if (typeAborter) return false;
 
-    const cols = getTerminalCols();
+    const LOGO_INDENT = '  ';
 
     for (const row of BANNER_ROWS) {
         if (typeAborter) return false;
-        element.textContent += centerLine(row, cols) + '\n';
+        const span = document.createElement('span');
+        span.className = 'logo-white';
+        span.textContent = LOGO_INDENT + row + '\n';
+        element.appendChild(span);
         element.scrollTop = element.scrollHeight;
         await sleep(32);
     }
 
-    element.textContent += '\n';
+    element.appendChild(document.createTextNode('\n'));
 
     const label = 'TRACELINE // DIAGNOSTIC SHELL';
-    const boxWidth = Math.max(label.length + 4, Math.min(cols - 2, 60));
-    const top    = '┌' + '─'.repeat(boxWidth) + '┐';
-    const mid    = '│' + label.padStart(Math.floor((boxWidth + label.length) / 2)).padEnd(boxWidth) + '│';
-    const bottom = '└' + '─'.repeat(boxWidth) + '┘';
+    const barLen = label.length + 2;
+    const bar = '━'.repeat(barLen);
 
-    for (const line of [top, mid, bottom]) {
+    const lines = [
+        LOGO_INDENT + bar,
+        LOGO_INDENT + ' ' + label,
+        LOGO_INDENT + bar,
+    ];
+
+    for (const line of lines) {
         if (typeAborter) return false;
-        element.textContent += centerLine(line, cols) + '\n';
+        const span = document.createElement('span');
+        span.className = 'logo-white';
+        span.textContent = line + '\n';
+        element.appendChild(span);
         element.scrollTop = element.scrollHeight;
         await sleep(45);
     }
 
-    element.textContent += '\n';
+    element.appendChild(document.createTextNode('\n'));
     element.scrollTop = element.scrollHeight;
     return true;
 }
 
 async function typeText(element, text) {
     let lastScroll = 0;
+    let tail = element._tail;
+    if (!tail || tail.parentNode !== element) {
+        tail = document.createTextNode('');
+        element.appendChild(tail);
+        element._tail = tail;
+    }
     for (let i = 0; i < text.length; i++) {
         if (typeAborter) return false;
-        element.textContent += text[i];
+        tail.textContent += text[i];
         const ch = text[i];
         let delay;
         if (ch === '\n') {
