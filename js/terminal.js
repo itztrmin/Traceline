@@ -3,46 +3,70 @@ let typeAborter = false;
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-const T_GRID = [
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
-    [0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+const BANNER_ROWS = [
+    '.+ooo+.',
+    ':+sssssssss+:',
+    '-+sssssssssssss+-',
+    '.ossssssNMMMMNssssso.',
+    '/sssssssNMd++dMNsssss/',
+    '+sssssssNMy    yMNsssss+',
+    '+ssssssssMMo    oMMssssss+',
+    'sssssssssMMdddddMMNsssssss',
+    'sssssssssNMMMMMMMNssssssss',
+    'sssssssssNMy   yMNssssssss',
+    '+ssssssssNMo   oMNsssssss+',
+    '+sssssssNMd+ +dMNssssss+',
+    '/sssssssNMMMMMNsssssss/',
+    '.osssssssNNNsssssssso.',
+    '-+sssssssssssssss+-',
+    ':+sssssssssss+:',
+    '.+ooo+.',
 ];
 
-async function printLogo(element) {
-    const ON  = '. ';
-    const OFF = '  ';
+function getTerminalCols() {
+    const el = document.getElementById('terminal-output');
+    if (!el) return 60;
+    const style = window.getComputedStyle(el);
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.font = `${style.fontSize} ${style.fontFamily}`;
+    const charW = ctx.measureText('M').width || 8;
+    const padL = parseFloat(style.paddingLeft) || 0;
+    const padR = parseFloat(style.paddingRight) || 0;
+    return Math.floor((el.clientWidth - padL - padR) / charW);
+}
 
+function centerLine(str, cols) {
+    if (str.length >= cols) return str;
+    const pad = Math.floor((cols - str.length) / 2);
+    return ' '.repeat(pad) + str;
+}
+
+async function printLogo(element) {
     if (typeAborter) return false;
 
-    for (const row of T_GRID) {
+    const cols = getTerminalCols();
+
+    for (const row of BANNER_ROWS) {
         if (typeAborter) return false;
-        element.textContent += row.map(c => c ? ON : OFF).join('') + '\n';
+        element.textContent += centerLine(row, cols) + '\n';
         element.scrollTop = element.scrollHeight;
-        await sleep(28);
+        await sleep(32);
     }
 
     element.textContent += '\n';
 
-    const box = [
-        '┌─────────────────────────────────────────────┐',
-        '│     TRACELINE DIAGNOSTIC // TELEMETRY LOG   │',
-        '└─────────────────────────────────────────────┘',
-    ];
-    for (const line of box) {
+    const label = 'TRACELINE // DIAGNOSTIC SHELL';
+    const boxWidth = Math.max(label.length + 4, Math.min(cols - 2, 60));
+    const top    = '┌' + '─'.repeat(boxWidth) + '┐';
+    const mid    = '│' + label.padStart(Math.floor((boxWidth + label.length) / 2)).padEnd(boxWidth) + '│';
+    const bottom = '└' + '─'.repeat(boxWidth) + '┘';
+
+    for (const line of [top, mid, bottom]) {
         if (typeAborter) return false;
-        element.textContent += line + '\n';
+        element.textContent += centerLine(line, cols) + '\n';
         element.scrollTop = element.scrollHeight;
-        await sleep(40);
+        await sleep(45);
     }
 
     element.textContent += '\n';
@@ -58,14 +82,14 @@ async function typeText(element, text) {
         const ch = text[i];
         let delay;
         if (ch === '\n') {
-            delay = 14 + Math.random() * 22;
+            delay = 12 + Math.random() * 18;
         } else if (ch === ' ') {
-            delay = 3 + Math.random() * 6;
+            delay = 2 + Math.random() * 5;
         } else {
-            delay = 6 + Math.random() * 14;
+            delay = 5 + Math.random() * 12;
         }
         const now = Date.now();
-        if (now - lastScroll > 60) {
+        if (now - lastScroll > 50) {
             element.scrollTop = element.scrollHeight;
             lastScroll = now;
         }
