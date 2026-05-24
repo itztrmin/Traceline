@@ -32,6 +32,8 @@ backBtn.addEventListener('click', () => {
     heroContainer.style.display = 'flex';
     trapBtn.textContent = 'Run Security Audit';
     trapBtn.disabled = false;
+    const existing = document.getElementById('copy-log-btn');
+    if (existing) existing.remove();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
@@ -50,108 +52,110 @@ trapBtn.addEventListener('click', async () => {
 
     const dataPromise = collectAllData();
 
-    if (!await appendLine('┌─────────────────────────────────────────────┐', 60)) return;
-    if (!await appendLine('│     TRACELINE DIAGNOSTIC // TELEMETRY LOG   │', 40)) return;
-    if (!await appendLine('└─────────────────────────────────────────────┘', 80)) return;
-    if (!await appendBlank(300)) return;
+    if (!await printLogo(terminalEl)) return;
 
-    if (!await appendLine('[SYS] Initializing scan engine...', 200)) return;
-    if (!await appendLine('[SYS] Establishing data collection context...', 180)) return;
-    if (!await appendLine('[SYS] Loading browser API hooks...', 220)) return;
-    if (!await appendBlank(400)) return;
+    if (!await appendLine('┌─────────────────────────────────────────────┐', 40)) return;
+    if (!await appendLine('│     TRACELINE DIAGNOSTIC // TELEMETRY LOG   │', 30)) return;
+    if (!await appendLine('└─────────────────────────────────────────────┘', 60)) return;
+    if (!await appendBlank(280)) return;
 
-    if (!await appendLine('[NET] Probing network identity...', 120)) return;
-    if (!await appendLine('[NET] Querying geolocation resolvers...', 160)) return;
-    if (!await appendLine('[NET] Tracing ISP route...', 100)) return;
+    if (!await appendLine('[SYS] Initializing scan engine...', 180)) return;
+    if (!await appendLine('[SYS] Establishing data collection context...', 160)) return;
+    if (!await appendLine('[SYS] Loading browser API hooks...', 200)) return;
+    if (!await appendBlank(380)) return;
+
+    if (!await appendLine('[NET] Probing network identity...', 110)) return;
+    if (!await appendLine('[NET] Querying geolocation resolvers...', 140)) return;
+    if (!await appendLine('[NET] Tracing ISP route...', 90)) return;
 
     const data = await dataPromise;
     if (typeAborter) return;
 
     const { ip, loc, org, vpn, systemTimezone, ipTimezone } = data.network;
 
-    if (!await appendLine('[NET] Resolver responded. Parsing...', 300)) return;
-    if (!await appendBlank(200)) return;
+    if (!await appendLine('[NET] Resolver responded. Parsing...', 280)) return;
+    if (!await appendBlank(180)) return;
 
-    if (!await appendLine('[+] NETWORK IDENTIFICATION', 80)) return;
-    if (!await revealField('IP Address', ip, 120)) return;
-    if (!await revealField('Location', loc, 200)) return;
-    if (!await revealField('ISP Provider', org, 180)) return;
-    if (!await revealField('System TZ', systemTimezone, 150)) return;
-    if (!await revealField('IP TZ', ipTimezone || 'Unknown', 150)) return;
-    if (!await revealField('VPN / Proxy', vpn, 250)) return;
-    if (!await appendBlank(350)) return;
+    if (!await appendLine('[+] NETWORK IDENTIFICATION', 70)) return;
+    if (!await revealField('IP Address', ip, 100)) return;
+    if (!await revealField('Location', loc, 180)) return;
+    if (!await revealField('ISP Provider', org, 160)) return;
+    if (!await revealField('System TZ', systemTimezone, 130)) return;
+    if (!await revealField('IP TZ', ipTimezone || 'Unknown', 130)) return;
+    if (!await revealField('VPN / Proxy', vpn, 220)) return;
+    if (!await appendBlank(320)) return;
 
-    if (!await appendLine('[FP] Beginning hardware fingerprint extraction...', 140)) return;
-    if (!await appendLine('[FP] Rendering invisible canvas surface...', 180)) return;
-    if (!await revealField('Canvas Hash', data.canvasHash, 600)) return;
+    if (!await appendLine('[FP] Beginning hardware fingerprint extraction...', 120)) return;
+    if (!await appendLine('[FP] Rendering invisible canvas surface...', 160)) return;
+    if (!await revealField('Canvas Hash', data.canvasHash, 560)) return;
 
-    if (!await appendLine('[FP] Generating audio oscillator signal...', 160)) return;
-    if (!await appendLine('[FP] Processing audio compressor buffer...', 200)) return;
-    if (!await revealField('Audio Hash', data.audioHash, 800)) return;
+    if (!await appendLine('[FP] Generating audio oscillator signal...', 140)) return;
+    if (!await appendLine('[FP] Processing audio compressor buffer...', 180)) return;
+    if (!await revealField('Audio Hash', data.audioHash, 740)) return;
 
-    if (!await appendLine('[FP] Querying WebGL debug extension...', 180)) return;
-    if (!await revealField('GPU Vendor', data.gpu.vendor, 400)) return;
-    if (!await revealField('GPU Renderer', data.gpu.renderer, 200)) return;
+    if (!await appendLine('[FP] Querying WebGL debug extension...', 160)) return;
+    if (!await revealField('GPU Vendor', data.gpu.vendor, 360)) return;
+    if (!await revealField('GPU Renderer', data.gpu.renderer, 180)) return;
 
-    if (!await appendLine('[FP] Enumerating media input devices...', 160)) return;
-    if (!await revealField('Media Devices', data.mediaDevices, 500)) return;
-    if (!await appendBlank(300)) return;
+    if (!await appendLine('[FP] Enumerating media input devices...', 140)) return;
+    if (!await revealField('Media Devices', data.mediaDevices, 460)) return;
+    if (!await appendBlank(280)) return;
 
-    if (!await appendLine('[+] HARDWARE FINGERPRINT COMPLETE', 120)) return;
-    if (!await appendBlank(350)) return;
+    if (!await appendLine('[+] HARDWARE FINGERPRINT COMPLETE', 100)) return;
+    if (!await appendBlank(320)) return;
 
-    if (!await appendLine('[TEL] Extracting system telemetry...', 140)) return;
-    if (!await appendLine('[TEL] Reading navigator properties...', 160)) return;
-    if (!await appendBlank(200)) return;
+    if (!await appendLine('[TEL] Extracting system telemetry...', 120)) return;
+    if (!await appendLine('[TEL] Reading navigator properties...', 140)) return;
+    if (!await appendBlank(180)) return;
 
-    if (!await appendLine('[+] SYSTEM TELEMETRY', 80)) return;
-    if (!await revealField('Platform', data.sys.platform, 180)) return;
-    if (!await revealField('CPU Cores', data.sys.cpu, 220)) return;
-    if (!await revealField('System RAM', data.sys.ram, 200)) return;
-    if (!await revealField('Display', data.sys.display, 180)) return;
-    if (!await revealField('Pixel Ratio', data.sys.dpr, 150)) return;
-    if (!await revealField('Color Depth', data.sys.colorDepth, 150)) return;
-    if (!await revealField('Touch Input', data.sys.touch, 180)) return;
-    if (!await revealField('Language', data.sys.language, 160)) return;
-    if (!await revealField('Languages', data.sys.languages, 200)) return;
-    if (!await revealField('Timezone', data.sys.timezone, 150)) return;
-    if (!await appendBlank(300)) return;
+    if (!await appendLine('[+] SYSTEM TELEMETRY', 70)) return;
+    if (!await revealField('Platform', data.sys.platform, 160)) return;
+    if (!await revealField('CPU Cores', data.sys.cpu, 200)) return;
+    if (!await revealField('System RAM', data.sys.ram, 180)) return;
+    if (!await revealField('Display', data.sys.display, 160)) return;
+    if (!await revealField('Pixel Ratio', data.sys.dpr, 130)) return;
+    if (!await revealField('Color Depth', data.sys.colorDepth, 130)) return;
+    if (!await revealField('Touch Input', data.sys.touch, 160)) return;
+    if (!await revealField('Language', data.sys.language, 140)) return;
+    if (!await revealField('Languages', data.sys.languages, 180)) return;
+    if (!await revealField('Timezone', data.sys.timezone, 130)) return;
+    if (!await appendBlank(280)) return;
 
     if (data.battery) {
-        if (!await appendLine('[TEL] Reading battery subsystem...', 160)) return;
-        if (!await appendLine('[+] POWER STATE', 80)) return;
-        if (!await revealField('Battery', data.battery, 400)) return;
-        if (!await appendBlank(300)) return;
+        if (!await appendLine('[TEL] Reading battery subsystem...', 140)) return;
+        if (!await appendLine('[+] POWER STATE', 70)) return;
+        if (!await revealField('Battery', data.battery, 360)) return;
+        if (!await appendBlank(280)) return;
     }
 
-    if (!await appendLine('[PRIV] Auditing privacy signals...', 140)) return;
-    if (!await appendLine('[PRIV] Probing ad network endpoints...', 180)) return;
-    if (!await appendBlank(200)) return;
+    if (!await appendLine('[PRIV] Auditing privacy signals...', 120)) return;
+    if (!await appendLine('[PRIV] Probing ad network endpoints...', 160)) return;
+    if (!await appendBlank(180)) return;
 
-    if (!await appendLine('[+] CAPABILITIES & PRIVACY', 80)) return;
-    if (!await revealField('PDF Engine', data.priv.pdf, 180)) return;
-    if (!await revealField('Cookies', data.priv.cookies, 150)) return;
-    if (!await revealField('Do Not Track', data.priv.dnt, 200)) return;
-    if (!await revealField('Glob. Privacy', data.priv.gpc, 200)) return;
-    if (!await revealField('JS Enabled', 'Confirmed (you\'re reading this)', 150)) return;
-    if (!await revealField('AdBlocker', data.adBlock, 600)) return;
-    if (!await appendBlank(400)) return;
+    if (!await appendLine('[+] CAPABILITIES & PRIVACY', 70)) return;
+    if (!await revealField('PDF Engine', data.priv.pdf, 160)) return;
+    if (!await revealField('Cookies', data.priv.cookies, 130)) return;
+    if (!await revealField('Do Not Track', data.priv.dnt, 180)) return;
+    if (!await revealField('Glob. Privacy', data.priv.gpc, 180)) return;
+    if (!await revealField('JS Enabled', "Confirmed (you're reading this)", 130)) return;
+    if (!await revealField('AdBlocker', data.adBlock, 560)) return;
+    if (!await appendBlank(360)) return;
 
-    if (!await appendLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 100)) return;
-    if (!await appendLine('  SCAN COMPLETE — FINGERPRINT ASSEMBLED', 120)) return;
+    if (!await appendLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 90)) return;
+    if (!await appendLine('  SCAN COMPLETE — FINGERPRINT ASSEMBLED', 110)) return;
     if (!await appendLine('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 0)) return;
 
     terminalEl.classList.add('typing-complete');
     isTyping = false;
 
     if (!typeAborter) {
-        showCopyBtn(terminalEl.textContent);
+        showCopyBtn();
         docsSection.style.display = 'block';
         window.scrollBy({ top: 150, behavior: 'smooth' });
     }
 });
 
-function showCopyBtn(text) {
+function showCopyBtn() {
     const existing = document.getElementById('copy-log-btn');
     if (existing) existing.remove();
 
@@ -160,20 +164,26 @@ function showCopyBtn(text) {
     btn.textContent = 'Copy Log';
     btn.className = 'copy-log-btn';
     btn.addEventListener('click', () => {
-        navigator.clipboard.writeText(text).then(() => {
+        const raw = terminalEl.textContent.replace(/█/g, '').trimEnd();
+        navigator.clipboard.writeText(raw).then(() => {
             btn.textContent = 'Copied ✓';
             setTimeout(() => { btn.textContent = 'Copy Log'; }, 2000);
         }).catch(() => {
-            const ta = document.createElement('textarea');
-            ta.value = text;
-            ta.style.position = 'fixed';
-            ta.style.opacity = '0';
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
-            btn.textContent = 'Copied ✓';
-            setTimeout(() => { btn.textContent = 'Copy Log'; }, 2000);
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = raw;
+                ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                btn.textContent = 'Copied ✓';
+                setTimeout(() => { btn.textContent = 'Copy Log'; }, 2000);
+            } catch (_) {
+                btn.textContent = 'Failed';
+                setTimeout(() => { btn.textContent = 'Copy Log'; }, 2000);
+            }
         });
     });
 
@@ -183,15 +193,23 @@ function showCopyBtn(text) {
 
 function getPlatform() {
     const ua = navigator.userAgent;
-    if (navigator.userAgentData?.platform) {
-        return navigator.userAgentData.platform;
-    }
+    if (navigator.userAgentData?.platform) return navigator.userAgentData.platform;
     if (/Android/i.test(ua)) return 'Android';
     if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
     if (/Win/i.test(ua)) return 'Windows';
     if (/Mac/i.test(ua)) return 'macOS';
     if (/Linux/i.test(ua)) return 'Linux';
     return navigator.platform || 'Unknown';
+}
+
+function fetchWithTimeout(url, ms) {
+    return new Promise((resolve, reject) => {
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => { ctrl.abort(); reject(new Error('timeout')); }, ms);
+        fetch(url, { signal: ctrl.signal })
+            .then(r => { clearTimeout(timer); resolve(r); })
+            .catch(e => { clearTimeout(timer); reject(e); });
+    });
 }
 
 async function collectAllData() {
@@ -216,14 +234,7 @@ async function collectAllData() {
     const langs = navigator.languages ? navigator.languages.slice(0, 3).join(', ') : navigator.language || 'Unknown';
 
     return {
-        network: {
-            ip: ipData.ip,
-            loc,
-            org: ipData.org || 'Unknown',
-            vpn,
-            systemTimezone,
-            ipTimezone: ipData.timezone
-        },
+        network: { ip: ipData.ip, loc, org: ipData.org || 'Unknown', vpn, systemTimezone, ipTimezone: ipData.timezone },
         canvasHash,
         audioHash,
         gpu,
