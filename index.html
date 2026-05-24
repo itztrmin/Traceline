@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta property="og:title" content="Baseline - Security Audit">
+    <meta property="og:description" content="What happens behind the scenes when you visit a website? Run this audit to see your exact digital footprint and how to stop trackers.">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#0d0d0d">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <title>Baseline - Security Audit</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bebas+Neue&family=Coiny&family=Datatype:wght@100..900&family=Elms+Sans:ital,wght@0,100..900;1,100..900&family=Geo:ital@0;1&family=Goldman:wght@400;700&family=Joti+One&family=Lilita+One&family=Smooch+Sans:wght@100..900&display=swap" rel="stylesheet">
+
+    <style>
+        /* CSS Variables for Theming */
+        :root {
+            --bg-color: #0d0d0d;
+            --text-color: #d1d1d1;
+            --heading-color: #ffffff;
+            --nav-bg: rgba(13, 13, 13, 0.9);
+            --border-color: #333333;
+            --box-bg: #161616;
+            --btn-bg: #e0e0e0;
+            --btn-text: #000000;
+            --btn-hover: #ffffff;
+            --btn-disabled: #2a2a2a;
+            --btn-disabled-text: #555555;
+            --term-bg: #111111;
+            --term-text: #e0e0e0;
+            --term-cursor: #888888;
+            --highlight-bg: #222222;
+            --link-color: #888888;
+            --link-hover: #ffffff;
+        }
+
+        body.light-mode {
+            --bg-color: #f7f7f7;
+            --text-color: #333333;
+            --heading-color: #111111;
+            --nav-bg: rgba(247, 247, 247, 0.9);
+            --border-color: #d1d1d1;
+            --box-bg: #ebebeb;
+            --btn-bg: #111111;
+            --btn-text: #ffffff;
+            --btn-hover: #333333;
+            --btn-disabled: #cccccc;
+            --btn-disabled-text: #888888;
+            --term-bg: #ffffff;
+            --term-text: #222222;
+            --term-cursor: #111111;
+            --highlight-bg: #e0e0e0;
+            --link-color: #555555;
+            --link-hover: #111111;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            /* This is the "old font" stack */
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Navbar Styling */
+        nav {
+            width: 100%;
+            height: 60px;
+            background-color: var(--nav-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            box-sizing: border-box;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+        }
+
+        .brand {
+            /* Reverted to inherit body font */
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--heading-color);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--heading-color);
+            width: auto;
+            max-width: none;
+            border-radius: 0;
+        }
+        
+        .theme-toggle:hover {
+            background: none;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.7;
+        }
+
+        .theme-toggle svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .sun-icon { display: none; }
+        .moon-icon { display: block; }
+        body.light-mode .sun-icon { display: block; }
+        body.light-mode .moon-icon { display: none; }
+
+        /* Main Container */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            margin-top: 60px; 
+            padding-bottom: 40px;
+        }
+
+        #hero-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px 20px;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .title {
+            /* Reverted to inherit body font */
+            font-size: clamp(20px, 5vw, 28px);
+            color: var(--heading-color);
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+        }
+
+        .disclaimer {
+            font-size: clamp(13px, 3.5vw, 15px);
+            margin-bottom: 40px;
+            line-height: 1.7;
+            padding: 25px;
+            background-color: var(--box-bg);
+            border-left: 4px solid var(--border-color);
+            border-radius: 4px;
+            text-align: left;
+            width: 100%;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        /* Buttons */
+        button {
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
+            border: none;
+            border-radius: 4px;
+            padding: 16px 45px;
+            font-size: clamp(15px, 4vw, 18px);
+            font-weight: bold;
+            font-family: inherit;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: all 0.2s ease;
+            width: 100%;
+            max-width: 350px;
+        }
+
+        button:hover {
+            background-color: var(--btn-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        button:disabled {
+            background-color: var(--btn-disabled);
+            color: var(--btn-disabled-text);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Results & Documentation UI */
+        #results-container {
+            display: none;
+            width: 100%;
+            max-width: 900px;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+
+        #terminal-output {
+            background-color: var(--term-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 25px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            font-size: clamp(13px, 3vw, 15px);
+            line-height: 1.6;
+            color: var(--term-text); 
+            margin-bottom: 50px;
+            min-height: 400px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+
+        #terminal-output::after {
+            content: '█';
+            animation: blink 1s step-start infinite;
+            color: var(--term-cursor);
+            margin-left: 5px;
+        }
+
+        .typing-complete::after { display: none; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Documentation Styling */
+        .docs {
+            line-height: 1.8;
+            font-size: clamp(14px, 3.5vw, 16px);
+            padding: 0 10px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .docs h2 {
+            font-family: 'Archivo Black', sans-serif;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-top: 30px;
+            font-size: clamp(22px, 4vw, 28px);
+        }
+
+        .docs h3 {
+            font-family: 'Archivo Black', sans-serif;
+            color: var(--heading-color);
+            margin-top: 50px;
+            margin-bottom: 15px;
+            font-size: clamp(18px, 3.5vw, 22px);
+            display: flex;
+            align-items: center;
+        }
+        
+        .docs h3::before {
+            content: "■";
+            color: var(--border-color);
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        .docs p { margin-bottom: 20px; }
+        .docs strong { color: var(--heading-color); font-weight: 600; }
+
+        .highlight {
+            background-color: var(--highlight-bg);
+            padding: 3px 6px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        hr {
+            border: 0;
+            height: 1px;
+            background: var(--border-color);
+            margin: 40px 0;
+        }
+
+        /* Bottom Actions Area */
+        .bottom-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .back-btn {
+            background-color: transparent;
+            color: var(--heading-color);
+            border: 2px solid var(--border-color);
+            padding: 14px 40px;
+            font-size: 15px;
+            margin-bottom: 20px;
+            width: auto;
+        }
+
+        .back-btn:hover {
+            background-color: var(--border-color);
+            color: var(--bg-color);
+            box-shadow: none;
+            transform: none;
+        }
+
+        .tagline {
+            font-family: 'Goldman', sans-serif;
+            color: var(--link-color);
+            font-size: 14px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Footer Styling */
+        footer {
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: var(--link-color);
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
+            background-color: var(--nav-bg);
+            transition: all 0.3s ease;
+        }
+
+        footer a {
+            color: var(--link-color);
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.2s ease;
+        }
+
+        footer a:hover { color: var(--link-hover); }
+
+        .ad-banner-test {
+            width: 1px;
+            height: 1px;
+            position: absolute;
+            left: -9999px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="brand">Baseline</div>
+    <button class="theme-toggle" id="theme-btn" aria-label="Toggle Theme">
+        <svg class="moon-icon" viewBox="0 0 24 24">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+        <svg class="sun-icon" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+    </button>
+</nav>
+
+<div id="ad-test" class="ad-banner-test ad-banner ad-sponsor adsbox"></div>
+
+<main>
+    <div id="hero-container">
+        <div class="title">What happens behind the scenes when you visit a website?</div>
+        
+        <div class="disclaimer">
+            <strong>SECURITY DISCLAIMER</strong><br><br>
+            This page was built for educational and cybersecurity awareness purposes. By clicking the button below, you will allow this script to interrogate your browser. It will extract your hardware identity, network footprint, and rendering metrics to show you exactly what invisible trackers see.<br><br>
+            <em>Privacy Guarantee:</em> There is no backend database connected to this page. Everything you are about to see is processed entirely on your own device. The data is pulled, displayed on your screen, and deleted the moment you close the tab.
+        </div>
+
+        <button id="trap-button">Run Security Audit</button>
+    </div>
+
+    <div id="results-container">
+        
+        <div id="terminal-output"></div>
+
+        <div class="docs" id="documentation-section" style="display: none;">
+            <h2>The Post-Mortem: How We Found This & How to Stop It</h2>
+            <p>What you just watched scroll by is your digital footprint. And frankly, it's a fucking privacy shitshow. When you browse the web, you don't just ask for a webpage—your browser practically hands over your system's entire goddamn dossier in exchange. Advertising networks, security companies, and data brokers don't rely entirely on cookies anymore. That's old bullshit. Instead, they look at the exact combination of hardware, network settings, and system configurations you just exposed. Together, these form a "fingerprint" that is almost certainly unique to you.</p>
+            
+            <p>Here is a breakdown of exactly how this script tricked your browser into coughing up that information, and more importantly, how you can lock this damn thing down.</p>
+
+            <hr>
+
+            <h3>1. VPN / Proxy Detection Heuristics</h3>
+            <p><strong>How we got it:</strong> Identifying a VPN solely from the browser is a bitch, but we use logic to catch you slipping. We checked the local timezone of your operating system (via your browser's system clock) and compared it to the geographical timezone associated with your IP address. If you are physically sitting in Dhaka but your IP claims you're in New York, the timezones mismatch, immediately flagging you as using a proxy. We also scan your Internet Service Provider (ISP) name for known datacenter hosts (like AWS, DigitalOcean, or M247) because regular residential users don't use server farms for casual browsing.</p>
+            <p><strong>How to prevent it:</strong> Spoofing your system timezone to match your VPN's server timezone helps defeat the clock check. Extensions like <em>Spoof Timezone</em> can automate this. However, evading commercial database IP checks requires using Residential Proxies, which route traffic through actual hacked or leased household connections rather than data centers.</p>
+
+            <h3>2. The Canvas Fingerprint</h3>
+            <p><strong>How we got it:</strong> HTML5 includes a powerful drawing tool called a <span class="highlight">&lt;canvas&gt;</span>. Websites normally use this to render browser games or charts. In this script, we created an invisible canvas and forced your browser to draw a very specific, layered image using different colors and text fonts. Because every computer has a slightly different combination of graphics drivers, installed fonts, and sub-pixel smoothing algorithms, the resulting image is microscopically unique. We took a snapshot of those invisible pixels and hashed it into a unique ID code.</p>
+            <p><strong>How to prevent it:</strong> Traditional ad-blockers like uBlock Origin usually don't stop this because drawing on a canvas is a legitimate web feature. To fight back, you need to use a browser that actually gives a damn, like <strong>Brave</strong> or the <strong>Tor Browser</strong>. If you use Firefox, install an extension called <strong>CanvasBlocker</strong> which silently injects fake, randomized data into the math every time a site tries to draw a hidden image, completely trashing their metrics.</p>
+
+            <h3>3. AudioContext Fingerprinting</h3>
+            <p><strong>How we got it:</strong> We used the Web Audio API to create a high-frequency sine wave, pushed it through a digital audio compressor, and mathematically measured the result. We never actually played the sound through your speakers. Instead, we captured the digital audio buffer. Your specific sound card architecture dictates exactly how floating-point math is handled during processing. It's a ridiculously accurate, sneaky bastard of a hardware ID.</p>
+            <p><strong>How to prevent it:</strong> Similar to canvas fingerprinting, you are fighting native web features. Using the <strong>Brave</strong> browser is currently one of the best defenses, as it intercepts audio API requests and injects cryptographic noise into the result, ruining their math. For absolute protection, you can completely disable JavaScript, though this will break almost the entire modern internet.</p>
+
+            <h3>4. WebGL & GPU Extraction</h3>
+            <p><strong>How we got it:</strong> WebGL is the engine browsers use to render 3D graphics. We spun up a 3D environment in the background and simply asked it for the name of the hardware doing the heavy lifting by calling a specific debug extension (<span class="highlight">WEBGL_debug_renderer_info</span>). Your browser happily handed over the exact make and model of your graphics card. Thanks for playing, sucker.</p>
+            <p><strong>How to prevent it:</strong> You can disable WebGL entirely in your browser's advanced settings (in Firefox, type <code>about:config</code> and set <code>webgl.disabled</code> to true). Keep in mind that doing this will break browser-based 3D games, Google Earth, and advanced design tools.</p>
+
+            <h3>5. Silent Media Device Enumeration</h3>
+            <p><strong>How we got it:</strong> You know how websites have to ask permission to use your camera and microphone? Yeah, well, they don't have to ask permission to just <em>count</em> them. By querying <span class="highlight">navigator.mediaDevices.enumerateDevices()</span>, we asked your browser exactly how many audio inputs and video lenses are currently plugged into your machine. Even without granting us access to record, knowing you have exactly two webcams and three audio inputs adds another highly specific data point to your fingerprint.</p>
+            <p><strong>How to prevent it:</strong> Safari actually restricts this by default until permission is granted, which is a rare Apple W. For Chrome and Firefox, you have to dig into deep configuration flags to randomize or spoof media enumeration. The easiest fix? Unplug your shit when you aren't using it.</p>
+
+            <h3>6. Hardware & Network Telemetry</h3>
+            <p><strong>How we got it:</strong> We didn't even have to hack anything for this part—your browser just broadcasted it like a complete idiot. Using standard commands, we asked your machine how many CPU cores it has, how much RAM is installed, and what your screen's exact color-depth is. We then pinged a public IP lookup API to grab your location and ISP. When combined, this telemetry is easily enough to track you across different websites even if you religiously clear your cookies.</p>
+            <p><strong>How to prevent it:</strong> The best defense against general telemetry is blending in with the crowd. The <strong>Tor Browser</strong> handles this exceptionally well by forcing every user to share the exact same screen size, hardware profile, and timezone, making it impossible for trackers to tell you apart from anyone else. For daily browsing, combining a strict privacy browser with a trusted VPN is your best bet to mask your IP and severely limit the amount of hardware data you leak.</p>
+            
+            <div class="bottom-actions">
+                <button class="back-btn" id="back-btn">Back To Main Page</button>
+                <div class="tagline">Stay safe. Stay aware.</div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<footer>
+    &copy; 2026 <a href="https://trmin.pages.dev" target="_blank" rel="noopener">itztrmin</a> all rights reserved.
+</footer>
+
+<script>
+    // Global variable to handle typewriter animation interrupts
+    let isTyping = false;
+    let typeAborter = false;
+
+    // Theme Toggle Logic
+    const themeBtn = document.getElementById('theme-btn');
+    themeBtn.addEventListener('click', () => {
+        document.body.classList.toggle('light-mode');
+    });
+
+    // Reset UI Logic (Back to Main Page)
+    document.getElementById('back-btn').addEventListener('click', () => {
+        typeAborter = true; // Stop any ongoing typing animations
+        
+        document.getElementById('results-container').style.display = 'none';
+        document.getElementById('documentation-section').style.display = 'none';
+        document.getElementById('hero-container').style.display = 'flex';
+        
+        const trapBtn = document.getElementById('trap-button');
+        trapBtn.innerText = "Run Security Audit";
+        trapBtn.disabled = false;
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    function checkAdBlocker() {
+        const testAd = document.getElementById('ad-test');
+        // Check offset, display, and visibility
+        const isBlocked = testAd.offsetHeight === 0 || 
+                          window.getComputedStyle(testAd).display === 'none' ||
+                          window.getComputedStyle(testAd).visibility === 'hidden';
+        return isBlocked ? "Detected (Active)" : "Not Detected";
+    }
+
+    function getCanvasHash() {
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.textBaseline = "top";
+            ctx.font = "14px 'Arial'";
+            ctx.fillStyle = "#f60";
+            ctx.fillRect(125, 1, 62, 20);
+            ctx.fillStyle = "#069";
+            ctx.fillText("SysTrack_01", 2, 15);
+            ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+            ctx.fillText("SysTrack_01", 4, 17);
+            
+            const data = canvas.toDataURL();
+            let hash = 0;
+            for (let i = 0; i < data.length; i++) {
+                const char = data.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash;
+            }
+            return Math.abs(hash).toString(16);
+        } catch(e) {
+            return "Execution Blocked";
+        }
+    }
+
+    async function getAudioHash() {
+        try {
+            const audioCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 44100, 44100);
+            const oscillator = audioCtx.createOscillator();
+            oscillator.type = 'triangle';
+            oscillator.frequency.setValueAtTime(10000, audioCtx.currentTime);
+            const compressor = audioCtx.createDynamicsCompressor();
+            oscillator.connect(compressor);
+            compressor.connect(audioCtx.destination);
+            oscillator.start(0);
+            
+            const renderPromise = audioCtx.startRendering();
+            const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(null), 1000));
+            
+            const buffer = await Promise.race([renderPromise, timeoutPromise]);
+            if (!buffer) return "Timeout (Privacy Block)";
+
+            const data = buffer.getChannelData(0);
+            let sum = 0;
+            for (let i = 4500; i < 5000; i++) { sum += Math.abs(data[i]); }
+            return sum.toString().replace('.', '').substring(0, 10);
+        } catch(e) {
+            return "Restricted by Privacy Settings";
+        }
+    }
+
+    function getGPU() {
+        try {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+            if (!gl) return { vendor: "WebGL Not Supported", renderer: "WebGL Not Supported" };
+            const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+            if (debugInfo) {
+                return {
+                    vendor: gl.getParameter(debugInfo.UNMASKED_VENDOR_WEBGL),
+                    renderer: gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL)
+                };
+            }
+            return { vendor: "Masked by Driver", renderer: "Masked by Driver" };
+        } catch (e) {
+            return { vendor: "Execution Failed", renderer: "Execution Failed" };
+        }
+    }
+
+    async function getMediaDevices() {
+        try {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+                return "API Not Supported/Restricted";
+            }
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoCount = devices.filter(d => d.kind === 'videoinput').length;
+            const audioCount = devices.filter(d => d.kind === 'audioinput').length;
+            return `Cameras: ${videoCount} | Mics: ${audioCount} (Silently Enumerated)`;
+        } catch(e) {
+            return "Blocked by Browser";
+        }
+    }
+
+    async function typeTerminal(element, text, clear = false) {
+        if (clear) element.textContent = ""; 
+        element.classList.remove("typing-complete");
+        isTyping = true;
+        
+        for (let i = 0; i < text.length; i++) {
+            if (typeAborter) break; // Break out if user clicked back
+
+            element.textContent += text[i];
+            
+            if (text[i] === '\n') {
+                await new Promise(r => setTimeout(r, 100 + Math.random() * 150));
+            } else {
+                await new Promise(r => setTimeout(r, 2 + Math.random() * 8));
+            }
+            
+            element.scrollTop = element.scrollHeight;
+        }
+        
+        if (!typeAborter) element.classList.add("typing-complete");
+        isTyping = false;
+    }
+
+    document.getElementById('trap-button').addEventListener('click', async () => {
+        if (isTyping) return;
+        typeAborter = false;
+
+        const button = document.getElementById('trap-button');
+        const heroContainer = document.getElementById('hero-container');
+        const resultsContainer = document.getElementById('results-container');
+        const outputElement = document.getElementById('terminal-output');
+        
+        button.innerText = "Processing...";
+        button.disabled = true;
+        
+        heroContainer.style.display = "none";
+        resultsContainer.style.display = "block";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        await typeTerminal(outputElement, "====================================================\n SYSTEM DIAGNOSTIC // TELEMETRY EXFILTRATION LOG \n====================================================\n\n[+] INITIALIZING SCAN...\n", true);
+        if (typeAborter) return;
+
+        const adBlockStatus = checkAdBlocker();
+        const systemTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        
+        let networkString = "";
+        let vpnStatus = "Not Detected";
+
+        try {
+            const ipResponse = await fetch('https://ipapi.co/json/');
+            if (!ipResponse.ok) throw new Error("Primary API Failed");
+            const ipData = await ipResponse.json();
+            
+            const ipTimezone = ipData.timezone;
+            const isp = (ipData.org || "").toLowerCase();
+            
+            const suspiciousISPs = ['vpn', 'proxy', 'datacenter', 'aws', 'amazon', 'digitalocean', 'linode', 'ovh', 'm247', 'cloudflare', 'hosting'];
+            const isSuspiciousISP = suspiciousISPs.some(keyword => isp.includes(keyword));
+            const isTimezoneMismatch = ipTimezone && ipTimezone !== systemTimezone;
+
+            if (isSuspiciousISP || isTimezoneMismatch) {
+                vpnStatus = "WARNING: Probable VPN/Proxy Detected";
+                if (isTimezoneMismatch) vpnStatus += ` (Timezone Mismatch)`;
+            }
+
+            networkString = `    IP Address    : ${ipData.ip}\n    Location      : ${ipData.city}, ${ipData.region} (${ipData.country_name})\n    ISP Provider  : ${ipData.org}\n    VPN / Proxy   : ${vpnStatus}\n`;
+        } catch (e1) {
+            try {
+                const fallbackResponse = await fetch('https://ipwho.is/');
+                const fallbackData = await fallbackResponse.json();
+                
+                const ipTimezone = fallbackData.timezone ? fallbackData.timezone.id : "";
+                const isp = (fallbackData.connection.isp || "").toLowerCase();
+                
+                const suspiciousISPs = ['vpn', 'proxy', 'datacenter', 'aws', 'amazon', 'digitalocean', 'linode', 'ovh', 'm247', 'cloudflare', 'hosting'];
+                const isSuspiciousISP = suspiciousISPs.some(keyword => isp.includes(keyword));
+                const isTimezoneMismatch = ipTimezone && ipTimezone !== systemTimezone;
+
+                if (isSuspiciousISP || isTimezoneMismatch) {
+                    vpnStatus = "WARNING: Probable VPN/Proxy Detected";
+                }
+
+                networkString = `    IP Address    : ${fallbackData.ip}\n    Location      : ${fallbackData.city}, ${fallbackData.region} (${fallbackData.country})\n    ISP Provider  : ${fallbackData.connection.isp}\n    VPN / Proxy   : ${vpnStatus}\n`;
+            } catch (e2) {
+                networkString = `    Status: Network API Blocked (CORS/AdBlocker/VPN)\n    VPN / Proxy   : Unknown\n`;
+            }
+        }
+
+        const canvasHash = getCanvasHash();
+        const audioHash = await getAudioHash();
+        const gpuInfo = getGPU();
+        const mediaDevices = await getMediaDevices();
+
+        let log = `\n[+] NETWORK IDENTIFICATION\n`;
+        log += networkString + `\n`;
+
+        log += `[+] HARDWARE FINGERPRINTING\n`;
+        log += `    Canvas Hash   : ${canvasHash}\n`;
+        log += `    Audio Hash    : ${audioHash}\n`;
+        log += `    GPU Vendor    : ${gpuInfo.vendor}\n`;
+        log += `    GPU Renderer  : ${gpuInfo.renderer}\n`;
+        log += `    Media Devices : ${mediaDevices}\n\n`;
+
+        log += `[+] SYSTEM TELEMETRY\n`;
+        log += `    CPU Cores     : ${navigator.hardwareConcurrency || 'Unknown'} Logical Cores\n`;
+        log += `    System RAM    : ~${navigator.deviceMemory || 'Unknown'} GB Allocation\n`;
+        log += `    Display Data  : ${window.screen.width}x${window.screen.height} | ${window.screen.colorDepth}-bit Color Depth\n`;
+        log += `    Touch Support : ${navigator.maxTouchPoints > 0 ? navigator.maxTouchPoints + ' input points detected' : 'No Touch Interface'}\n\n`;
+
+        if ('getBattery' in navigator) {
+            try {
+                const battery = await navigator.getBattery();
+                const level = Math.round(battery.level * 100);
+                const charging = battery.charging ? "Charging ⚡" : "Draining";
+                log += `[+] POWER STATE\n`;
+                log += `    Battery Level : ${level}% (${charging})\n\n`;
+            } catch(e) {}
+        }
+
+        const gpc = navigator.globalPrivacyControl ? "Active (GPC Enabled)" : "None";
+
+        log += `[+] BROWSER CAPABILITIES & PRIVACY\n`;
+        log += `    PDF Engine    : ${navigator.pdfViewerEnabled ? 'Active' : 'Disabled'}\n`;
+        log += `    Cookies       : ${navigator.cookieEnabled ? 'Accepted' : 'Rejected'}\n`;
+        log += `    Do Not Track  : ${navigator.doNotTrack === "1" ? 'Signal Sent' : 'No Signal'}\n`;
+        log += `    Global Privacy: ${gpc}\n\n`;
+
+        log += `[+] ENVIRONMENT VARIABLES\n`;
+        log += `    OS Platform   : ${navigator.platform}\n`;
+        log += `    System Langs  : ${navigator.languages ? navigator.languages.join(", ") : navigator.language}\n`;
+        log += `    System Clock  : ${systemTimezone}\n`;
+        log += `    Ad-Blocker    : ${adBlockStatus}\n`;
+        
+        if (navigator.connection) {
+            const speed = navigator.connection.downlink ? `~${navigator.connection.downlink} Mbps` : 'Unknown';
+            const ping = navigator.connection.rtt ? `${navigator.connection.rtt}ms RTT` : '';
+            log += `    Connection    : ${navigator.connection.effectiveType || 'Unknown'} (${speed} | ${ping})\n`;
+        }
+
+        log += `\n[+] RAW USER-AGENT STRING\n    ${navigator.userAgent}\n`;
+        log += `\n====================================================\n`;
+        log += ` LOG COMPILED LOCALLY. SESSION TERMINATED. \n`;
+        log += `====================================================`;
+
+        if (typeAborter) return;
+        await typeTerminal(outputElement, log, false);
+        if (typeAborter) return;
+
+        const docs = document.getElementById('documentation-section');
+        docs.style.display = "block";
+        docs.animate([
+            { opacity: 0, transform: 'translateY(20px)' },
+            { opacity: 1, transform: 'translateY(0)' }
+        ], { duration: 600, easing: 'ease-out' });
+    });
+</script>
+
+</body>
+              </html>
