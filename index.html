@@ -3,23 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="See your exact digital footprint — what trackers silently collect every time you visit a site.">
+    <meta name="description" content="What happens behind the scenes when you visit a website? Run this audit to see your exact digital footprint and how to stop trackers.">
     <meta property="og:title" content="TraceLine - Security Audit">
-    <meta property="og:description" content="See your exact digital footprint — what trackers silently collect every time you visit a site.">
+    <meta property="og:description" content="What happens behind the scenes when you visit a website? Run this audit to see your exact digital footprint and how to stop trackers.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://traceline.pages.dev">
-    <meta property="og:image" content="https://traceline.pages.dev/assets/icons/favicon.png">
-    <meta property="og:image:type" content="image/png">
-    <meta property="og:image:width" content="512">
-    <meta property="og:image:height" content="512">
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="TraceLine - Security Audit">
-    <meta name="twitter:description" content="See your exact digital footprint — what trackers silently collect every time you visit a site.">
-    <meta name="twitter:image" content="https://traceline.pages.dev/assets/icons/favicon.png">
     <meta name="theme-color" content="#0d0d0d">
     <title>TraceLine - Security Audit</title>
-    <link rel="icon" type="image/png" href="assets/icons/favicon.png">
-    <link rel="apple-touch-icon" href="assets/icons/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Goldman:wght@400;700&display=swap" rel="stylesheet">
@@ -39,14 +28,10 @@
         </svg>
         <svg class="icon-sun" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <circle cx="12" cy="12" r="5"/>
-            <line x1="12" y1="1" x2="12" y2="3"/>
-            <line x1="12" y1="21" x2="12" y2="23"/>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-            <line x1="1" y1="12" x2="3" y2="12"/>
-            <line x1="21" y1="12" x2="23" y2="12"/>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
         </svg>
     </button>
 </nav>
@@ -123,7 +108,20 @@
     &copy; 2026 <a href="https://trmin.pages.dev" target="_blank" rel="noopener">itztrmin</a> all rights reserved.
 </footer>
 
-<script src="js/theme.js" defer></script>
-<script src="js/main.js" defer></script>
+<!--
+    LOAD ORDER MATTERS:
+    1. theme    — no deps
+    2. utils    — no deps (defines TL.fetchWithTimeout, TL.getPlatform, etc.)
+    3. terminal — needs TL.sleep from utils
+    4. network  — needs TL.fetchWithTimeout from utils
+    5. fp       — needs TL.network + TL.getPlatform  (renamed from fingerprint.js to avoid adblocker URL filters)
+    6. app      — needs everything above
+-->
+<script src="js/core/theme.js"></script>
+<script src="js/core/utils.js"></script>
+<script src="js/ui/terminal.js"></script>
+<script src="js/data/network.js"></script>
+<script src="js/data/fp.js"></script>
+<script src="js/ui/app.js"></script>
 </body>
 </html>
