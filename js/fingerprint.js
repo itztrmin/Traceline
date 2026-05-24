@@ -1,6 +1,4 @@
 async function checkAdBlocker() {
-    // Primary check: DOM-based trap element (works reliably with all ad blockers)
-    // The element has multiple ad-related class names and IDs that blockers target
     const el = document.getElementById('ad-trap');
     if (el) {
         const s = window.getComputedStyle(el);
@@ -16,9 +14,6 @@ async function checkAdBlocker() {
         }
     }
 
-    // Secondary check: bait script URL — with no-cors, fetch never throws on block;
-    // instead we check if a known bait element was injected by the response
-    // We use a timed image load which DOES throw on block
     return new Promise(resolve => {
         const img = new Image();
         const timer = setTimeout(() => {
