@@ -5,19 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <meta property="og:title" content="TraceLine - Security Audit">
-    <meta property="og:description" content="What happens behind the scenes when you visit a website? Run this audit to see your exact digital footprint and how to stop trackers.">
+    <meta property="og:description" content="What happens behind the scenes when you visit a website? Run this audit to see your exact digital footprint.">
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#0d0d0d">
-    <meta name="twitter:card" content="summary_large_image">
 
     <title>TraceLine - Security Audit</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bebas+Neue&family=Coiny&family=Datatype:wght@100..900&family=Elms+Sans:ital,wght@0,100..900;1,100..900&family=Geo:ital@0;1&family=Goldman:wght@400;700&family=Joti+One&family=Lilita+One&family=Smooch+Sans:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Goldman:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        /* CSS Variables for Theming */
         :root {
             --bg-color: #0d0d0d;
             --text-color: #d1d1d1;
@@ -31,8 +29,8 @@
             --btn-disabled: #2a2a2a;
             --btn-disabled-text: #555555;
             --term-bg: #111111;
-            --term-text: #e0e0e0;
-            --term-cursor: #888888;
+            --term-text: #00ff41; /* Switched to hacker green for better terminal vibe */
+            --term-cursor: #00ff41;
             --highlight-bg: #222222;
             --link-color: #888888;
             --link-hover: #ffffff;
@@ -88,7 +86,6 @@
             left: 0;
             z-index: 1000;
             backdrop-filter: blur(5px);
-            transition: all 0.3s ease;
         }
 
         .brand {
@@ -108,22 +105,6 @@
             align-items: center;
             justify-content: center;
             color: var(--heading-color);
-            width: auto;
-            max-width: none;
-            border-radius: 0;
-        }
-        
-        .theme-toggle:hover {
-            background: none;
-            transform: none;
-            box-shadow: none;
-            opacity: 0.7;
-        }
-
-        .theme-toggle svg {
-            width: 24px;
-            height: 24px;
-            fill: currentColor;
         }
 
         .sun-icon { display: none; }
@@ -172,17 +153,10 @@
             text-align: left;
             width: 100%;
             box-sizing: border-box;
-            transition: all 0.3s ease;
         }
 
-        .about-section {
-            border-left: 4px solid #4CAF50;
-        }
-
-        .disclaimer {
-            border-left: 4px solid #f44336;
-            margin-bottom: 40px;
-        }
+        .about-section { border-left: 4px solid #4CAF50; }
+        .disclaimer { border-left: 4px solid #f44336; margin-bottom: 40px; }
 
         button {
             background-color: var(--btn-bg);
@@ -201,19 +175,8 @@
             max-width: 350px;
         }
 
-        button:hover {
-            background-color: var(--btn-hover);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        button:disabled {
-            background-color: var(--btn-disabled);
-            color: var(--btn-disabled-text);
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
+        button:hover { background-color: var(--btn-hover); transform: translateY(-2px); }
+        button:disabled { background-color: var(--btn-disabled); color: var(--btn-disabled-text); cursor: not-allowed; transform: none; }
 
         #results-container {
             display: none;
@@ -230,7 +193,6 @@
             padding: 25px;
             white-space: pre-wrap;
             word-wrap: break-word;
-            overflow-wrap: break-word;
             font-size: clamp(13px, 3vw, 15px);
             line-height: 1.6;
             color: var(--term-text); 
@@ -238,7 +200,6 @@
             min-height: 400px;
             position: relative;
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            transition: all 0.3s ease;
         }
 
         #terminal-output::after {
@@ -258,113 +219,20 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
-        .docs h2 {
-            font-family: 'Archivo Black', sans-serif;
-            color: var(--heading-color);
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 12px;
-            margin-top: 30px;
-            font-size: clamp(22px, 4vw, 28px);
-        }
-
-        .docs h3 {
-            font-family: 'Archivo Black', sans-serif;
-            color: var(--heading-color);
-            margin-top: 50px;
-            margin-bottom: 15px;
-            font-size: clamp(18px, 3.5vw, 22px);
-            display: flex;
-            align-items: center;
-        }
-        
-        .docs h3::before {
-            content: "■";
-            color: var(--border-color);
-            margin-right: 10px;
-            font-size: 14px;
-        }
-
+        .docs h2 { font-family: 'Archivo Black', sans-serif; color: var(--heading-color); border-bottom: 2px solid var(--border-color); padding-bottom: 12px; font-size: clamp(22px, 4vw, 28px); }
+        .docs h3 { font-family: 'Archivo Black', sans-serif; color: var(--heading-color); margin-top: 50px; margin-bottom: 15px; font-size: clamp(18px, 3.5vw, 22px); }
         .docs p { margin-bottom: 20px; }
         .docs strong { color: var(--heading-color); font-weight: 600; }
+        
+        .bottom-actions { display: flex; flex-direction: column; align-items: center; margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border-color); }
+        .back-btn { background-color: transparent; color: var(--heading-color); border: 2px solid var(--border-color); width: auto; margin-bottom: 20px;}
+        .back-btn:hover { background-color: var(--border-color); color: var(--bg-color); }
 
-        .highlight {
-            background-color: var(--highlight-bg);
-            padding: 3px 6px;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-            font-family: monospace;
-            font-size: 0.9em;
-        }
-
-        hr {
-            border: 0;
-            height: 1px;
-            background: var(--border-color);
-            margin: 40px 0;
-        }
-
-        .bottom-actions {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 60px;
-            padding-top: 40px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .back-btn {
-            background-color: transparent;
-            color: var(--heading-color);
-            border: 2px solid var(--border-color);
-            padding: 14px 40px;
-            font-size: 15px;
-            margin-bottom: 20px;
-            width: auto;
-        }
-
-        .back-btn:hover {
-            background-color: var(--border-color);
-            color: var(--bg-color);
-            box-shadow: none;
-            transform: none;
-        }
-
-        .tagline {
-            font-family: 'Goldman', sans-serif;
-            color: var(--link-color);
-            font-size: 14px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        footer {
-            width: 100%;
-            text-align: center;
-            padding: 20px;
-            font-size: 12px;
-            color: var(--link-color);
-            border-top: 1px solid var(--border-color);
-            margin-top: auto;
-            background-color: var(--nav-bg);
-            transition: all 0.3s ease;
-        }
-
-        footer a {
-            color: var(--link-color);
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.2s ease;
-        }
-
-        footer a:hover { color: var(--link-hover); }
-
-        .ad-banner-test {
-            width: 1px;
-            height: 1px;
-            position: absolute;
-            left: -9999px;
-            display: block;
-        }
+        footer { width: 100%; text-align: center; padding: 20px; font-size: 12px; color: var(--link-color); border-top: 1px solid var(--border-color); margin-top: auto; background-color: var(--nav-bg); }
+        footer a { color: var(--link-color); text-decoration: none; font-weight: bold; }
+        
+        /* Fake ad container for DOM testing */
+        .ad-banner-test { width: 1px; height: 1px; position: absolute; left: -9999px; }
     </style>
 </head>
 <body>
@@ -372,24 +240,12 @@
 <nav>
     <div class="brand">TraceLine</div>
     <button class="theme-toggle" id="theme-btn" aria-label="Toggle Theme">
-        <svg class="moon-icon" viewBox="0 0 24 24">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
-        <svg class="sun-icon" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
+        <svg class="moon-icon" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        <svg class="sun-icon" viewBox="0 0 24 24" width="24" height="24" fill="currentColor"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
     </button>
 </nav>
 
-<div id="ad-test" class="ad-banner-test ad-banner ad-sponsor adsbox"></div>
+<div id="ad-test" class="ad-banner-test adbox ads ad-placement doubleclick"></div>
 
 <main>
     <div id="hero-container">
@@ -397,56 +253,45 @@
         
         <div class="about-section">
             <strong>ABOUT TRACELINE</strong><br><br>
-            Look, the internet is fundamentally broken. TraceLine is a 100% open-source project built to show you exactly how much data you're bleeding every time you click a damn link. We aren't trying to sell you a VPN, and we don't save your data. We just want you to see the reality of modern browser fingerprinting. The source code is out there for anyone to audit.
+            Look, the internet is fundamentally broken. TraceLine is a 100% open-source project built to show you exactly how much personal data you're bleeding every time you click a damn link. We aren't trying to sell you a VPN, and we don't save your data. We just want you to see the reality of modern browser fingerprinting. The source code is out there for anyone to audit.
         </div>
 
         <div class="disclaimer">
             <strong>SECURITY DISCLAIMER</strong><br><br>
-            Don't be a dumbass. By clicking the button below, you are explicitly allowing this script to rip through your browser's APIs. It will extract your hardware identity, network footprint, rendering metrics, and whatever else it can grab to show you what invisible trackers see.<br><br>
-            <em>Privacy Guarantee:</em> There is no backend database connected to this page. The data is pulled locally, blasted onto your screen, and deleted the exact moment you close this tab.
+            Don't be an idiot. By clicking the button below, you are explicitly allowing this script to rip through your browser's internal APIs. It will extract your hardware identity, network footprint, rendering metrics, and whatever else it can grab to show you exactly what invisible trackers see.<br><br>
+            <em>Privacy Guarantee:</em> There is no backend database connected to this page. Everything is processed locally, blasted onto your screen, and deleted the exact moment you close this tab.
         </div>
 
-        <button id="trap-button">Run Security Audit</button>
+        <button id="trap-button">Initiate Diagnostic</button>
     </div>
 
     <div id="results-container">
-        
         <div id="terminal-output"></div>
 
         <div class="docs" id="documentation-section" style="display: none;">
             <h2>The Post-Mortem: How We Found This & How to Stop It</h2>
-            <p>What you just watched scroll by is your digital footprint. And frankly, it's a fucking privacy shitshow. When you browse the web, you don't just ask for a webpage—your browser practically hands over your system's entire goddamn dossier in exchange. Advertising networks, security companies, and data brokers don't rely entirely on cookies anymore. That's old bullshit. Instead, they look at the exact combination of hardware, network settings, and system configurations you just exposed. Together, these form a "fingerprint" that is almost certainly unique to you.</p>
+            <p>What you just watched scroll by is your digital footprint. And frankly, it's a fucking privacy nightmare. When you browse the web, you don't just ask for a webpage—your browser practically hands over your system's entire goddamn dossier in exchange. Ad networks, security companies, and data brokers don't rely on cookies anymore. That's old bullshit. They look at the exact combination of hardware, network settings, and system configurations you just exposed. </p>
             
-            <p>Here is a breakdown of exactly how this script tricked your browser into coughing up that information, and more importantly, how you can lock this damn thing down.</p>
+            <p>Here is a breakdown of exactly how this script tricked your browser into coughing up that information, and more importantly, why some of it might be inaccurate (and why that's actually a good thing).</p>
 
             <hr>
 
-            <h3>1. VPN / Proxy Detection Heuristics</h3>
-            <p><strong>How we got it:</strong> Identifying a VPN solely from the browser is a bitch, but we use logic to catch you slipping. We checked the local timezone of your operating system (via your browser's system clock) and compared it to the geographical timezone associated with your IP address. If you are physically sitting in Dhaka but your IP claims you're in New York, the timezones mismatch, immediately flagging you as using a proxy. We also scan your Internet Service Provider (ISP) name for known datacenter hosts (like AWS, DigitalOcean, or M247) because regular residential users don't use server farms for casual browsing.</p>
-            <p><strong>How to prevent it:</strong> Spoofing your system timezone to match your VPN's server timezone helps defeat the clock check. Extensions like <em>Spoof Timezone</em> can automate this. However, evading commercial database IP checks requires using Residential Proxies, which route traffic through actual hacked or leased household connections rather than data centers.</p>
+            <h3>1. The "Inaccurate" Hardware Stats</h3>
+            <p><strong>Did the scan say you only have 8GB of RAM or 8 cores when you actually have way more?</strong> Good. Browsers like Firefox, Safari, and Brave intentionally lie to scripts like this. They cap the <code>navigator.deviceMemory</code> and <code>hardwareConcurrency</code> APIs. Why? Because if a script sees you have exactly 48GB of RAM and 14 cores, that makes you incredibly unique. By forcing everyone to look like they have generic 8GB/8-Core machines, you blend into the crowd. We attempted to pull the real data using Chromium's new <em>Client Hints</em>, but if you're heavily shielded, it gives us the middle finger.</p>
 
-            <h3>2. The Canvas Fingerprint</h3>
-            <p><strong>How we got it:</strong> HTML5 includes a powerful drawing tool called a <span class="highlight">&lt;canvas&gt;</span>. Websites normally use this to render browser games or charts. In this script, we created an invisible canvas and forced your browser to draw a very specific, layered image using different colors and text fonts. Because every computer has a slightly different combination of graphics drivers, installed fonts, and sub-pixel smoothing algorithms, the resulting image is microscopically unique. We took a snapshot of those invisible pixels and hashed it into a unique ID code.</p>
-            <p><strong>How to prevent it:</strong> Traditional ad-blockers like uBlock Origin usually don't stop this because drawing on a canvas is a legitimate web feature. To fight back, you need to use a browser that actually gives a damn, like <strong>Brave</strong> or the <strong>Tor Browser</strong>. If you use Firefox, install an extension called <strong>CanvasBlocker</strong> which silently injects fake, randomized data into the math every time a site tries to draw a hidden image, completely trashing their metrics.</p>
+            <h3>2. Network Identification & The Adblock Test</h3>
+            <p><strong>How we got it:</strong> We hit multiple public IP APIs simultaneously. If your adblocker blocked the primary ones (like it did in your screenshot), we had a sneaky fallback ready (GeoJS) that almost never gets flagged. We also ran a two-part adblocker test: first, we created a fake invisible "ad" to see if your browser hid it, and second, we literally tried to ping a Google ad-tracking URL. If that network request got shot down, we know your shields are up.</p>
+            <p><strong>How to protect it:</strong> Use a real, system-wide VPN. A browser proxy isn't always enough. And for adblocking, uBlock Origin is the undisputed king. Don't use the garbage built-in ones from standard Chrome.</p>
 
-            <h3>3. AudioContext Fingerprinting</h3>
-            <p><strong>How we got it:</strong> We used the Web Audio API to create a high-frequency sine wave, pushed it through a digital audio compressor, and mathematically measured the result. We never actually played the sound through your speakers. Instead, we captured the digital audio buffer. Your specific sound card architecture dictates exactly how floating-point math is handled during processing. It's a ridiculously accurate, sneaky bastard of a hardware ID.</p>
-            <p><strong>How to prevent it:</strong> Similar to canvas fingerprinting, you are fighting native web features. Using the <strong>Brave</strong> browser is currently one of the best defenses, as it intercepts audio API requests and injects cryptographic noise into the result, ruining their math. For absolute protection, you can completely disable JavaScript, though this will break almost the entire modern internet.</p>
+            <h3>3. The Canvas & Audio Fingerprints</h3>
+            <p><strong>How we got it:</strong> We created an invisible canvas and forced your graphic drivers to draw a tiny image. Every computer draws pixels microscopically differently based on OS, drivers, and fonts. We also generated a silent, high-frequency audio wave and measured how your specific sound card processed the floating-point math. These hashes are practically unique to your machine.</p>
+            <p><strong>How to prevent it:</strong> Use a browser that fights back. Brave browser intercepts these requests and injects cryptographic noise into the math, ruining the fingerprint. If you use Firefox, get the <strong>CanvasBlocker</strong> extension immediately.</p>
 
             <h3>4. WebGL & GPU Extraction</h3>
-            <p><strong>How we got it:</strong> WebGL is the engine browsers use to render 3D graphics. We spun up a 3D environment in the background and simply asked it for the name of the hardware doing the heavy lifting by calling a specific debug extension (<span class="highlight">WEBGL_debug_renderer_info</span>). Your browser happily handed over the exact make and model of your graphics card. Thanks for playing, sucker.</p>
-            <p><strong>How to prevent it:</strong> You can disable WebGL entirely in your browser's advanced settings (in Firefox, type <code>about:config</code> and set <code>webgl.disabled</code> to true). Keep in mind that doing this will break browser-based 3D games, Google Earth, and advanced design tools.</p>
-
-            <h3>5. Silent Media Device Enumeration</h3>
-            <p><strong>How we got it:</strong> You know how websites have to ask permission to use your camera and microphone? Yeah, well, they don't have to ask permission to just <em>count</em> them. By querying <span class="highlight">navigator.mediaDevices.enumerateDevices()</span>, we asked your browser exactly how many audio inputs and video lenses are currently plugged into your machine. Even without granting us access to record, knowing you have exactly two webcams and three audio inputs adds another highly specific data point to your fingerprint.</p>
-            <p><strong>How to prevent it:</strong> Safari actually restricts this by default until permission is granted, which is a rare Apple W. For Chrome and Firefox, you have to dig into deep configuration flags to randomize or spoof media enumeration. The easiest fix? Unplug your shit when you aren't using it.</p>
-
-            <h3>6. Hardware & Network Telemetry</h3>
-            <p><strong>How we got it:</strong> We didn't even have to hack anything for this part—your browser just broadcasted it like a complete idiot. Using standard commands, we asked your machine how many CPU cores it has, how much RAM is installed, and what your screen's exact color-depth is. We then pinged a public IP lookup API to grab your location and ISP. When combined, this telemetry is easily enough to track you across different websites even if you religiously clear your cookies.</p>
-            <p><strong>How to prevent it:</strong> The best defense against general telemetry is blending in with the crowd. The <strong>Tor Browser</strong> handles this exceptionally well by forcing every user to share the exact same screen size, hardware profile, and timezone, making it impossible for trackers to tell you apart from anyone else. For daily browsing, combining a strict privacy browser with a trusted VPN is your best bet to mask your IP and severely limit the amount of hardware data you leak.</p>
+            <p><strong>How we got it:</strong> We spun up a 3D WebGL environment in the background and just... asked it what graphics card was doing the work. Your browser happily handed over the exact make and model. Thanks for playing, sucker.</p>
             
             <div class="bottom-actions">
-                <button class="back-btn" id="back-btn">Back To Main Page</button>
+                <button class="back-btn" id="back-btn">Clear Data & Go Back</button>
                 <div class="tagline">Stay safe. Stay paranoid.</div>
             </div>
 
@@ -455,65 +300,69 @@
 </main>
 
 <footer>
-    &copy; 2026 <a href="https://trmin.pages.dev" target="_blank" rel="noopener">itztrmin</a> all rights reserved.
+    &copy; 2026 <a href="https://trmin.pages.dev" target="_blank" rel="noopener">itztrmin</a> - All rights reserved. Open Source under MIT.
 </footer>
 
 <script>
     let isTyping = false;
     let typeAborter = false;
 
-    // Theme Toggle Logic
-    const themeBtn = document.getElementById('theme-btn');
-    themeBtn.addEventListener('click', () => {
+    document.getElementById('theme-btn').addEventListener('click', () => {
         document.body.classList.toggle('light-mode');
     });
 
-    // Reset UI Logic (Back to Main Page)
     document.getElementById('back-btn').addEventListener('click', () => {
         typeAborter = true; 
-        
         document.getElementById('results-container').style.display = 'none';
         document.getElementById('documentation-section').style.display = 'none';
         document.getElementById('hero-container').style.display = 'flex';
         
         const trapBtn = document.getElementById('trap-button');
-        trapBtn.innerText = "Run Security Audit";
+        trapBtn.innerText = "Initiate Diagnostic";
         trapBtn.disabled = false;
-        
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    function checkAdBlocker() {
+    // Upgraded Adblock Detection (DOM + Network level)
+    async function checkAdBlocker() {
+        let isCosmeticBlocked = false;
         const testAd = document.getElementById('ad-test');
-        const isBlocked = testAd.offsetHeight === 0 || 
-                          window.getComputedStyle(testAd).display === 'none' ||
-                          window.getComputedStyle(testAd).visibility === 'hidden';
-        return isBlocked ? "Detected (Active)" : "Not Detected";
+        if (testAd && (testAd.offsetHeight === 0 || window.getComputedStyle(testAd).display === 'none')) {
+            isCosmeticBlocked = true;
+        }
+
+        let isNetworkBlocked = false;
+        try {
+            // Try to hit a known ad network tracker
+            await fetch('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', { 
+                method: 'HEAD', mode: 'no-cors', cache: 'no-store' 
+            });
+        } catch (e) {
+            isNetworkBlocked = true;
+        }
+
+        if (isNetworkBlocked && isCosmeticBlocked) return "Aggressive (Network & DOM Blocked)";
+        if (isNetworkBlocked) return "Active (Network-level Blocked)";
+        if (isCosmeticBlocked) return "Active (Cosmetic DOM Hidden)";
+        return "Not Detected (You are exposed)";
     }
 
     function getCanvasHash() {
         try {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            ctx.textBaseline = "top";
-            ctx.font = "14px 'Arial'";
-            ctx.fillStyle = "#f60";
-            ctx.fillRect(125, 1, 62, 20);
-            ctx.fillStyle = "#069";
-            ctx.fillText("SysTrack_01", 2, 15);
-            ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
-            ctx.fillText("SysTrack_01", 4, 17);
-            
+            ctx.textBaseline = "top"; ctx.font = "14px 'Arial'";
+            ctx.fillStyle = "#f60"; ctx.fillRect(125, 1, 62, 20);
+            ctx.fillStyle = "#069"; ctx.fillText("TraceLine_Hash", 2, 15);
             const data = canvas.toDataURL();
             let hash = 0;
             for (let i = 0; i < data.length; i++) {
-                const char = data.charCodeAt(i);
-                hash = ((hash << 5) - hash) + char;
+                hash = ((hash << 5) - hash) + data.charCodeAt(i);
                 hash = hash & hash;
             }
-            return Math.abs(hash).toString(16);
+            return Math.abs(hash).toString(16) + "f";
         } catch(e) {
-            return "Execution Blocked";
+            return "Blocked by Browser Shields";
         }
     }
 
@@ -527,17 +376,14 @@
             oscillator.connect(compressor);
             compressor.connect(audioCtx.destination);
             oscillator.start(0);
-            
             const renderPromise = audioCtx.startRendering();
-            const timeoutPromise = new Promise((resolve) => setTimeout(() => resolve(null), 1000));
-            
+            const timeoutPromise = new Promise(r => setTimeout(() => r(null), 800));
             const buffer = await Promise.race([renderPromise, timeoutPromise]);
-            if (!buffer) return "Timeout (Privacy Block)";
-
+            if (!buffer) return "Timeout (Audio API Blocked)";
             const data = buffer.getChannelData(0);
             let sum = 0;
-            for (let i = 4500; i < 5000; i++) { sum += Math.abs(data[i]); }
-            return sum.toString().replace('.', '').substring(0, 10);
+            for (let i = 4500; i < 5000; i++) sum += Math.abs(data[i]);
+            return sum.toString().replace('.', '').substring(0, 11);
         } catch(e) {
             return "Restricted by Privacy Settings";
         }
@@ -547,7 +393,7 @@
         try {
             const canvas = document.createElement('canvas');
             const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-            if (!gl) return { vendor: "WebGL Not Supported", renderer: "WebGL Not Supported" };
+            if (!gl) return { vendor: "WebGL Blocked", renderer: "WebGL Blocked" };
             const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
             if (debugInfo) {
                 return {
@@ -563,37 +409,24 @@
 
     async function getMediaDevices() {
         try {
-            if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
-                return "API Not Supported/Restricted";
-            }
             const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoCount = devices.filter(d => d.kind === 'videoinput').length;
-            const audioCount = devices.filter(d => d.kind === 'audioinput').length;
-            return `Cameras: ${videoCount} | Mics: ${audioCount} (Silently Enumerated)`;
-        } catch(e) {
-            return "Blocked by Browser";
-        }
+            const v = devices.filter(d => d.kind === 'videoinput').length;
+            const a = devices.filter(d => d.kind === 'audioinput').length;
+            return `Cameras: ${v} | Mics: ${a} (Silently Enumerated)`;
+        } catch(e) { return "Access Denied by Browser"; }
     }
 
     async function typeTerminal(element, text, clear = false) {
         if (clear) element.textContent = ""; 
         element.classList.remove("typing-complete");
         isTyping = true;
-        
         for (let i = 0; i < text.length; i++) {
             if (typeAborter) break; 
-
             element.textContent += text[i];
-            
-            if (text[i] === '\n') {
-                await new Promise(r => setTimeout(r, 60 + Math.random() * 80));
-            } else {
-                await new Promise(r => setTimeout(r, 2 + Math.random() * 8));
-            }
-            
+            if (text[i] === '\n') await new Promise(r => setTimeout(r, 40));
+            else await new Promise(r => setTimeout(r, 1));
             element.scrollTop = element.scrollHeight;
         }
-        
         if (!typeAborter) element.classList.add("typing-complete");
         isTyping = false;
     }
@@ -603,118 +436,110 @@
         typeAborter = false;
 
         const button = document.getElementById('trap-button');
-        const heroContainer = document.getElementById('hero-container');
-        const resultsContainer = document.getElementById('results-container');
-        const outputElement = document.getElementById('terminal-output');
-        
-        button.innerText = "Extracting Data...";
+        button.innerText = "Extracting...";
         button.disabled = true;
         
-        heroContainer.style.display = "none";
-        resultsContainer.style.display = "block";
+        document.getElementById('hero-container').style.display = "none";
+        document.getElementById('results-container').style.display = "block";
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        await typeTerminal(outputElement, "====================================================\n TRACELINE DIAGNOSTIC // TELEMETRY EXFILTRATION LOG \n====================================================\n\n[+] INITIALIZING SCAN...\n", true);
+        const out = document.getElementById('terminal-output');
+        await typeTerminal(out, "[+] ESTABLISHING SECURE CONTEXT...\n[+] BYPASSING SURFACE SHIELDS...\n[+] INITIALIZING DEEP SCAN...\n\n", true);
         if (typeAborter) return;
 
-        const adBlockStatus = checkAdBlocker();
-        const systemTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        
-        let networkString = "";
-        let vpnStatus = "Not Detected";
-
-        // Multi-layered IP fetching to beat aggressive adblockers
+        // 1. IP Tracking (Robust Fallback System)
         let ipData = { ip: "Unknown", city: "Unknown", region: "Unknown", country: "Unknown", org: "Unknown", timezone: "" };
-        
         try {
-            const res1 = await fetch('https://ipapi.co/json/');
-            if (!res1.ok) throw new Error("API 1 Blocked");
-            const data1 = await res1.json();
-            ipData = { ip: data1.ip, city: data1.city, region: data1.region, country: data1.country_name, org: data1.org, timezone: data1.timezone };
+            // Attempt 1: ipwho.is (Usually good, sometimes blocked)
+            const r1 = await fetch('https://ipwho.is/');
+            if(!r1.ok) throw new Error();
+            const d1 = await r1.json();
+            ipData = { ip: d1.ip, city: d1.city, region: d1.region, country: d1.country, org: d1.connection.isp, timezone: d1.timezone?.id || "" };
         } catch (e1) {
             try {
-                const res2 = await fetch('https://ipwho.is/');
-                if (!res2.ok) throw new Error("API 2 Blocked");
-                const data2 = await res2.json();
-                ipData = { ip: data2.ip, city: data2.city, region: data2.region, country: data2.country, org: data2.connection.isp, timezone: data2.timezone ? data2.timezone.id : "" };
+                // Attempt 2: geojs (Rarely blocked by AdBlockers)
+                const r2 = await fetch('https://get.geojs.io/v1/ip/geo.json');
+                const d2 = await r2.json();
+                ipData = { ip: d2.ip, city: d2.city, region: d2.region, country: d2.country, org: d2.organization || d2.organization_name || "Unknown ISP", timezone: d2.timezone || "" };
             } catch (e2) {
                 try {
-                    // Raw IP fallback if full telemetry APIs are blocked
-                    const res3 = await fetch('https://api.ipify.org?format=json');
-                    const data3 = await res3.json();
-                    ipData.ip = data3.ip;
-                    ipData.org = "Data blocked by browser shield/AdBlocker";
+                    // Attempt 3: Bare minimum ipify
+                    const r3 = await fetch('https://api.ipify.org?format=json');
+                    const d3 = await r3.json();
+                    ipData.ip = d3.ip; ipData.org = "ISP Data Blocked by Shield";
                 } catch (e3) {
-                    ipData.ip = "CONNECTION BLOCKED (You've got some tight security)";
+                    ipData.ip = "CONNECTION BLOCKED";
                 }
             }
         }
 
-        const ispLower = (ipData.org || "").toLowerCase();
-        const suspiciousISPs = ['vpn', 'proxy', 'datacenter', 'aws', 'amazon', 'digitalocean', 'linode', 'ovh', 'm247', 'cloudflare', 'hosting'];
-        const isSuspiciousISP = suspiciousISPs.some(keyword => ispLower.includes(keyword));
-        const isTimezoneMismatch = ipData.timezone && ipData.timezone !== systemTimezone;
-
-        if (isSuspiciousISP || isTimezoneMismatch) {
-            vpnStatus = "WARNING: Probable VPN/Proxy Detected";
-            if (isTimezoneMismatch) vpnStatus += ` (Timezone Mismatch: ${systemTimezone} vs ${ipData.timezone})`;
+        const sysTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const ispL = (ipData.org || "").toLowerCase();
+        const sus = ['vpn', 'proxy', 'datacenter', 'aws', 'amazon', 'digitalocean', 'm247', 'cloudflare'];
+        let vpnStat = "Not Detected";
+        if (sus.some(k => ispL.includes(k)) || (ipData.timezone && ipData.timezone !== sysTz)) {
+            vpnStat = "WARNING: Probable VPN/Proxy routing detected";
         }
 
-        networkString = `    IP Address    : ${ipData.ip}\n    Location      : ${ipData.city}, ${ipData.region} (${ipData.country})\n    ISP Provider  : ${ipData.org}\n    VPN / Proxy   : ${vpnStatus}\n`;
-
-        const canvasHash = getCanvasHash();
-        const audioHash = await getAudioHash();
-        const gpuInfo = getGPU();
-        const mediaDevices = await getMediaDevices();
-
-        let log = `\n[+] NETWORK IDENTIFICATION\n`;
-        log += networkString + `\n`;
-
-        log += `[+] HARDWARE FINGERPRINTING\n`;
-        log += `    Canvas Hash   : ${canvasHash}\n`;
-        log += `    Audio Hash    : ${audioHash}\n`;
-        log += `    GPU Vendor    : ${gpuInfo.vendor}\n`;
-        log += `    GPU Renderer  : ${gpuInfo.renderer}\n`;
-        log += `    Media Devices : ${mediaDevices}\n\n`;
-
-        const cpuCores = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Logical Cores` : 'Masked by Browser';
-        const ram = navigator.deviceMemory ? `~${navigator.deviceMemory} GB Allocation` : 'Masked (Firefox/Safari Protects This)';
-
-        log += `[+] SYSTEM TELEMETRY\n`;
-        log += `    User Agent    : ${navigator.userAgent.substring(0, 70)}...\n`;
-        log += `    Platform      : ${navigator.platform || 'Unknown'}\n`;
-        log += `    CPU Cores     : ${cpuCores}\n`;
-        log += `    System RAM    : ${ram}\n`;
-        log += `    Display Data  : ${window.screen.width}x${window.screen.height} | ${window.screen.colorDepth}-bit Color Depth\n`;
-        log += `    Touch Support : ${navigator.maxTouchPoints > 0 ? navigator.maxTouchPoints + ' input points detected' : 'No Touch Interface'}\n\n`;
-
-        if ('getBattery' in navigator) {
+        // 2. Client Hints / Platform extraction
+        let accurateOS = navigator.platform || "Unknown";
+        if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
             try {
-                const battery = await navigator.getBattery();
-                const level = Math.round(battery.level * 100);
-                const charging = battery.charging ? "Charging ⚡" : "Draining";
-                log += `[+] POWER STATE\n`;
-                log += `    Battery Level : ${level}% (${charging})\n\n`;
+                const uaData = await navigator.userAgentData.getHighEntropyValues(['architecture', 'model', 'platform', 'platformVersion']);
+                accurateOS = `${uaData.platform} ${uaData.platformVersion} (${uaData.architecture})`;
             } catch(e) {}
         }
 
-        const gpc = navigator.globalPrivacyControl ? "Active (GPC Enabled)" : "None / Ignored";
+        // 3. Hardware hashes
+        const adblock = await checkAdBlocker();
+        const chash = getCanvasHash();
+        const ahash = await getAudioHash();
+        const gpu = getGPU();
+        const media = await getMediaDevices();
+
+        let log = `[+] NETWORK EXFILTRATION\n`;
+        log += `    IP Address    : ${ipData.ip}\n`;
+        log += `    Location      : ${ipData.city}, ${ipData.region} (${ipData.country})\n`;
+        log += `    ISP / Host    : ${ipData.org}\n`;
+        log += `    Network Type  : ${navigator.connection ? navigator.connection.effectiveType : 'Unknown'}\n`;
+        log += `    VPN / Proxy   : ${vpnStat}\n\n`;
+
+        log += `[+] HARDWARE FINGERPRINTING\n`;
+        log += `    Canvas Hash   : ${chash}\n`;
+        log += `    Audio Hash    : ${ahash}\n`;
+        log += `    GPU Vendor    : ${gpu.vendor}\n`;
+        log += `    GPU Renderer  : ${gpu.renderer}\n`;
+        log += `    Media Devices : ${media}\n\n`;
+
+        const cores = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Logical Cores` : 'Masked';
+        const ram = navigator.deviceMemory ? `~${navigator.deviceMemory} GB Reported` : 'Masked by Browser Shield';
+
+        log += `[+] SYSTEM TELEMETRY\n`;
+        log += `    Real OS/Arch  : ${accurateOS}\n`;
+        log += `    User Agent    : ${navigator.userAgent.substring(0, 75)}...\n`;
+        log += `    Reported CPU  : ${cores} (Browsers may cap this)\n`;
+        log += `    Reported RAM  : ${ram} (Browsers may cap this)\n`;
+        log += `    Display Res   : ${window.screen.width}x${window.screen.height} | ${window.screen.colorDepth}-bit\n\n`;
+
+        if ('getBattery' in navigator) {
+            try {
+                const b = await navigator.getBattery();
+                log += `[+] POWER STATE\n    Battery Level : ${Math.round(b.level * 100)}% (${b.charging ? 'Charging' : 'Draining'})\n\n`;
+            } catch(e) {}
+        }
 
         log += `[+] BROWSER CAPABILITIES & PRIVACY\n`;
-        log += `    PDF Engine    : ${navigator.pdfViewerEnabled ? 'Active' : 'Disabled'}\n`;
-        log += `    Cookies       : ${navigator.cookieEnabled ? 'Accepted' : 'Rejected'}\n`;
-        log += `    Do Not Track  : ${navigator.doNotTrack === "1" ? 'Signal Sent' : 'No Signal'}\n`;
-        log += `    Global Privacy: ${gpc}\n`;
-        log += `    AdBlocker     : ${adBlockStatus}\n\n`;
-
-        log += `====================================================\n SCAN COMPLETE // PARSING POST-MORTEM DATA...\n====================================================\n`;
+        log += `    Do Not Track  : ${navigator.doNotTrack === "1" ? 'Signal Sent (Most sites ignore this)' : 'No Signal'}\n`;
+        log += `    Global Privacy: ${navigator.globalPrivacyControl ? 'Active' : 'Ignored'}\n`;
+        log += `    AdBlocker     : ${adblock}\n\n`;
+        log += `====================================================\n DATA LOG COMPLETE // INITIATING POST-MORTEM...\n====================================================\n`;
 
         if (typeAborter) return;
-        await typeTerminal(outputElement, log);
+        await typeTerminal(out, log);
         
         if (!typeAborter) {
             document.getElementById('documentation-section').style.display = 'block';
-            window.scrollBy({ top: 150, behavior: 'smooth' });
+            window.scrollBy({ top: 100, behavior: 'smooth' });
         }
     });
 </script>
