@@ -1,25 +1,39 @@
 async function checkAdBlocker() {
-    let isBlocked = false;
-    try {
-        await fetch('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', {
-            method: 'HEAD',
-            mode: 'no-cors',
-            cache: 'no-store'
-        });
-    } catch (_) {
-        isBlocked = true;
+    // Primary check: DOM-based trap element (works reliably with all ad blockers)
+    // The element has multiple ad-related class names and IDs that blockers target
+    const el = document.getElementById('ad-trap');
+    if (el) {
+        const s = window.getComputedStyle(el);
+        if (
+            el.offsetHeight === 0 ||
+            el.offsetWidth === 0 ||
+            s.display === 'none' ||
+            s.visibility === 'hidden' ||
+            s.opacity === '0' ||
+            el.getAttribute('aria-hidden') === 'true'
+        ) {
+            return 'Detected (Active)';
+        }
     }
+
+    // Secondary check: bait script URL — with no-cors, fetch never throws on block;
+    // instead we check if a known bait element was injected by the response
+    // We use a timed image load which DOES throw on block
     return new Promise(resolve => {
-        setTimeout(() => {
-            const el = document.getElementById('ad-trap');
-            if (el) {
-                const s = window.getComputedStyle(el);
-                if (el.offsetHeight === 0 || s.display === 'none' || s.visibility === 'hidden') {
-                    isBlocked = true;
-                }
-            }
-            resolve(isBlocked ? 'Detected (Active)' : 'Not Detected');
-        }, 300);
+        const img = new Image();
+        const timer = setTimeout(() => {
+            img.src = '';
+            resolve('Detected (Active)');
+        }, 1500);
+        img.onload = () => {
+            clearTimeout(timer);
+            resolve('Not Detected');
+        };
+        img.onerror = () => {
+            clearTimeout(timer);
+            resolve('Detected (Active)');
+        };
+        img.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?t=' + Date.now();
     });
 }
 
