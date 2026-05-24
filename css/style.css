@@ -343,7 +343,16 @@ body.light-mode #terminal-title-text {
     border-color: var(--link-hover);
 }
 
-@keyframes blink {
+.logo-white {
+    color: #ffffff;
+    font-weight: bold;
+}
+
+body.light-mode .logo-white {
+    color: #111111;
+}
+
+
     50% { opacity: 0; }
 }
 
