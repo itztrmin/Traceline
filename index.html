@@ -57,17 +57,22 @@
             --link-hover: #111111;
         }
 
+        /* STRICT SCROLL LOCK: Fixes the wandering navigation bar */
+        html, body {
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
             font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-            margin: 0;
-            padding: 0;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            max-width: 100vw; /* Fixes horizontal overflow displacing the toggler */
-            overflow-x: hidden;
             box-sizing: border-box;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
@@ -85,6 +90,7 @@
             position: fixed;
             top: 0;
             left: 0;
+            right: 0;
             z-index: 1000;
             backdrop-filter: blur(5px);
         }
@@ -121,7 +127,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* justify-content: center; REMOVED: Stops the layout from vertically jumping */
             width: 100%;
             margin-top: 60px; 
             padding: 20px;
@@ -136,7 +141,7 @@
             text-align: center;
             max-width: 700px;
             width: 100%;
-            margin: auto; /* Vertically centers the intro content naturally */
+            margin: auto; 
             padding: 20px 0;
         }
 
@@ -170,7 +175,7 @@
             border: none;
             border-radius: 4px;
             padding: 16px 30px;
-            font-size: clamp(14px, 4vw, 16px);
+            font-size: 16px;
             font-weight: bold;
             font-family: inherit;
             cursor: pointer;
@@ -207,14 +212,19 @@
             border-radius: 6px;
             padding: 20px;
             white-space: pre-wrap;
-            overflow-wrap: anywhere; /* STRICT WRAP: Stops hashes from breaking the screen width */
-            font-size: clamp(11px, 3vw, 14px); 
+            
+            /* FORCES LONG HASHES TO BREAK AND STOPS SCREEN FROM STRETCHING WIDE */
+            overflow-wrap: break-word; 
+            word-wrap: break-word;
+            word-break: break-all;
+
+            font-size: 13px; 
             line-height: 1.6;
             color: var(--term-text); 
             margin-bottom: 40px;
             min-height: 300px;
-            max-height: 60vh; /* Keeps terminal from taking over screen */
-            overflow-y: auto; /* Adds internal scrollbar for logs */
+            max-height: 60vh; 
+            overflow-y: auto; 
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             width: 100%;
             box-sizing: border-box;
@@ -230,10 +240,13 @@
         .typing-complete::after { display: none; }
         @keyframes blink { 50% { opacity: 0; } }
 
+        /* FIXED DOCUMENTATION TEXT SCALING */
         .docs {
             line-height: 1.8;
-            font-size: clamp(14px, 4vw, 16px);
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 16px; /* Standard Desktop Size */
+            max-width: 800px; /* Stops text from getting too wide on huge screens */
+            margin: 0 auto;
         }
 
         .docs h2 {
@@ -242,7 +255,7 @@
             border-bottom: 2px solid var(--border-color);
             padding-bottom: 12px;
             margin-top: 20px;
-            font-size: clamp(20px, 5vw, 26px);
+            font-size: 26px; /* Standard Desktop Header */
         }
 
         .docs h3 {
@@ -250,7 +263,7 @@
             color: var(--heading-color);
             margin-top: 40px;
             margin-bottom: 15px;
-            font-size: clamp(16px, 4.5vw, 20px);
+            font-size: 20px;
             display: flex;
             align-items: center;
         }
@@ -341,6 +354,23 @@
             position: absolute;
             left: -9999px;
             display: block;
+        }
+
+        /* MOBILE RESPONSIVE TWEAKS */
+        @media (max-width: 600px) {
+            #terminal-output {
+                font-size: 11px;
+                padding: 15px;
+            }
+            .docs {
+                font-size: 15px; /* Slightly smaller for mobile readability */
+            }
+            .docs h2 {
+                font-size: 22px;
+            }
+            .docs h3 {
+                font-size: 18px;
+            }
         }
     </style>
 </head>
@@ -585,7 +615,6 @@
                 await new Promise(r => setTimeout(r, 1 + Math.random() * 5));
             }
             
-            // This now scrolls the terminal natively instead of aggressively stretching the whole page
             element.scrollTop = element.scrollHeight;
         }
         
