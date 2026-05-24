@@ -1,6 +1,5 @@
 async function checkAdBlocker() {
     let isBlocked = false;
-
     try {
         await fetch('https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js', {
             method: 'HEAD',
@@ -10,7 +9,6 @@ async function checkAdBlocker() {
     } catch (_) {
         isBlocked = true;
     }
-
     return new Promise(resolve => {
         setTimeout(() => {
             const el = document.getElementById('ad-trap');
@@ -21,32 +19,51 @@ async function checkAdBlocker() {
                 }
             }
             resolve(isBlocked ? 'Detected (Active)' : 'Not Detected');
-        }, 250);
+        }, 300);
     });
 }
 
 function getCanvasHash() {
     try {
         const canvas = document.createElement('canvas');
-        canvas.width = 220;
-        canvas.height = 30;
+        canvas.width = 300;
+        canvas.height = 60;
         const ctx = canvas.getContext('2d');
-        ctx.textBaseline = 'top';
-        ctx.font = "14px 'Arial'";
-        ctx.fillStyle = '#f60';
-        ctx.fillRect(125, 1, 62, 20);
-        ctx.fillStyle = '#069';
-        ctx.fillText('SysTrack_01', 2, 15);
-        ctx.fillStyle = 'rgba(102, 204, 0, 0.7)';
-        ctx.fillText('SysTrack_01', 4, 17);
 
-        const data = canvas.toDataURL();
-        let hash = 0;
+        ctx.fillStyle = '#0d0d0d';
+        ctx.fillRect(0, 0, 300, 60);
+
+        ctx.textBaseline = 'alphabetic';
+        ctx.font = '16px Arial';
+        ctx.fillStyle = '#ff6600';
+        ctx.fillText('TraceLine_FP_v2', 10, 28);
+
+        ctx.font = 'italic 13px Georgia';
+        ctx.fillStyle = 'rgba(102,204,0,0.85)';
+        ctx.fillText('TraceLine_FP_v2', 12, 30);
+
+        ctx.beginPath();
+        ctx.arc(260, 30, 18, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,102,204,0.6)';
+        ctx.fill();
+
+        ctx.font = 'bold 11px monospace';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('0xFP', 244, 34);
+
+        const data = canvas.toDataURL('image/png');
+        let h1 = 0x811c9dc5;
+        let h2 = 0xdeadbeef;
         for (let i = 0; i < data.length; i++) {
-            hash = ((hash << 5) - hash) + data.charCodeAt(i);
-            hash |= 0;
+            const c = data.charCodeAt(i);
+            h1 ^= c;
+            h1 = Math.imul(h1, 0x01000193);
+            h2 ^= c;
+            h2 = Math.imul(h2, 0x1b873593);
         }
-        return Math.abs(hash).toString(16);
+        h1 = ((h1 ^ (h1 >>> 16)) >>> 0);
+        h2 = ((h2 ^ (h2 >>> 16)) >>> 0);
+        return (h1.toString(16).padStart(8, '0') + h2.toString(16).padStart(8, '0'));
     } catch (_) {
         return 'Execution Blocked';
     }
@@ -58,48 +75,66 @@ async function getAudioHash() {
         if (!AudioCtx) return 'API Not Supported';
 
         const ctx = new AudioCtx(1, 44100, 44100);
+
         const osc = ctx.createOscillator();
         osc.type = 'triangle';
         osc.frequency.setValueAtTime(10000, ctx.currentTime);
 
         const comp = ctx.createDynamicsCompressor();
+        comp.threshold.setValueAtTime(-50, ctx.currentTime);
+        comp.knee.setValueAtTime(40, ctx.currentTime);
+        comp.ratio.setValueAtTime(12, ctx.currentTime);
+        comp.attack.setValueAtTime(0, ctx.currentTime);
+        comp.release.setValueAtTime(0.25, ctx.currentTime);
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+
         osc.connect(comp);
-        comp.connect(ctx.destination);
+        comp.connect(gain);
+        gain.connect(ctx.destination);
         osc.start(0);
 
         const buffer = await Promise.race([
             ctx.startRendering(),
-            new Promise(r => setTimeout(() => r(null), 1500))
+            new Promise(r => setTimeout(() => r(null), 2000))
         ]);
 
         if (!buffer) return 'Timeout (Privacy Block)';
 
-        const data = buffer.getChannelData(0);
+        const ch = buffer.getChannelData(0);
         let sum = 0;
-        for (let i = 4500; i < 5000; i++) sum += Math.abs(data[i]);
-        return sum.toString().replace('.', '').substring(0, 10);
+        for (let i = 4000; i < 5000; i++) sum += Math.abs(ch[i]);
+
+        const raw = sum.toFixed(15);
+        return raw.replace('.', '').replace(/^0+/, '').substring(0, 12) || '000000000000';
     } catch (_) {
         return 'Restricted by Privacy Settings';
     }
 }
 
 function getGPU() {
-    try {
-        const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        if (!gl) return { vendor: 'WebGL Not Supported', renderer: 'WebGL Not Supported' };
+    const contexts = ['webgl2', 'webgl', 'experimental-webgl'];
+    for (const ctxName of contexts) {
+        try {
+            const canvas = document.createElement('canvas');
+            const gl = canvas.getContext(ctxName);
+            if (!gl) continue;
 
-        const ext = gl.getExtension('WEBGL_debug_renderer_info');
-        if (ext) {
+            const ext = gl.getExtension('WEBGL_debug_renderer_info');
+            if (ext) {
+                return {
+                    vendor: gl.getParameter(ext.UNMASKED_VENDOR_WEBGL) || 'Unknown',
+                    renderer: gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || 'Unknown'
+                };
+            }
             return {
-                vendor: gl.getParameter(ext.UNMASKED_VENDOR_WEBGL),
-                renderer: gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)
+                vendor: gl.getParameter(gl.VENDOR) || 'Masked by Driver',
+                renderer: gl.getParameter(gl.RENDERER) || 'Masked by Driver'
             };
-        }
-        return { vendor: 'Masked by Driver', renderer: 'Masked by Driver' };
-    } catch (_) {
-        return { vendor: 'Execution Failed', renderer: 'Execution Failed' };
+        } catch (_) {}
     }
+    return { vendor: 'WebGL Not Available', renderer: 'WebGL Not Available' };
 }
 
 async function getMediaDevices() {
@@ -108,7 +143,8 @@ async function getMediaDevices() {
         const devices = await navigator.mediaDevices.enumerateDevices();
         const video = devices.filter(d => d.kind === 'videoinput').length;
         const audio = devices.filter(d => d.kind === 'audioinput').length;
-        return `Cameras: ${video} | Mics: ${audio}`;
+        const output = devices.filter(d => d.kind === 'audiooutput').length;
+        return `Cameras: ${video} | Mics: ${audio} | Speakers: ${output}`;
     } catch (_) {
         return 'Blocked by Browser';
     }
@@ -119,45 +155,44 @@ async function getIPData() {
 
     const apis = [
         async () => {
-            const r = await fetch('https://ipapi.co/json/');
+            const r = await fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout(5000) });
             const d = await r.json();
             if (d.error) throw new Error('Rate limited');
             return { ip: d.ip, city: d.city, country: d.country_name, org: d.org, timezone: d.timezone };
         },
         async () => {
-            const r = await fetch('https://ipinfo.io/json');
+            const r = await fetch('https://ipinfo.io/json', { signal: AbortSignal.timeout(5000) });
             const d = await r.json();
             return { ip: d.ip, city: d.city, country: d.country, org: d.org, timezone: d.timezone };
         },
         async () => {
-            const r = await fetch('https://freeipapi.com/api/json');
+            const r = await fetch('https://freeipapi.com/api/json', { signal: AbortSignal.timeout(5000) });
             const d = await r.json();
             return { ip: d.ipAddress, city: d.cityName, country: d.countryName, org: 'Masked by Network Shield', timezone: d.timeZone };
         },
         async () => {
-            const r = await fetch('https://api.ipify.org?format=json');
+            const r = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(4000) });
             const d = await r.json();
             return { ...empty, ip: d.ip, org: 'Extended data blocked by shield/AdBlocker' };
         }
     ];
 
     for (const api of apis) {
-        try {
-            return await api();
-        } catch (_) {}
+        try { return await api(); } catch (_) {}
     }
-
     return { ...empty, ip: 'CONNECTION BLOCKED' };
 }
 
 function detectVPN(ipData, systemTimezone) {
     const ispLower = (ipData.org || '').toLowerCase();
-    const dcKeywords = ['vpn', 'proxy', 'datacenter', 'aws', 'amazon', 'digitalocean', 'linode', 'ovh', 'm247', 'cloudflare', 'hosting'];
+    const dcKeywords = ['vpn', 'proxy', 'datacenter', 'aws', 'amazon', 'digitalocean',
+        'linode', 'vultr', 'ovh', 'm247', 'cloudflare', 'hosting', 'hetzner',
+        'server', 'network', 'internet', 'broadband'];
     const isSuspicious = dcKeywords.some(k => ispLower.includes(k));
-    const tzMismatch = ipData.timezone && ipData.timezone !== systemTimezone;
+    const tzMismatch = ipData.timezone && systemTimezone && ipData.timezone !== systemTimezone;
 
-    if (isSuspicious || tzMismatch) {
-        return 'WARNING: Probable VPN/Proxy' + (tzMismatch ? ' (Timezone Mismatch)' : '');
-    }
+    if (isSuspicious && tzMismatch) return 'HIGH RISK: VPN/Proxy + Timezone Mismatch';
+    if (isSuspicious) return 'WARNING: Datacenter/VPN ISP Detected';
+    if (tzMismatch) return `WARNING: Timezone Mismatch (${systemTimezone} vs ${ipData.timezone})`;
     return 'Not Detected';
 }
