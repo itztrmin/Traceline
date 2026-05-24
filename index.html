@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <meta property="og:title" content="Baseline - Security Audit">
+    <meta property="og:title" content="TraceLine - Security Audit">
     <meta property="og:description" content="What happens behind the scenes when you visit a website? Run this audit to see your exact digital footprint and how to stop trackers.">
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#0d0d0d">
     <meta name="twitter:card" content="summary_large_image">
 
-    <title>Baseline - Security Audit</title>
+    <title>TraceLine - Security Audit</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,7 +61,6 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            /* This is the "old font" stack */
             font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
             margin: 0;
             padding: 0;
@@ -74,7 +73,6 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* Navbar Styling */
         nav {
             width: 100%;
             height: 60px;
@@ -94,7 +92,6 @@
         }
 
         .brand {
-            /* Reverted to inherit body font */
             font-size: 20px;
             font-weight: bold;
             color: var(--heading-color);
@@ -134,7 +131,6 @@
         body.light-mode .sun-icon { display: block; }
         body.light-mode .moon-icon { display: none; }
 
-        /* Main Container */
         main {
             flex: 1;
             display: flex;
@@ -158,7 +154,6 @@
         }
 
         .title {
-            /* Reverted to inherit body font */
             font-size: clamp(20px, 5vw, 28px);
             color: var(--heading-color);
             margin-bottom: 20px;
@@ -167,13 +162,12 @@
             line-height: 1.3;
         }
 
-        .disclaimer {
+        .about-section, .disclaimer {
             font-size: clamp(13px, 3.5vw, 15px);
-            margin-bottom: 40px;
+            margin-bottom: 20px;
             line-height: 1.7;
-            padding: 25px;
+            padding: 20px 25px;
             background-color: var(--box-bg);
-            border-left: 4px solid var(--border-color);
             border-radius: 4px;
             text-align: left;
             width: 100%;
@@ -181,7 +175,15 @@
             transition: all 0.3s ease;
         }
 
-        /* Buttons */
+        .about-section {
+            border-left: 4px solid #4CAF50;
+        }
+
+        .disclaimer {
+            border-left: 4px solid #f44336;
+            margin-bottom: 40px;
+        }
+
         button {
             background-color: var(--btn-bg);
             color: var(--btn-text);
@@ -213,7 +215,6 @@
             box-shadow: none;
         }
 
-        /* Results & Documentation UI */
         #results-container {
             display: none;
             width: 100%;
@@ -250,7 +251,6 @@
         .typing-complete::after { display: none; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* Documentation Styling */
         .docs {
             line-height: 1.8;
             font-size: clamp(14px, 3.5vw, 16px);
@@ -303,7 +303,6 @@
             margin: 40px 0;
         }
 
-        /* Bottom Actions Area */
         .bottom-actions {
             display: flex;
             flex-direction: column;
@@ -338,7 +337,6 @@
             text-transform: uppercase;
         }
 
-        /* Footer Styling */
         footer {
             width: 100%;
             text-align: center;
@@ -372,7 +370,7 @@
 <body>
 
 <nav>
-    <div class="brand">Baseline</div>
+    <div class="brand">TraceLine</div>
     <button class="theme-toggle" id="theme-btn" aria-label="Toggle Theme">
         <svg class="moon-icon" viewBox="0 0 24 24">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
@@ -397,10 +395,15 @@
     <div id="hero-container">
         <div class="title">What happens behind the scenes when you visit a website?</div>
         
+        <div class="about-section">
+            <strong>ABOUT TRACELINE</strong><br><br>
+            Look, the internet is fundamentally broken. TraceLine is a 100% open-source project built to show you exactly how much data you're bleeding every time you click a damn link. We aren't trying to sell you a VPN, and we don't save your data. We just want you to see the reality of modern browser fingerprinting. The source code is out there for anyone to audit.
+        </div>
+
         <div class="disclaimer">
             <strong>SECURITY DISCLAIMER</strong><br><br>
-            This page was built for educational and cybersecurity awareness purposes. By clicking the button below, you will allow this script to interrogate your browser. It will extract your hardware identity, network footprint, and rendering metrics to show you exactly what invisible trackers see.<br><br>
-            <em>Privacy Guarantee:</em> There is no backend database connected to this page. Everything you are about to see is processed entirely on your own device. The data is pulled, displayed on your screen, and deleted the moment you close the tab.
+            Don't be a dumbass. By clicking the button below, you are explicitly allowing this script to rip through your browser's APIs. It will extract your hardware identity, network footprint, rendering metrics, and whatever else it can grab to show you what invisible trackers see.<br><br>
+            <em>Privacy Guarantee:</em> There is no backend database connected to this page. The data is pulled locally, blasted onto your screen, and deleted the exact moment you close this tab.
         </div>
 
         <button id="trap-button">Run Security Audit</button>
@@ -444,7 +447,7 @@
             
             <div class="bottom-actions">
                 <button class="back-btn" id="back-btn">Back To Main Page</button>
-                <div class="tagline">Stay safe. Stay aware.</div>
+                <div class="tagline">Stay safe. Stay paranoid.</div>
             </div>
 
         </div>
@@ -456,7 +459,6 @@
 </footer>
 
 <script>
-    // Global variable to handle typewriter animation interrupts
     let isTyping = false;
     let typeAborter = false;
 
@@ -468,7 +470,7 @@
 
     // Reset UI Logic (Back to Main Page)
     document.getElementById('back-btn').addEventListener('click', () => {
-        typeAborter = true; // Stop any ongoing typing animations
+        typeAborter = true; 
         
         document.getElementById('results-container').style.display = 'none';
         document.getElementById('documentation-section').style.display = 'none';
@@ -483,7 +485,6 @@
 
     function checkAdBlocker() {
         const testAd = document.getElementById('ad-test');
-        // Check offset, display, and visibility
         const isBlocked = testAd.offsetHeight === 0 || 
                           window.getComputedStyle(testAd).display === 'none' ||
                           window.getComputedStyle(testAd).visibility === 'hidden';
@@ -580,12 +581,12 @@
         isTyping = true;
         
         for (let i = 0; i < text.length; i++) {
-            if (typeAborter) break; // Break out if user clicked back
+            if (typeAborter) break; 
 
             element.textContent += text[i];
             
             if (text[i] === '\n') {
-                await new Promise(r => setTimeout(r, 100 + Math.random() * 150));
+                await new Promise(r => setTimeout(r, 60 + Math.random() * 80));
             } else {
                 await new Promise(r => setTimeout(r, 2 + Math.random() * 8));
             }
@@ -606,14 +607,14 @@
         const resultsContainer = document.getElementById('results-container');
         const outputElement = document.getElementById('terminal-output');
         
-        button.innerText = "Processing...";
+        button.innerText = "Extracting Data...";
         button.disabled = true;
         
         heroContainer.style.display = "none";
         resultsContainer.style.display = "block";
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        await typeTerminal(outputElement, "====================================================\n SYSTEM DIAGNOSTIC // TELEMETRY EXFILTRATION LOG \n====================================================\n\n[+] INITIALIZING SCAN...\n", true);
+        await typeTerminal(outputElement, "====================================================\n TRACELINE DIAGNOSTIC // TELEMETRY EXFILTRATION LOG \n====================================================\n\n[+] INITIALIZING SCAN...\n", true);
         if (typeAborter) return;
 
         const adBlockStatus = checkAdBlocker();
@@ -622,45 +623,44 @@
         let networkString = "";
         let vpnStatus = "Not Detected";
 
+        // Multi-layered IP fetching to beat aggressive adblockers
+        let ipData = { ip: "Unknown", city: "Unknown", region: "Unknown", country: "Unknown", org: "Unknown", timezone: "" };
+        
         try {
-            const ipResponse = await fetch('https://ipapi.co/json/');
-            if (!ipResponse.ok) throw new Error("Primary API Failed");
-            const ipData = await ipResponse.json();
-            
-            const ipTimezone = ipData.timezone;
-            const isp = (ipData.org || "").toLowerCase();
-            
-            const suspiciousISPs = ['vpn', 'proxy', 'datacenter', 'aws', 'amazon', 'digitalocean', 'linode', 'ovh', 'm247', 'cloudflare', 'hosting'];
-            const isSuspiciousISP = suspiciousISPs.some(keyword => isp.includes(keyword));
-            const isTimezoneMismatch = ipTimezone && ipTimezone !== systemTimezone;
-
-            if (isSuspiciousISP || isTimezoneMismatch) {
-                vpnStatus = "WARNING: Probable VPN/Proxy Detected";
-                if (isTimezoneMismatch) vpnStatus += ` (Timezone Mismatch)`;
-            }
-
-            networkString = `    IP Address    : ${ipData.ip}\n    Location      : ${ipData.city}, ${ipData.region} (${ipData.country_name})\n    ISP Provider  : ${ipData.org}\n    VPN / Proxy   : ${vpnStatus}\n`;
+            const res1 = await fetch('https://ipapi.co/json/');
+            if (!res1.ok) throw new Error("API 1 Blocked");
+            const data1 = await res1.json();
+            ipData = { ip: data1.ip, city: data1.city, region: data1.region, country: data1.country_name, org: data1.org, timezone: data1.timezone };
         } catch (e1) {
             try {
-                const fallbackResponse = await fetch('https://ipwho.is/');
-                const fallbackData = await fallbackResponse.json();
-                
-                const ipTimezone = fallbackData.timezone ? fallbackData.timezone.id : "";
-                const isp = (fallbackData.connection.isp || "").toLowerCase();
-                
-                const suspiciousISPs = ['vpn', 'proxy', 'datacenter', 'aws', 'amazon', 'digitalocean', 'linode', 'ovh', 'm247', 'cloudflare', 'hosting'];
-                const isSuspiciousISP = suspiciousISPs.some(keyword => isp.includes(keyword));
-                const isTimezoneMismatch = ipTimezone && ipTimezone !== systemTimezone;
-
-                if (isSuspiciousISP || isTimezoneMismatch) {
-                    vpnStatus = "WARNING: Probable VPN/Proxy Detected";
-                }
-
-                networkString = `    IP Address    : ${fallbackData.ip}\n    Location      : ${fallbackData.city}, ${fallbackData.region} (${fallbackData.country})\n    ISP Provider  : ${fallbackData.connection.isp}\n    VPN / Proxy   : ${vpnStatus}\n`;
+                const res2 = await fetch('https://ipwho.is/');
+                if (!res2.ok) throw new Error("API 2 Blocked");
+                const data2 = await res2.json();
+                ipData = { ip: data2.ip, city: data2.city, region: data2.region, country: data2.country, org: data2.connection.isp, timezone: data2.timezone ? data2.timezone.id : "" };
             } catch (e2) {
-                networkString = `    Status: Network API Blocked (CORS/AdBlocker/VPN)\n    VPN / Proxy   : Unknown\n`;
+                try {
+                    // Raw IP fallback if full telemetry APIs are blocked
+                    const res3 = await fetch('https://api.ipify.org?format=json');
+                    const data3 = await res3.json();
+                    ipData.ip = data3.ip;
+                    ipData.org = "Data blocked by browser shield/AdBlocker";
+                } catch (e3) {
+                    ipData.ip = "CONNECTION BLOCKED (You've got some tight security)";
+                }
             }
         }
+
+        const ispLower = (ipData.org || "").toLowerCase();
+        const suspiciousISPs = ['vpn', 'proxy', 'datacenter', 'aws', 'amazon', 'digitalocean', 'linode', 'ovh', 'm247', 'cloudflare', 'hosting'];
+        const isSuspiciousISP = suspiciousISPs.some(keyword => ispLower.includes(keyword));
+        const isTimezoneMismatch = ipData.timezone && ipData.timezone !== systemTimezone;
+
+        if (isSuspiciousISP || isTimezoneMismatch) {
+            vpnStatus = "WARNING: Probable VPN/Proxy Detected";
+            if (isTimezoneMismatch) vpnStatus += ` (Timezone Mismatch: ${systemTimezone} vs ${ipData.timezone})`;
+        }
+
+        networkString = `    IP Address    : ${ipData.ip}\n    Location      : ${ipData.city}, ${ipData.region} (${ipData.country})\n    ISP Provider  : ${ipData.org}\n    VPN / Proxy   : ${vpnStatus}\n`;
 
         const canvasHash = getCanvasHash();
         const audioHash = await getAudioHash();
@@ -677,9 +677,14 @@
         log += `    GPU Renderer  : ${gpuInfo.renderer}\n`;
         log += `    Media Devices : ${mediaDevices}\n\n`;
 
+        const cpuCores = navigator.hardwareConcurrency ? `${navigator.hardwareConcurrency} Logical Cores` : 'Masked by Browser';
+        const ram = navigator.deviceMemory ? `~${navigator.deviceMemory} GB Allocation` : 'Masked (Firefox/Safari Protects This)';
+
         log += `[+] SYSTEM TELEMETRY\n`;
-        log += `    CPU Cores     : ${navigator.hardwareConcurrency || 'Unknown'} Logical Cores\n`;
-        log += `    System RAM    : ~${navigator.deviceMemory || 'Unknown'} GB Allocation\n`;
+        log += `    User Agent    : ${navigator.userAgent.substring(0, 70)}...\n`;
+        log += `    Platform      : ${navigator.platform || 'Unknown'}\n`;
+        log += `    CPU Cores     : ${cpuCores}\n`;
+        log += `    System RAM    : ${ram}\n`;
         log += `    Display Data  : ${window.screen.width}x${window.screen.height} | ${window.screen.colorDepth}-bit Color Depth\n`;
         log += `    Touch Support : ${navigator.maxTouchPoints > 0 ? navigator.maxTouchPoints + ' input points detected' : 'No Touch Interface'}\n\n`;
 
@@ -693,43 +698,25 @@
             } catch(e) {}
         }
 
-        const gpc = navigator.globalPrivacyControl ? "Active (GPC Enabled)" : "None";
+        const gpc = navigator.globalPrivacyControl ? "Active (GPC Enabled)" : "None / Ignored";
 
         log += `[+] BROWSER CAPABILITIES & PRIVACY\n`;
         log += `    PDF Engine    : ${navigator.pdfViewerEnabled ? 'Active' : 'Disabled'}\n`;
         log += `    Cookies       : ${navigator.cookieEnabled ? 'Accepted' : 'Rejected'}\n`;
         log += `    Do Not Track  : ${navigator.doNotTrack === "1" ? 'Signal Sent' : 'No Signal'}\n`;
-        log += `    Global Privacy: ${gpc}\n\n`;
+        log += `    Global Privacy: ${gpc}\n`;
+        log += `    AdBlocker     : ${adBlockStatus}\n\n`;
 
-        log += `[+] ENVIRONMENT VARIABLES\n`;
-        log += `    OS Platform   : ${navigator.platform}\n`;
-        log += `    System Langs  : ${navigator.languages ? navigator.languages.join(", ") : navigator.language}\n`;
-        log += `    System Clock  : ${systemTimezone}\n`;
-        log += `    Ad-Blocker    : ${adBlockStatus}\n`;
+        log += `====================================================\n SCAN COMPLETE // PARSING POST-MORTEM DATA...\n====================================================\n`;
+
+        if (typeAborter) return;
+        await typeTerminal(outputElement, log);
         
-        if (navigator.connection) {
-            const speed = navigator.connection.downlink ? `~${navigator.connection.downlink} Mbps` : 'Unknown';
-            const ping = navigator.connection.rtt ? `${navigator.connection.rtt}ms RTT` : '';
-            log += `    Connection    : ${navigator.connection.effectiveType || 'Unknown'} (${speed} | ${ping})\n`;
+        if (!typeAborter) {
+            document.getElementById('documentation-section').style.display = 'block';
+            window.scrollBy({ top: 150, behavior: 'smooth' });
         }
-
-        log += `\n[+] RAW USER-AGENT STRING\n    ${navigator.userAgent}\n`;
-        log += `\n====================================================\n`;
-        log += ` LOG COMPILED LOCALLY. SESSION TERMINATED. \n`;
-        log += `====================================================`;
-
-        if (typeAborter) return;
-        await typeTerminal(outputElement, log, false);
-        if (typeAborter) return;
-
-        const docs = document.getElementById('documentation-section');
-        docs.style.display = "block";
-        docs.animate([
-            { opacity: 0, transform: 'translateY(20px)' },
-            { opacity: 1, transform: 'translateY(0)' }
-        ], { duration: 600, easing: 'ease-out' });
     });
 </script>
-
 </body>
-              </html>
+</html>
