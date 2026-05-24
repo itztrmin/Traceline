@@ -45,7 +45,8 @@ trapBtn.addEventListener('click', async () => {
     trapBtn.disabled = true;
     heroContainer.style.display = 'none';
     resultsContainer.style.display = 'block';
-    terminalEl.textContent = '';
+    terminalEl.innerHTML = '';
+    terminalEl._tail = null;
     terminalEl.classList.remove('typing-complete');
     isTyping = true;
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -160,7 +161,7 @@ function showCopyBtn() {
     btn.textContent = 'Copy Log';
     btn.className = 'copy-log-btn';
     btn.addEventListener('click', () => {
-        const raw = terminalEl.textContent.replace(/█/g, '').trimEnd();
+        const raw = (terminalEl.innerText || terminalEl.textContent).replace(/█/g, '').trimEnd();
         navigator.clipboard.writeText(raw).then(() => {
             btn.textContent = 'Copied ✓';
             setTimeout(() => { btn.textContent = 'Copy Log'; }, 2000);
