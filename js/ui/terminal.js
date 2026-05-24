@@ -93,8 +93,7 @@ TL.terminal = (function () {
         var label = 'TRACELINE // DIAGNOSTIC SHELL';
         var lineLen = Math.min(Math.max(label.length + 4, 45), cols - 2);
         var line = '━'.repeat(lineLen);
-        var pad = Math.floor((cols - (label.length + 2)) / 2);
-        var mid = ' '.repeat(Math.max(0, pad)) + '  ' + label;
+        var mid = '  ' + label;
 
         for (var i = 0; i < 3; i++) {
             if (aborted) return false;
