@@ -56,7 +56,15 @@
     </div>
 
     <div id="results-container">
-        <div id="terminal-output"></div>
+        <div id="terminal-wrapper">
+            <div id="terminal-titlebar">
+                <span class="term-dot term-dot-red"></span>
+                <span class="term-dot term-dot-yellow"></span>
+                <span class="term-dot term-dot-green"></span>
+                <span id="terminal-title-text">traceline — diagnostic shell</span>
+            </div>
+            <div id="terminal-output"></div>
+        </div>
 
         <div class="docs" id="documentation-section" style="display:none">
             <h2>The Post-Mortem: How We Got This & How to Stop It</h2>
