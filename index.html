@@ -18,7 +18,7 @@
 </head>
 <body>
 
-<div id="ad-trap" class="ad-trap ad-banner ad-sponsor adsbox doubleclick ad-placeholder" aria-hidden="true"></div>
+<div id="ad-trap" class="ad-trap ad-banner ad-sponsor adsbox doubleclick ad-placeholder"></div>
 
 <nav>
     <div class="brand">TraceLine</div>
@@ -96,6 +96,10 @@
             <p><strong>How we got it:</strong> We didn't even have to hack anything for this part — your browser just broadcasted it like an idiot. Using standard commands, we asked your machine how many CPU cores it has, how much RAM is installed, and your screen's exact color-depth. Combined with your IP address, this telemetry is enough to track you across different websites even if you clear your cookies every ten minutes.</p>
             <p><strong>How to prevent it:</strong> The best defense against general telemetry is blending in. The <strong>Tor Browser</strong> handles this by forcing every user to share the exact same screen size, hardware profile, and timezone, making it impossible to tell you apart from anyone else. For daily browsing, a strict privacy browser combined with a trusted VPN is the best way to stop the bleeding.</p>
 
+            <h3>7. Browser Security Score</h3>
+            <p><strong>How it works:</strong> After every audit, TraceLine grades your browser's privacy posture on a scale of <strong>0 to 10</strong>. The score weighs eleven signals gathered during the scan — whether an ad-blocker is running, whether canvas and audio fingerprinting are blocked, whether your GPU identity is masked, whether a VPN is in use, whether DNT and Global Privacy Control headers are sent, and more. Each signal contributes a weighted point value, and the total is normalised to a clean <code>/10</code> with a letter grade.</p>
+            <p><strong>How to improve your score:</strong> The breakdown in the terminal tells you exactly which checks failed. The fastest wins are: installing an ad-blocker like <strong>uBlock Origin</strong>, switching to <strong>Brave</strong> (blocks canvas, audio, and WebGL fingerprinting by default), and enabling a VPN. Turning on Do Not Track and Global Privacy Control in your browser settings is trivial and free. Masking hardware telemetry (CPU core count, RAM) requires a privacy-focused browser or extensions like <strong>CanvasBlocker</strong> on Firefox.</p>
+
             <div class="bottom-actions">
                 <button class="back-btn" id="back-btn">Back To Main Page</button>
                 <div class="tagline">Stay safe. Stay paranoid.</div>
@@ -115,13 +119,15 @@
     3. terminal — needs TL.sleep from utils
     4. network  — needs TL.fetchWithTimeout from utils
     5. fp       — needs TL.network + TL.getPlatform  (renamed from fingerprint.js to avoid adblocker URL filters)
-    6. app      — needs everything above
+    6. score    — needs nothing; pure calculation from collected data
+    7. app      — needs everything above
 -->
 <script src="js/core/theme.js"></script>
 <script src="js/core/utils.js"></script>
 <script src="js/ui/terminal.js"></script>
 <script src="js/data/network.js"></script>
 <script src="js/data/fp.js"></script>
+<script src="js/data/score.js"></script>
 <script src="js/ui/app.js"></script>
 </body>
 </html>

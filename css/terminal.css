@@ -136,3 +136,17 @@ body.light-mode .term-divider {
         line-height: 1.6;
     }
 }
+
+/* ── Security Score inline colouring ─────────────────────────────────────── */
+/*
+   The score breakdown lines start with [+] or [-].
+   We can't easily colour individual characters inside a <pre>-style div
+   without adding DOM elements, so we let the terminal accent colours do
+   the job via the existing accent-green / accent-red CSS variables.
+   Browsers that support :has() will get a subtle glow on complete score lines.
+*/
+
+/* Score bar container — extra bottom padding so the bar breathes */
+#terminal-output.typing-complete {
+    padding-bottom: 28px;
+}

@@ -44,7 +44,8 @@ TL.network = (function () {
     var DC_KEYWORDS = [
         'vpn', 'proxy', 'datacenter', 'data center', 'aws', 'amazon',
         'digitalocean', 'linode', 'vultr', 'ovh', 'm247', 'cloudflare',
-        'hosting', 'hetzner', 'server', 'network', 'internet', 'broadband'
+        'hetzner', 'serverius', 'leaseweb', 'choopa', 'psychz',
+        'quadranet', 'nexeon', 'sharktech', 'servermania', 'zenlayer'
     ];
 
     function detectVPN(ipData, systemTimezone) {

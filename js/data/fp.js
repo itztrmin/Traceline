@@ -250,7 +250,7 @@ TL.fingerprint = (function () {
             if (
                 el.offsetHeight === 0 || el.offsetWidth === 0 ||
                 s.display === 'none' || s.visibility === 'hidden' ||
-                s.opacity === '0' || el.getAttribute('aria-hidden') === 'true'
+                s.opacity === '0'
             ) return 'Detected (Active)';
         }
         return new Promise(function (resolve) {

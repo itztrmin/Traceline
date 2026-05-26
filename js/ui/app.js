@@ -11,6 +11,7 @@ var TL = window.TL || {};
 
     term.init(terminalEl);
 
+    // ── Copy log button ────────────────────────────────────────────────────────
     function showCopyBtn() {
         var existing = document.getElementById('copy-log-btn');
         if (existing) existing.remove();
@@ -21,7 +22,9 @@ var TL = window.TL || {};
         btn.className = 'copy-log-btn';
 
         btn.addEventListener('click', function () {
+            // Strip cursor block and trailing whitespace
             var raw = terminalEl.textContent.replace(/█/g, '').trimEnd();
+
             var copied = function () {
                 btn.textContent = 'Copied ✓';
                 setTimeout(function () { btn.textContent = 'Copy Log'; }, 2000);
@@ -30,34 +33,34 @@ var TL = window.TL || {};
                 btn.textContent = 'Failed';
                 setTimeout(function () { btn.textContent = 'Copy Log'; }, 2000);
             };
+
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(raw).then(copied).catch(function () {
-                    try {
-                        var ta = document.createElement('textarea');
-                        ta.value = raw;
-                        ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
-                        document.body.appendChild(ta); ta.focus(); ta.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(ta);
-                        copied();
-                    } catch (_) { failed(); }
+                    legacyCopy(raw, copied, failed);
                 });
             } else {
-                try {
-                    var ta = document.createElement('textarea');
-                    ta.value = raw;
-                    ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
-                    document.body.appendChild(ta); ta.focus(); ta.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(ta);
-                    copied();
-                } catch (_) { failed(); }
+                legacyCopy(raw, copied, failed);
             }
         });
 
         document.getElementById('terminal-wrapper').appendChild(btn);
     }
 
+    function legacyCopy(text, onSuccess, onFail) {
+        try {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            onSuccess();
+        } catch (_) { onFail(); }
+    }
+
+    // ── Back button ────────────────────────────────────────────────────────────
     backBtn.addEventListener('click', function () {
         term.abort();
         resultsContainer.style.display = 'none';
@@ -70,6 +73,63 @@ var TL = window.TL || {};
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
+    // ── Score bar renderer ─────────────────────────────────────────────────────
+    /**
+     * Renders a visual bar like:  [████████░░]  8.0 / 10
+     * using only characters that render reliably in monospace terminals.
+     */
+    function renderScoreBar(score, max, cols) {
+        var barWidth = Math.min(20, Math.max(10, Math.floor((cols - 18) * 0.45)));
+        var filled   = Math.round((score / max) * barWidth);
+        var empty    = barWidth - filled;
+        return '[' + '█'.repeat(filled) + '░'.repeat(empty) + ']  ' +
+               score.toFixed(1) + ' / ' + max;
+    }
+
+    // ── Security score section ─────────────────────────────────────────────────
+    async function renderSecurityScore(data) {
+        if (term.wasAborted()) return false;
+
+        var result = TL.score.calculate(data);
+        var cols   = term.getCols();
+
+        if (!await term.blank(300)) return false;
+        if (!await term.typeLine('[SEC] Computing browser security score...', 200)) return false;
+        if (!await term.typeLine('[SEC] Evaluating ' + result.breakdown.length + ' privacy signal categories...', 180)) return false;
+        if (!await term.blank(320)) return false;
+
+        // ── Header divider
+        if (!await term.divider('BROWSER SECURITY SCORE')) return false;
+        if (!await term.blank(120)) return false;
+
+        // ── Visual score bar
+        var bar = renderScoreBar(result.score, result.max, cols);
+        if (!await term.typeLine('  Score   ' + bar, 80)) return false;
+        if (!await term.typeLine('  Grade   ' + result.grade, 120)) return false;
+        if (!await term.typeLine('  Verdict ' + result.verdict, 180)) return false;
+        if (!await term.blank(260)) return false;
+
+        // ── Per-category breakdown
+        if (!await term.typeLine('  ── Category Breakdown ──────────────────────', 80)) return false;
+        if (!await term.blank(100)) return false;
+
+        for (var i = 0; i < result.breakdown.length; i++) {
+            if (term.wasAborted()) return false;
+            var item   = result.breakdown[i];
+            var marker = item.good ? '[+]' : '[-]';
+            var line   = '  ' + marker + ' ' + TL.pad(item.label, 26) + TL.pad(item.status, 14) + item.pts;
+            if (!await term.typeLine(line, 60)) return false;
+        }
+
+        if (!await term.blank(200)) return false;
+
+        // ── Closing divider
+        if (!await term.divider('SCAN COMPLETE — FINGERPRINT ASSEMBLED')) return false;
+
+        return true;
+    }
+
+    // ── Main audit ─────────────────────────────────────────────────────────────
     trapBtn.addEventListener('click', async function () {
         if (term.isRunning()) return;
 
@@ -176,7 +236,9 @@ var TL = window.TL || {};
         if (!await term.field('AdBlocker',     data.adBlock,                         560)) return;
         if (!await term.blank(360)) return;
 
-        if (!await term.divider('SCAN COMPLETE — FINGERPRINT ASSEMBLED')) return;
+        // ── Security Score (new section) ──────────────────────────────────────
+        var scoreOk = await renderSecurityScore(data);
+        if (!scoreOk && term.wasAborted()) return;
 
         term.markComplete();
 
