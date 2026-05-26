@@ -6,6 +6,7 @@ var TL = window.TL || {};
     var heroContainer    = document.getElementById('hero-container');
     var resultsContainer = document.getElementById('results-container');
     var docsSection      = document.getElementById('documentation-section');
+    var scoreSection     = document.getElementById('score-section');
     var terminalEl       = document.getElementById('terminal-output');
     var term             = TL.terminal;
 
@@ -22,9 +23,7 @@ var TL = window.TL || {};
         btn.className = 'copy-log-btn';
 
         btn.addEventListener('click', function () {
-            // Strip cursor block and trailing whitespace
             var raw = terminalEl.textContent.replace(/█/g, '').trimEnd();
-
             var copied = function () {
                 btn.textContent = 'Copied ✓';
                 setTimeout(function () { btn.textContent = 'Copy Log'; }, 2000);
@@ -33,11 +32,8 @@ var TL = window.TL || {};
                 btn.textContent = 'Failed';
                 setTimeout(function () { btn.textContent = 'Copy Log'; }, 2000);
             };
-
             if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(raw).then(copied).catch(function () {
-                    legacyCopy(raw, copied, failed);
-                });
+                navigator.clipboard.writeText(raw).then(copied).catch(function () { legacyCopy(raw, copied, failed); });
             } else {
                 legacyCopy(raw, copied, failed);
             }
@@ -51,97 +47,101 @@ var TL = window.TL || {};
             var ta = document.createElement('textarea');
             ta.value = text;
             ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
-            document.body.appendChild(ta);
-            ta.focus();
-            ta.select();
+            document.body.appendChild(ta); ta.focus(); ta.select();
             document.execCommand('copy');
             document.body.removeChild(ta);
             onSuccess();
         } catch (_) { onFail(); }
     }
 
-    // ── Back button ────────────────────────────────────────────────────────────
+    // ── Back button ───────────────────────────────────────────────────────────
     backBtn.addEventListener('click', function () {
         term.abort();
         resultsContainer.style.display = 'none';
-        docsSection.style.display = 'none';
-        heroContainer.style.display = 'flex';
+        scoreSection.style.display     = 'none';
+        docsSection.style.display      = 'none';
+        heroContainer.style.display    = 'flex';
         trapBtn.textContent = 'Run Security Audit';
-        trapBtn.disabled = false;
+        trapBtn.disabled    = false;
         var existing = document.getElementById('copy-log-btn');
         if (existing) existing.remove();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // ── Score bar renderer ─────────────────────────────────────────────────────
-    /**
-     * Renders a visual bar like:  [████████░░]  8.0 / 10
-     * using only characters that render reliably in monospace terminals.
-     */
-    function renderScoreBar(score, max, cols) {
-        var barWidth = Math.min(20, Math.max(10, Math.floor((cols - 18) * 0.45)));
-        var filled   = Math.round((score / max) * barWidth);
-        var empty    = barWidth - filled;
-        return '[' + '█'.repeat(filled) + '░'.repeat(empty) + ']  ' +
-               score.toFixed(1) + ' / ' + max;
+    // ── Score card renderer ───────────────────────────────────────────────────
+    function renderScoreCard(result) {
+        var pct   = (result.score / result.max) * 100;
+        var color = pct >= 85 ? '#4CAF50'
+                  : pct >= 70 ? '#8bc34a'
+                  : pct >= 55 ? '#ffc107'
+                  : pct >= 40 ? '#ff9800'
+                  : '#f44336';
+
+        // Clear & show
+        scoreSection.innerHTML = '';
+        scoreSection.style.display = 'block';
+
+        // ── Header
+        var header = document.createElement('div');
+        header.className = 'score-header';
+        header.innerHTML =
+            '<div class="score-label">BROWSER SECURITY SCORE</div>' +
+            '<div class="score-subtitle">Based on ' + result.breakdown.length + ' privacy signal checks</div>';
+        scoreSection.appendChild(header);
+
+        // ── Big score + grade
+        var hero = document.createElement('div');
+        hero.className = 'score-hero';
+        hero.innerHTML =
+            '<div class="score-number" style="color:' + color + '">' +
+                result.score.toFixed(1) + '<span class="score-denom"> / 10</span>' +
+            '</div>' +
+            '<div class="score-grade" style="color:' + color + '">' + result.grade + '</div>';
+        scoreSection.appendChild(hero);
+
+        // ── Progress bar
+        var barWrap = document.createElement('div');
+        barWrap.className = 'score-bar-wrap';
+        barWrap.innerHTML =
+            '<div class="score-bar-track">' +
+                '<div class="score-bar-fill" style="width:' + pct + '%;background:' + color + '"></div>' +
+            '</div>' +
+            '<div class="score-verdict">' + result.verdict + '</div>';
+        scoreSection.appendChild(barWrap);
+
+        // ── Breakdown grid
+        var grid = document.createElement('div');
+        grid.className = 'score-grid';
+
+        result.breakdown.forEach(function (item) {
+            var row = document.createElement('div');
+            row.className = 'score-row ' + (item.good ? 'score-row-good' : 'score-row-bad');
+            row.innerHTML =
+                '<span class="score-row-icon">' + (item.good ? '✓' : '✗') + '</span>' +
+                '<span class="score-row-label">' + item.label + '</span>' +
+                '<span class="score-row-status">' + item.status + '</span>' +
+                '<span class="score-row-pts">' + item.pts + '</span>';
+            grid.appendChild(row);
+        });
+
+        scoreSection.appendChild(grid);
     }
 
-    // ── Security score section ─────────────────────────────────────────────────
-    async function renderSecurityScore(data) {
-        if (term.wasAborted()) return false;
-
-        var result = TL.score.calculate(data);
-        var cols   = term.getCols();
-
-        if (!await term.blank(300)) return false;
-        if (!await term.typeLine('[SEC] Computing browser security score...', 200)) return false;
-        if (!await term.typeLine('[SEC] Evaluating ' + result.breakdown.length + ' privacy signal categories...', 180)) return false;
-        if (!await term.blank(320)) return false;
-
-        // ── Header divider
-        if (!await term.divider('BROWSER SECURITY SCORE')) return false;
-        if (!await term.blank(120)) return false;
-
-        // ── Visual score bar
-        var bar = renderScoreBar(result.score, result.max, cols);
-        if (!await term.typeLine('  Score   ' + bar, 80)) return false;
-        if (!await term.typeLine('  Grade   ' + result.grade, 120)) return false;
-        if (!await term.typeLine('  Verdict ' + result.verdict, 180)) return false;
-        if (!await term.blank(260)) return false;
-
-        // ── Per-category breakdown
-        if (!await term.typeLine('  ── Category Breakdown ──────────────────────', 80)) return false;
-        if (!await term.blank(100)) return false;
-
-        for (var i = 0; i < result.breakdown.length; i++) {
-            if (term.wasAborted()) return false;
-            var item   = result.breakdown[i];
-            var marker = item.good ? '[+]' : '[-]';
-            var line   = '  ' + marker + ' ' + TL.pad(item.label, 26) + TL.pad(item.status, 14) + item.pts;
-            if (!await term.typeLine(line, 60)) return false;
-        }
-
-        if (!await term.blank(200)) return false;
-
-        // ── Closing divider
-        if (!await term.divider('SCAN COMPLETE — FINGERPRINT ASSEMBLED')) return false;
-
-        return true;
-    }
-
-    // ── Main audit ─────────────────────────────────────────────────────────────
+    // ── Main audit ────────────────────────────────────────────────────────────
     trapBtn.addEventListener('click', async function () {
         if (term.isRunning()) return;
 
         term.reset();
-        trapBtn.textContent = 'Extracting...';
-        trapBtn.disabled = true;
+        scoreSection.style.display  = 'none';
+        scoreSection.innerHTML      = '';
+        docsSection.style.display   = 'none';
+        trapBtn.textContent         = 'Extracting...';
+        trapBtn.disabled            = true;
         heroContainer.style.display = 'none';
         resultsContainer.style.display = 'block';
         term.setTyping(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        // Kick off all data collection immediately in parallel
         var dataPromise = TL.fingerprint.collectAll();
 
         if (!await term.header()) return;
@@ -165,35 +165,35 @@ var TL = window.TL || {};
         if (!await term.blank(180)) return;
 
         if (!await term.typeLine('[+] NETWORK IDENTIFICATION', 70)) return;
-        if (!await term.field('IP Address',  net.ip,              100)) return;
-        if (!await term.field('Location',    net.loc,             180)) return;
-        if (!await term.field('ISP Provider',net.org,             160)) return;
-        if (!await term.field('System TZ',   net.systemTimezone,  130)) return;
-        if (!await term.field('IP TZ',       net.ipTimezone || 'Unknown', 130)) return;
-        if (!await term.field('VPN / Proxy', net.vpn,             220)) return;
+        if (!await term.field('IP Address',  net.ip,                          100)) return;
+        if (!await term.field('Location',    net.loc,                         180)) return;
+        if (!await term.field('ISP Provider',net.org,                         160)) return;
+        if (!await term.field('System TZ',   net.systemTimezone,              130)) return;
+        if (!await term.field('IP TZ',       net.ipTimezone || 'Unknown',     130)) return;
+        if (!await term.field('VPN / Proxy', net.vpn,                         220)) return;
         if (!await term.blank(320)) return;
 
         if (!await term.typeLine('[FP] Beginning hardware fingerprint extraction...', 120)) return;
         if (!await term.typeLine('[FP] Rendering invisible canvas surface...', 160)) return;
-        if (!await term.field('Canvas Hash',    data.canvasHash,   560)) return;
+        if (!await term.field('Canvas Hash',   data.canvasHash,   560)) return;
 
         if (!await term.typeLine('[FP] Generating audio oscillator signal...', 140)) return;
         if (!await term.typeLine('[FP] Processing audio compressor buffer...', 180)) return;
-        if (!await term.field('Audio Hash',     data.audioHash,    740)) return;
+        if (!await term.field('Audio Hash',    data.audioHash,    740)) return;
 
         if (!await term.typeLine('[FP] Querying WebGL debug extension...', 160)) return;
-        if (!await term.field('GPU Vendor',     data.gpu.vendor,   360)) return;
-        if (!await term.field('GPU Renderer',   data.gpu.renderer, 180)) return;
-        if (!await term.field('HW Accel',       data.hwAccel,      200)) return;
+        if (!await term.field('GPU Vendor',    data.gpu.vendor,   360)) return;
+        if (!await term.field('GPU Renderer',  data.gpu.renderer, 180)) return;
+        if (!await term.field('HW Accel',      data.hwAccel,      200)) return;
 
         if (!await term.typeLine('[FP] Enumerating media input devices...', 140)) return;
-        if (!await term.field('Media Devices',  data.mediaDevices, 460)) return;
+        if (!await term.field('Media Devices', data.mediaDevices, 460)) return;
 
         if (!await term.typeLine('[FP] Probing display refresh rate...', 160)) return;
-        if (!await term.field('Refresh Rate',   data.refreshRate,  500)) return;
+        if (!await term.field('Refresh Rate',  data.refreshRate,  500)) return;
 
         if (!await term.typeLine('[FP] Scanning installed font stack...', 180)) return;
-        if (!await term.field('Fonts',          data.fonts,        600)) return;
+        if (!await term.field('Fonts',         data.fonts,        600)) return;
         if (!await term.blank(280)) return;
 
         if (!await term.typeLine('[+] HARDWARE FINGERPRINT COMPLETE', 100)) return;
@@ -234,16 +234,19 @@ var TL = window.TL || {};
         if (!await term.field('Glob. Privacy', data.priv.gpc,                        180)) return;
         if (!await term.field('JS Enabled',    "Confirmed (you're reading this)",     130)) return;
         if (!await term.field('AdBlocker',     data.adBlock,                         560)) return;
-        if (!await term.blank(360)) return;
+        if (!await term.blank(180)) return;
 
-        // ── Security Score (new section) ──────────────────────────────────────
-        var scoreOk = await renderSecurityScore(data);
-        if (!scoreOk && term.wasAborted()) return;
+        if (!await term.divider('SCAN COMPLETE — FINGERPRINT ASSEMBLED')) return;
 
         term.markComplete();
 
         if (!term.wasAborted()) {
             showCopyBtn();
+
+            // Compute and render the score card below the terminal
+            var result = TL.score.calculate(data);
+            renderScoreCard(result);
+
             docsSection.style.display = 'block';
             window.scrollBy({ top: 150, behavior: 'smooth' });
         }

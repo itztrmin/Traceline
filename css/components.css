@@ -263,3 +263,189 @@ body.light-mode .icon-sun  { opacity: 1; }
         font-size: 14px;
     }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BROWSER SECURITY SCORE CARD
+   Sits between the terminal and the docs section
+   ══════════════════════════════════════════════════════════════════════════ */
+
+#score-section {
+    width: 100%;
+    background: var(--box-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 32px 28px 28px;
+    margin-bottom: 40px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    font-family: var(--font-mono);
+}
+
+/* Header */
+.score-header {
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+}
+
+.score-label {
+    font-size: clamp(11px, 3vw, 13px);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--link-color);
+    margin-bottom: 4px;
+}
+
+.score-subtitle {
+    font-size: 11px;
+    color: var(--link-color);
+    opacity: 0.6;
+    letter-spacing: 1px;
+}
+
+/* Big number + grade row */
+.score-hero {
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.score-number {
+    font-family: var(--font-display);
+    font-size: clamp(48px, 12vw, 72px);
+    line-height: 1;
+    font-weight: 900;
+    transition: color 0.4s ease;
+}
+
+.score-denom {
+    font-size: clamp(18px, 4vw, 24px);
+    opacity: 0.55;
+}
+
+.score-grade {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 7vw, 44px);
+    font-weight: 900;
+    border: 3px solid currentColor;
+    border-radius: var(--radius-md);
+    padding: 2px 12px;
+    line-height: 1.3;
+    opacity: 0.9;
+}
+
+/* Progress bar */
+.score-bar-wrap {
+    margin-bottom: 28px;
+}
+
+.score-bar-track {
+    width: 100%;
+    height: 6px;
+    background: var(--border-color);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.score-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-verdict {
+    font-size: clamp(12px, 3vw, 14px);
+    color: var(--text-color);
+    opacity: 0.75;
+    letter-spacing: 0.5px;
+}
+
+/* Breakdown grid */
+.score-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+}
+
+.score-row {
+    display: grid;
+    grid-template-columns: 22px 1fr auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border-radius: var(--radius-sm);
+    font-size: clamp(10px, 2.5vw, 12px);
+    letter-spacing: 0.5px;
+    transition: background var(--transition-fast);
+}
+
+.score-row:hover {
+    background: var(--highlight-bg);
+}
+
+.score-row-icon {
+    font-size: 13px;
+    font-weight: bold;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.score-row-good .score-row-icon { color: var(--accent-green); }
+.score-row-bad  .score-row-icon { color: var(--accent-red);   }
+
+.score-row-label {
+    color: var(--text-color);
+    min-width: 0;
+}
+
+.score-row-status {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.score-row-good .score-row-status {
+    background: rgba(76,175,80,0.12);
+    color: var(--accent-green);
+    border: 1px solid rgba(76,175,80,0.25);
+}
+
+.score-row-bad .score-row-status {
+    background: rgba(244,67,54,0.10);
+    color: var(--accent-red);
+    border: 1px solid rgba(244,67,54,0.2);
+}
+
+.score-row-pts {
+    font-size: 11px;
+    color: var(--link-color);
+    text-align: right;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-width: 32px;
+}
+
+.score-row-good .score-row-pts { color: var(--accent-green); }
+
+/* Mobile */
+@media (max-width: 520px) {
+    #score-section {
+        padding: 24px 16px 20px;
+    }
+
+    .score-row {
+        grid-template-columns: 18px 1fr auto;
+        gap: 8px;
+    }
+
+    /* Hide pts column on very small screens */
+    .score-row-pts {
+        display: none;
+    }
+}
