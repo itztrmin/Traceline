@@ -9,71 +9,75 @@ TL.fingerprint = (function () {
             h1 ^= c; h1 = Math.imul(h1, 0x01000193);
             h2 ^= c; h2 = Math.imul(h2, 0x1b873593);
         }
-        return (((h1 ^ (h1 >>> 16)) >>> 0).toString(16).padStart(8, '0') +
-                ((h2 ^ (h2 >>> 16)) >>> 0).toString(16).padStart(8, '0'));
+        return (((h1 ^ (h1 >>> 16)) >>> 0).toString(16).padStart(8,'0') +
+                ((h2 ^ (h2 >>> 16)) >>> 0).toString(16).padStart(8,'0'));
     }
 
     function drawCanvasScene(ctx, w, h) {
         ctx.fillStyle = '#0d0d0d';
         ctx.fillRect(0, 0, w, h);
         ctx.textBaseline = 'alphabetic';
-        ctx.font = '16px Arial';
+        ctx.font = '15px Arial';
         ctx.fillStyle = '#ff6600';
-        ctx.fillText('TraceLine_FP \u00e9\u03b1\u6c49\u0639', 10, 28);
-        ctx.font = 'italic 13px Georgia';
+        ctx.fillText('TraceLine_FP \u00e9\u03b1\u6c49\u0639\u1e1f', 8, 26);
+        ctx.font = 'italic 12px Georgia';
         ctx.fillStyle = 'rgba(102,204,0,0.85)';
-        ctx.fillText('TraceLine_FP \u00e9\u03b1\u6c49\u0639', 12, 30);
+        ctx.fillText('TraceLine_FP \u00e9\u03b1\u6c49\u0639\u1e1f', 10, 28);
         ctx.beginPath();
-        ctx.arc(260, 30, 18, 0, Math.PI * 2);
+        ctx.arc(258, 30, 17, 0, Math.PI * 2);
         ctx.fillStyle = 'rgba(0,102,204,0.6)';
         ctx.fill();
-        ctx.font = 'bold 11px monospace';
+        ctx.font = 'bold 10px monospace';
         ctx.fillStyle = '#ffffff';
-        ctx.fillText('0xFP', 244, 34);
-        ctx.shadowColor = 'rgba(255,100,0,0.4)';
-        ctx.shadowBlur = 4;
+        ctx.fillText('0xFP', 243, 33);
+        ctx.shadowColor = 'rgba(255,100,0,0.5)';
+        ctx.shadowBlur = 5;
         ctx.beginPath();
-        ctx.moveTo(0, 45);
-        ctx.bezierCurveTo(75, 55, 225, 35, 300, 45);
+        ctx.moveTo(0, 44);
+        ctx.bezierCurveTo(80, 54, 220, 34, 300, 44);
         ctx.strokeStyle = '#cc4400';
         ctx.lineWidth = 1.5;
         ctx.stroke();
         ctx.shadowBlur = 0;
+        ctx.globalCompositeOperation = 'multiply';
+        ctx.fillStyle = 'rgba(100,200,100,0.08)';
+        ctx.fillRect(0, 0, w, h);
+        ctx.globalCompositeOperation = 'source-over';
     }
 
     function getCanvas() {
         try {
             var w = 300, h = 60;
-            var c1 = document.createElement('canvas');
-            c1.width = w; c1.height = h;
-            var ctx1 = c1.getContext('2d', { willReadFrequently: true });
-            if (!ctx1) return 'Context Unavailable';
-            drawCanvasScene(ctx1, w, h);
 
-            var c2 = document.createElement('canvas');
-            c2.width = w; c2.height = h;
-            var ctx2 = c2.getContext('2d', { willReadFrequently: true });
-            drawCanvasScene(ctx2, w, h);
+            var canvases = [0, 1, 2].map(function () {
+                var c = document.createElement('canvas');
+                c.width = w; c.height = h;
+                var ctx = c.getContext('2d', { willReadFrequently: true, alpha: false });
+                drawCanvasScene(ctx, w, h);
+                return { canvas: c, ctx: ctx, dataUrl: c.toDataURL('image/png') };
+            });
 
-            var d1 = c1.toDataURL('image/png');
-            var d2 = c2.toDataURL('image/png');
+            var d0 = canvases[0].dataUrl;
+            var d1 = canvases[1].dataUrl;
+            var d2 = canvases[2].dataUrl;
 
-            if (d1 !== d2) {
-                return 'Noise Injected (Privacy Shielded) — session:' + hashBuffer(d1).substring(0, 8);
+            if (d0 !== d1 || d1 !== d2) {
+                var noiseType = d0 !== d1 && d1 !== d2 ? 'per-render noise' : 'intermittent noise';
+                return 'Protected — browser is injecting ' + noiseType + ' into canvas output. Session token: ' + hashBuffer(d0).substring(0,8);
             }
 
-            var px1 = ctx1.getImageData(0, 0, w, h).data;
-            var px2 = ctx2.getImageData(0, 0, w, h).data;
-            var pixelMatch = true;
-            for (var i = 0; i < 200; i += 4) {
-                if (px1[i] !== px2[i] || px1[i+1] !== px2[i+1]) { pixelMatch = false; break; }
+            var px0 = canvases[0].ctx.getImageData(0, 0, w, h).data;
+            var px1 = canvases[1].ctx.getImageData(0, 0, w, h).data;
+            var diffCount = 0;
+            for (var i = 0; i < px0.length; i += 4) {
+                if (px0[i] !== px1[i] || px0[i+1] !== px1[i+1] || px0[i+2] !== px1[i+2]) diffCount++;
             }
-            if (!pixelMatch) {
-                return 'Pixel Noise Detected (Privacy Shielded) — session:' + hashBuffer(d1).substring(0, 8);
+            if (diffCount > 0) {
+                return 'Protected — pixel-level noise detected across ' + diffCount + ' pixel(s). Session token: ' + hashBuffer(d0).substring(0,8);
             }
 
-            return hashBuffer(d1);
-        } catch (_) { return 'Execution Blocked'; }
+            return hashBuffer(d0);
+        } catch (_) { return 'Blocked — canvas execution prevented by browser policy'; }
     }
 
     function buildAudioGraph(AudioCtx) {
@@ -97,39 +101,40 @@ TL.fingerprint = (function () {
     async function getAudio() {
         try {
             var AudioCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-            if (!AudioCtx) return 'API Not Supported';
+            if (!AudioCtx) return 'Not available — Web Audio API is unsupported or blocked';
 
-            var timeout = new Promise(function (r) { setTimeout(function () { r(null); }, 3500); });
+            var timeout = new Promise(function (r) { setTimeout(function () { r(null); }, 4000); });
 
             var buf1 = await Promise.race([buildAudioGraph(AudioCtx).startRendering(), timeout]);
-            if (!buf1) return 'Timeout (Privacy Block)';
-
-            var buf2 = await Promise.race([buildAudioGraph(AudioCtx).startRendering(), timeout]);
+            if (!buf1) return 'Blocked — audio rendering timed out (browser privacy policy)';
 
             var ch1 = buf1.getChannelData(0);
-            var sums = [0, 0, 0, 0];
+            var sums = [0,0,0,0];
             for (var i = 3000; i < 4000; i++) sums[0] += Math.abs(ch1[i]);
             for (var i = 4000; i < 5000; i++) sums[1] += Math.abs(ch1[i]);
             for (var i = 5000; i < 6000; i++) sums[2] += Math.abs(ch1[i]);
             for (var i = 6000; i < 7000; i++) sums[3] += Math.abs(ch1[i]);
 
+            if (sums[0] === 0 && sums[1] === 0 && sums[2] === 0 && sums[3] === 0) {
+                return 'Protected — audio output was zeroed out by browser';
+            }
+
+            var buf2 = await Promise.race([buildAudioGraph(AudioCtx).startRendering(), timeout]);
             if (buf2) {
                 var ch2 = buf2.getChannelData(0);
                 var ref = 0;
                 for (var i = 4000; i < 5000; i++) ref += Math.abs(ch2[i]);
-                if (Math.abs(ref - sums[1]) > 1e-8) {
-                    return 'Noise Injected (Privacy Shielded) — session:' + sums[1].toFixed(6).replace('.','').replace(/^0+/,'').substring(0,8);
+                if (Math.abs(ref - sums[1]) > 1e-9) {
+                    return 'Protected — audio values shift between renders (noise injection active). Session token: ' +
+                        sums[1].toFixed(8).replace('.','').replace(/^0+/,'').substring(0,8);
                 }
-            }
-
-            if (sums[0] === 0 && sums[1] === 0 && sums[2] === 0 && sums[3] === 0) {
-                return 'Zeroed Output (Privacy Shielded)';
             }
 
             return sums.map(function (s) {
                 return s.toFixed(12).replace('.','').replace(/^0+/,'').substring(0,8).padStart(8,'0');
             }).join('');
-        } catch (_) { return 'Restricted by Privacy Settings'; }
+
+        } catch (_) { return 'Restricted — audio fingerprinting blocked by browser settings'; }
     }
 
     function getGPU() {
@@ -159,16 +164,14 @@ TL.fingerprint = (function () {
                 var fr = gl.getParameter(gl.RENDERER) || '';
 
                 if (fr.toLowerCase().indexOf('angle') !== -1) {
-                    var angleMatch = fr.match(/ANGLE \(([^,]+),\s*([^,\)]+)/);
-                    if (angleMatch) {
-                        return { vendor: angleMatch[1].trim(), renderer: angleMatch[2].trim(), masked: false };
-                    }
+                    var m = fr.match(/ANGLE \(([^,]+),\s*([^,)]+)/);
+                    if (m) return { vendor: m[1].trim(), renderer: m[2].trim(), masked: false };
                 }
 
-                return { vendor: fv || 'Masked', renderer: fr || 'Masked', masked: true };
+                return { vendor: fv || 'Masked by browser', renderer: fr || 'Masked by browser', masked: true };
             } catch (_) {}
         }
-        return { vendor: 'WebGL Blocked', renderer: 'WebGL Blocked', masked: true };
+        return { vendor: 'WebGL blocked', renderer: 'WebGL blocked', masked: true };
     }
 
     function getWebGLFingerprint() {
@@ -178,8 +181,8 @@ TL.fingerprint = (function () {
             var gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
             if (!gl) return null;
 
-            var vsrc = 'attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}';
-            var fsrc = 'precision highp float;uniform float t;void main(){gl_FragColor=vec4(0.3+t*0.1,0.6,0.9,1.0);}';
+            var vsrc = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.0,1.0);}';
+            var fsrc = 'precision highp float;uniform float u;void main(){gl_FragColor=vec4(0.31+u*0.09,0.61,0.91,1.0);}';
 
             var vs = gl.createShader(gl.VERTEX_SHADER);
             gl.shaderSource(vs, vsrc); gl.compileShader(vs);
@@ -190,12 +193,12 @@ TL.fingerprint = (function () {
             gl.attachShader(prog, vs); gl.attachShader(prog, fs);
             gl.linkProgram(prog); gl.useProgram(prog);
 
-            var tloc = gl.getUniformLocation(prog, 't');
-            if (tloc) gl.uniform1f(tloc, 0.5);
+            var uloc = gl.getUniformLocation(prog, 'u');
+            if (uloc) gl.uniform1f(uloc, 0.47);
 
             var buf = gl.createBuffer();
             gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
             var ploc = gl.getAttribLocation(prog, 'p');
             gl.enableVertexAttribArray(ploc);
             gl.vertexAttribPointer(ploc, 2, gl.FLOAT, false, 0, 0);
@@ -214,12 +217,19 @@ TL.fingerprint = (function () {
                 gl.MAX_TEXTURE_IMAGE_UNITS
             ].map(function (p) { return String(gl.getParameter(p)); }).join('|');
 
+            var prec = '';
+            try {
+                var vp = gl.getShaderPrecisionFormat(gl.VERTEX_SHADER, gl.HIGH_FLOAT);
+                var fp = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT);
+                if (vp && fp) prec = vp.rangeMin + ',' + vp.rangeMax + ',' + vp.precision + '|' + fp.rangeMin + ',' + fp.rangeMax + ',' + fp.precision;
+            } catch (_) {}
+
             var exts = (gl.getSupportedExtensions() || []).sort().join(',');
 
             gl.deleteBuffer(buf); gl.deleteProgram(prog);
             gl.deleteShader(vs); gl.deleteShader(fs);
 
-            return hashBuffer(Array.from(pixels.slice(0, 512)).join(',') + caps + exts);
+            return hashBuffer(Array.from(pixels.slice(0, 512)).join(',') + caps + prec + exts);
         } catch (_) { return null; }
     }
 
@@ -227,7 +237,7 @@ TL.fingerprint = (function () {
         try {
             var canvas = document.createElement('canvas');
             var gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-            if (!gl) return 'Disabled (WebGL Unavailable)';
+            if (!gl) return 'Disabled — WebGL is unavailable';
 
             var ext = gl.getExtension('WEBGL_debug_renderer_info');
             var renderer = ext
@@ -236,16 +246,16 @@ TL.fingerprint = (function () {
 
             var softSignals = ['swiftshader', 'llvmpipe', 'softpipe', 'software', 'mesa offscreen', 'indirect', 'angle (software', 'cpu'];
             if (softSignals.some(function (s) { return renderer.indexOf(s) !== -1; })) {
-                return 'Disabled (Software Renderer)';
+                return 'Disabled — running on software renderer';
             }
 
             var start = performance.now();
             for (var i = 0; i < 300; i++) gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             var elapsed = performance.now() - start;
 
-            if (elapsed > 100) return 'Likely Disabled (Slow: ' + elapsed.toFixed(1) + 'ms)';
-            return 'Enabled (' + elapsed.toFixed(1) + 'ms / 300 clears)';
-        } catch (_) { return 'Indeterminate'; }
+            if (elapsed > 100) return 'Possibly disabled — 300 clears took ' + elapsed.toFixed(1) + 'ms (slow)';
+            return 'Yes — 300 GPU clears completed in ' + elapsed.toFixed(1) + 'ms';
+        } catch (_) { return 'Could not determine'; }
     }
 
     function getRefreshRate() {
@@ -260,12 +270,12 @@ TL.fingerprint = (function () {
                     if (d > 1 && d < 100) samples.push(d);
                 }
                 last = ts;
-                if (samples.length < 50) {
+                if (samples.length < 60) {
                     handle = requestAnimationFrame(tick);
                 } else {
                     cancelAnimationFrame(handle);
                     samples.sort(function (a, b) { return a - b; });
-                    var trimmed = samples.slice(10, 40);
+                    var trimmed = samples.slice(10, 50);
                     var avg = trimmed.reduce(function (a, b) { return a + b; }, 0) / trimmed.length;
                     var hz = Math.round(1000 / avg);
                     var standard = [24, 30, 48, 60, 75, 90, 120, 144, 165, 240, 360];
@@ -279,10 +289,10 @@ TL.fingerprint = (function () {
 
             setTimeout(function () {
                 cancelAnimationFrame(handle);
-                if (samples.length < 5) { resolve('Indeterminate'); return; }
+                if (samples.length < 5) { resolve('Could not determine'); return; }
                 var avg = samples.reduce(function (a, b) { return a + b; }, 0) / samples.length;
-                resolve(Math.round(1000 / avg) + ' Hz (partial)');
-            }, 3000);
+                resolve(Math.round(1000 / avg) + ' Hz (partial sample)');
+            }, 3500);
         });
     }
 
@@ -329,24 +339,96 @@ TL.fingerprint = (function () {
             ];
 
             var found = probeList.filter(installed);
-            if (found.length === 0) return 'None detected (canvas blocked or sandboxed)';
-            return found.join(', ') + ' (' + found.length + ' detected)';
-        } catch (_) { return 'Detection Blocked'; }
+            if (found.length === 0) return 'None detected — canvas may be sandboxed or font access blocked';
+            return found.join(', ') + ' (' + found.length + ' fonts identified)';
+        } catch (_) { return 'Detection blocked'; }
+    }
+
+    function getSpeechVoices() {
+        return new Promise(function (resolve) {
+            try {
+                if (!window.speechSynthesis) { resolve(null); return; }
+                var read = function () {
+                    var voices = window.speechSynthesis.getVoices();
+                    if (!voices || voices.length === 0) { resolve(null); return; }
+                    var names = voices.slice(0, 8).map(function (v) { return v.name; }).join(', ');
+                    resolve(voices.length + ' voices — ' + names + (voices.length > 8 ? '...' : ''));
+                };
+                var voices = window.speechSynthesis.getVoices();
+                if (voices && voices.length > 0) { read(); return; }
+                window.speechSynthesis.onvoiceschanged = read;
+                setTimeout(function () { resolve(null); }, 1500);
+            } catch (_) { resolve(null); }
+        });
+    }
+
+    function getCSSMediaFingerprint() {
+        var results = [];
+        var tests = [
+            ['prefers-color-scheme: dark',     'prefers-color-scheme', 'dark'],
+            ['prefers-color-scheme: light',    'prefers-color-scheme', 'light'],
+            ['prefers-reduced-motion: reduce', 'prefers-reduced-motion', 'reduce'],
+            ['prefers-contrast: more',         'prefers-contrast', 'more'],
+            ['pointer: coarse',                'pointer', 'coarse'],
+            ['pointer: fine',                  'pointer', 'fine'],
+            ['hover: hover',                   'hover', 'hover'],
+            ['hover: none',                    'hover', 'none'],
+            ['any-pointer: coarse',            'any-pointer', 'coarse'],
+            ['display-mode: browser',          'display-mode', 'browser'],
+            ['inverted-colors: inverted',      'inverted-colors', 'inverted'],
+            ['forced-colors: active',          'forced-colors', 'active']
+        ];
+        tests.forEach(function (t) {
+            try {
+                if (window.matchMedia('(' + t[1] + ': ' + t[2] + ')').matches) results.push(t[0]);
+            } catch (_) {}
+        });
+        return results.length ? results.join(', ') : 'No distinctive media features';
+    }
+
+    function getTimingFingerprint() {
+        try {
+            var iterations = 50000;
+            var results = [];
+            for (var trial = 0; trial < 5; trial++) {
+                var start = performance.now();
+                var x = 0;
+                for (var i = 0; i < iterations; i++) x += Math.sqrt(i) * Math.sin(i);
+                results.push(performance.now() - start);
+            }
+            results.sort(function (a, b) { return a - b; });
+            var median = results[2];
+            void x;
+            if (median < 2)  return 'Very fast (' + median.toFixed(2) + 'ms) — native hardware likely';
+            if (median < 8)  return 'Fast (' + median.toFixed(2) + 'ms)';
+            if (median < 20) return 'Moderate (' + median.toFixed(2) + 'ms) — possible throttling';
+            return 'Slow (' + median.toFixed(2) + 'ms) — timer resolution may be clamped';
+        } catch (_) { return 'Could not measure'; }
+    }
+
+    function getScreenOrientation() {
+        try {
+            var or = window.screen.orientation || window.screen.mozOrientation || window.screen.msOrientation;
+            if (or && or.type) return or.type + (or.angle !== undefined ? ' (' + or.angle + '\u00b0)' : '');
+            if (window.matchMedia('(orientation: portrait)').matches) return 'portrait';
+            if (window.matchMedia('(orientation: landscape)').matches) return 'landscape';
+            return 'Unknown';
+        } catch (_) { return 'Unknown'; }
     }
 
     async function getMediaDevices() {
         try {
             if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
-                return 'API Restricted';
+                return 'Restricted — device enumeration API is unavailable';
             }
             var devices = await navigator.mediaDevices.enumerateDevices();
             var video   = devices.filter(function (d) { return d.kind === 'videoinput';  }).length;
             var audio   = devices.filter(function (d) { return d.kind === 'audioinput';  }).length;
             var output  = devices.filter(function (d) { return d.kind === 'audiooutput'; }).length;
             var labeled = devices.filter(function (d) { return d.label && d.label !== ''; }).length;
-            var suffix  = labeled > 0 ? ', labels exposed' : ', labels hidden';
+            var suffix  = labeled > 0 ? ' (device names exposed)' : ' (device names hidden)';
             return 'Cameras: ' + video + ' | Mics: ' + audio + ' | Speakers: ' + output + suffix;
-        } catch (_) { return 'Blocked by Browser'; }
+        } catch (_) { return 'Blocked by browser'; }
     }
 
     async function checkAdBlocker() {
@@ -355,20 +437,20 @@ TL.fingerprint = (function () {
             var s = window.getComputedStyle(el);
             if (el.offsetHeight === 0 || el.offsetWidth === 0 ||
                 s.display === 'none' || s.visibility === 'hidden' || s.opacity === '0') {
-                return 'Detected (DOM Element Hidden)';
+                return 'Yes — ad element was hidden by browser extension';
             }
         }
 
         var baits = [
-            'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?t=' + Date.now(),
-            'https://static.doubleclick.net/instream/ad_status.js?t=' + Date.now(),
-            'https://ads.pubmatic.com/AdServer/js/gshowad.js?t=' + Date.now()
+            'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?cb=' + Date.now(),
+            'https://static.doubleclick.net/instream/ad_status.js?cb=' + Date.now(),
+            'https://ads.pubmatic.com/AdServer/js/gshowad.js?cb=' + Date.now()
         ];
 
         var checkUrl = function (url) {
             return new Promise(function (resolve) {
                 var img = new Image();
-                var timer = setTimeout(function () { img.src = ''; resolve(true); }, 1000);
+                var timer = setTimeout(function () { img.src = ''; resolve(true); }, 1200);
                 img.onload  = function () { clearTimeout(timer); resolve(false); };
                 img.onerror = function () { clearTimeout(timer); resolve(true); };
                 img.src = url;
@@ -376,17 +458,9 @@ TL.fingerprint = (function () {
         };
 
         for (var i = 0; i < baits.length; i++) {
-            if (await checkUrl(baits[i])) return 'Detected (Active)';
+            if (await checkUrl(baits[i])) return 'Yes — ad network request was blocked';
         }
-        return 'Not Detected';
-    }
-
-    function detectBatterySpoof(b) {
-        if (!b) return false;
-        if (b.level === 1.0 && b.charging === true) return true;
-        if (b.chargingTime === 0 && b.dischargingTime === Infinity && b.charging === false) return true;
-        if (b.dischargingTime && isFinite(b.dischargingTime) && b.dischargingTime > 86400 * 7) return true;
-        return false;
+        return 'No — ad network requests went through unblocked';
     }
 
     async function getBattery() {
@@ -394,8 +468,17 @@ TL.fingerprint = (function () {
         try {
             var b = await navigator.getBattery();
 
-            if (detectBatterySpoof(b)) {
-                return 'Spoofed / Blocked by Browser (privacy protection active)';
+            if (b.level === 1.0 && b.charging === true &&
+                b.chargingTime === 0 && !isFinite(b.dischargingTime)) {
+                return 'API blocked — browser is returning fake values (100% charging is a known privacy spoof)';
+            }
+
+            if (b.level === 1.0 && b.charging === true) {
+                return 'Possibly spoofed — showing 100% charging. This is Brave\'s default fake battery state';
+            }
+
+            if (b.dischargingTime && isFinite(b.dischargingTime) && b.dischargingTime > 86400 * 3) {
+                return 'Possibly spoofed — discharge time is unrealistically long (' + Math.round(b.dischargingTime / 3600) + 'h)';
             }
 
             var level = Math.round(b.level * 100);
@@ -405,13 +488,13 @@ TL.fingerprint = (function () {
             if (!b.charging && b.dischargingTime && isFinite(b.dischargingTime)) {
                 var totalMins = Math.round(b.dischargingTime / 60);
                 if (totalMins < 1440) {
-                    extra = ' — ~' + Math.floor(totalMins / 60) + 'h ' + (totalMins % 60) + 'm left';
+                    extra = ' — about ' + Math.floor(totalMins / 60) + 'h ' + (totalMins % 60) + 'm left';
                 }
             }
             if (b.charging && b.chargingTime && isFinite(b.chargingTime) && b.chargingTime > 0) {
                 var chMins = Math.round(b.chargingTime / 60);
                 if (chMins < 600) {
-                    extra = ' — full in ~' + Math.floor(chMins / 60) + 'h ' + (chMins % 60) + 'm';
+                    extra = ' — full in about ' + Math.floor(chMins / 60) + 'h ' + (chMins % 60) + 'm';
                 }
             }
 
@@ -419,33 +502,16 @@ TL.fingerprint = (function () {
         } catch (_) { return null; }
     }
 
-    function getStorageEstimate() {
-        return new Promise(function (resolve) {
-            if (navigator.storage && navigator.storage.estimate) {
-                navigator.storage.estimate().then(function (est) {
-                    var usedMB  = est.usage  ? (est.usage  / 1048576).toFixed(1)    : null;
-                    var quotaGB = est.quota  ? (est.quota  / 1073741824).toFixed(1) : null;
-                    var result  = '';
-                    if (usedMB)  result += usedMB + ' MB used';
-                    if (quotaGB) result += (result ? ' of ' : '') + quotaGB + ' GB browser quota';
-                    resolve(result || 'Available (quota hidden)');
-                }).catch(function () { resolve('API Error'); });
-            } else {
-                resolve('API Not Supported');
-            }
-        });
-    }
-
     function getConnectionInfo() {
         var conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-        if (!conn) return 'Not Exposed';
+        if (!conn) return 'Not exposed by this browser';
         var parts = [];
         if (conn.effectiveType) parts.push(conn.effectiveType.toUpperCase());
         if (conn.type && conn.type !== 'unknown') parts.push(conn.type);
-        if (conn.downlink)      parts.push(conn.downlink + ' Mbps down');
+        if (conn.downlink) parts.push(conn.downlink + ' Mbps');
         if (conn.downlinkMax && conn.downlinkMax !== Infinity) parts.push(conn.downlinkMax + ' Mbps max');
         if (conn.rtt !== undefined && conn.rtt !== null) parts.push('RTT ' + conn.rtt + 'ms');
-        if (conn.saveData)      parts.push('Data Saver ON');
+        if (conn.saveData) parts.push('Data Saver ON');
         return parts.length ? parts.join(' | ') : 'Connected';
     }
 
@@ -459,58 +525,54 @@ TL.fingerprint = (function () {
         if (!brands) {
             brands = (uad.brands || []).map(function (b) { return b.brand + ' ' + b.version; }).join(', ') || 'Unknown';
         }
-        return {
-            brands:   brands,
-            mobile:   uad.mobile ? 'Yes' : 'No',
-            platform: uad.platform || 'Unknown'
-        };
+        return { brands: brands, mobile: uad.mobile ? 'Yes' : 'No', platform: uad.platform || 'Unknown' };
     }
 
     function getTorSignals() {
         var signals = [];
-        var screenW = window.screen.width;
-        var screenH = window.screen.height;
-        var innerW  = window.innerWidth;
-        if (screenW === 1000 && screenH === 900) signals.push('Tor standard resolution');
-        if (innerW === 1000) signals.push('Tor letterbox width');
-        if (navigator.languages && navigator.languages.length === 1 &&
-            navigator.languages[0] === 'en-US') signals.push('Single language (en-US)');
-        try {
-            if (window.screen.colorDepth === 24 && navigator.hardwareConcurrency === 1) {
-                signals.push('CPU masked to 1 core');
-            }
-        } catch (_) {}
-        return signals.length ? 'Likely Tor (' + signals.join(', ') + ')' : null;
+        if (window.screen.width === 1000 && window.screen.height === 900) signals.push('standard Tor resolution (1000x900)');
+        if (window.innerWidth === 1000) signals.push('letterboxed to 1000px wide');
+        if (navigator.languages && navigator.languages.length === 1 && navigator.languages[0] === 'en-US') {
+            signals.push('single language forced to en-US');
+        }
+        if (navigator.hardwareConcurrency === 1) signals.push('CPU core count masked to 1');
+        if (!navigator.deviceMemory) signals.push('RAM info suppressed');
+        return signals.length ? 'Likely Tor Browser — ' + signals.join(', ') : null;
     }
 
     function getSystemInfo() {
-        var dpr     = window.devicePixelRatio ? window.devicePixelRatio + 'x' : 'Unknown';
-        var langs   = navigator.languages
+        var dpr   = window.devicePixelRatio ? window.devicePixelRatio + 'x' : 'Unknown';
+        var langs = navigator.languages
             ? Array.prototype.slice.call(navigator.languages, 0, 5).join(', ')
             : navigator.language || 'Unknown';
 
         var sc = window.screen;
         var displayStr = sc.width + 'x' + sc.height;
         if (sc.availWidth && (sc.availWidth !== sc.width || sc.availHeight !== sc.height)) {
-            displayStr += ' (avail ' + sc.availWidth + 'x' + sc.availHeight + ')';
+            displayStr += ' (usable area: ' + sc.availWidth + 'x' + sc.availHeight + ')';
         }
 
-        var tor = getTorSignals();
+        var ramStr = navigator.deviceMemory
+            ? '~' + navigator.deviceMemory + ' GB (note: this API caps reporting at 8 GB)'
+            : 'Not exposed';
 
         return {
-            browser:    TL.getBrowser(),
-            platform:   TL.getPlatform(),
-            cpu:        navigator.hardwareConcurrency ? navigator.hardwareConcurrency + ' Logical Cores' : 'Masked',
-            ram:        navigator.deviceMemory ? '~' + navigator.deviceMemory + ' GB (API max: 8)' : 'Masked',
-            display:    displayStr,
-            dpr:        dpr,
-            colorDepth: sc.colorDepth + '-bit',
-            touch:      navigator.maxTouchPoints > 0 ? navigator.maxTouchPoints + ' points' : 'None',
-            language:   navigator.language || 'Unknown',
-            languages:  langs,
-            timezone:   Intl.DateTimeFormat().resolvedOptions().timeZone,
-            connection: getConnectionInfo(),
-            tor:        tor
+            browser:     TL.getBrowser(),
+            platform:    TL.getPlatform(),
+            cpu:         navigator.hardwareConcurrency ? navigator.hardwareConcurrency + ' logical cores' : 'Not exposed',
+            ram:         ramStr,
+            display:     displayStr,
+            orientation: getScreenOrientation(),
+            dpr:         dpr,
+            colorDepth:  sc.colorDepth + '-bit',
+            touch:       navigator.maxTouchPoints > 0 ? navigator.maxTouchPoints + ' touch points' : 'None',
+            language:    navigator.language || 'Unknown',
+            languages:   langs,
+            timezone:    Intl.DateTimeFormat().resolvedOptions().timeZone,
+            connection:  getConnectionInfo(),
+            timing:      getTimingFingerprint(),
+            css:         getCSSMediaFingerprint(),
+            tor:         getTorSignals()
         };
     }
 
@@ -527,26 +589,24 @@ TL.fingerprint = (function () {
             idb = (window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB) ? 'Available' : 'Blocked';
         } catch (_) { idb = 'Blocked'; }
 
-        var serviceWorker = 'Not Supported';
-        try {
-            serviceWorker = 'serviceWorker' in navigator ? 'Supported' : 'Not Supported';
-        } catch (_) {}
+        var sw = 'Not supported';
+        try { sw = 'serviceWorker' in navigator ? 'Supported' : 'Not supported'; } catch (_) {}
 
         var webRTC = 'Unknown';
         try {
             webRTC = (window.RTCPeerConnection || window.webkitRTCPeerConnection || window.mozRTCPeerConnection)
-                ? 'Available' : 'Blocked';
+                ? 'Available (potential IP leak vector)' : 'Blocked';
         } catch (_) { webRTC = 'Blocked'; }
 
         return {
-            pdf:           navigator.pdfViewerEnabled ? 'Active' : 'Disabled',
-            cookies:       navigator.cookieEnabled ? 'Accepted' : 'Rejected',
-            dnt:           navigator.doNotTrack === '1' || window.doNotTrack === '1' ? 'Signal Sent' : 'No Signal',
-            gpc:           navigator.globalPrivacyControl ? 'Active (GPC Enabled)' : 'None',
-            storage:       storage,
-            idb:           idb,
-            serviceWorker: serviceWorker,
-            webRTC:        webRTC
+            pdf:     navigator.pdfViewerEnabled ? 'Built-in viewer active' : 'No built-in PDF viewer',
+            cookies: navigator.cookieEnabled ? 'Accepted' : 'Rejected',
+            dnt:     navigator.doNotTrack === '1' || window.doNotTrack === '1' ? 'Sent' : 'Not sent',
+            gpc:     navigator.globalPrivacyControl ? 'Active' : 'Not set',
+            storage: storage,
+            idb:     idb,
+            sw:      sw,
+            webRTC:  webRTC
         };
     }
 
@@ -565,7 +625,7 @@ TL.fingerprint = (function () {
             getBattery(),
             getRefreshRate(),
             Promise.resolve(getInstalledFonts()),
-            getStorageEstimate()
+            getSpeechVoices()
         ]);
 
         var ipData      = results[0];
@@ -579,18 +639,15 @@ TL.fingerprint = (function () {
         var battery     = results[8];
         var refreshRate = results[9];
         var fonts       = results[10];
-        var storage     = results[11];
+        var voices      = results[11];
 
         var vpn = TL.network.detectVPN(ipData, systemTZ);
         var loc = (ipData.city && ipData.city !== 'Unknown' && ipData.city !== '-')
             ? ipData.city + ', ' + ipData.country
-            : 'Masked / Location Shielded';
+            : 'Hidden or shielded';
 
         return {
-            network: {
-                ip: ipData.ip, loc: loc, org: ipData.org || 'Unknown',
-                vpn: vpn, systemTimezone: systemTZ, ipTimezone: ipData.timezone
-            },
+            network:      { ip: ipData.ip, loc: loc, org: ipData.org || 'Unknown', vpn: vpn, systemTimezone: systemTZ, ipTimezone: ipData.timezone },
             canvasHash:   canvasHash,
             audioHash:    audioHash,
             gpu:          gpu,
@@ -601,7 +658,7 @@ TL.fingerprint = (function () {
             battery:      battery,
             refreshRate:  refreshRate,
             fonts:        fonts,
-            storage:      storage,
+            voices:       voices,
             clientHints:  getClientHints(),
             sys:          getSystemInfo(),
             priv:         getPrivacySignals()
