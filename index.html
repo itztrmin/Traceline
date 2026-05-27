@@ -61,6 +61,7 @@
                 <span class="term-dot term-dot-yellow"></span>
                 <span class="term-dot term-dot-green"></span>
                 <span id="terminal-title-text">traceline — diagnostic shell</span>
+                <span id="tl-live-clock"></span>
             </div>
             <div id="terminal-output" role="log" aria-live="polite" aria-label="Security audit output"></div>
         </div>
@@ -114,16 +115,6 @@
     &copy; 2026 <a href="https://trmin.pages.dev" target="_blank" rel="noopener">itztrmin</a> all rights reserved.
 </footer>
 
-<!--
-    LOAD ORDER MATTERS:
-    1. theme    — no deps
-    2. utils    — no deps (defines TL.fetchWithTimeout, TL.getPlatform, etc.)
-    3. terminal — needs TL.sleep from utils
-    4. network  — needs TL.fetchWithTimeout from utils
-    5. fp       — needs TL.network + TL.getPlatform  (renamed from fingerprint.js to avoid adblocker URL filters)
-    6. score    — needs nothing; pure calculation from collected data
-    7. app      — needs everything above
--->
 <script src="js/core/theme.js"></script>
 <script src="js/core/utils.js"></script>
 <script src="js/ui/terminal.js"></script>
