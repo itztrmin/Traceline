@@ -61,9 +61,9 @@ TL.geo = (function () {
         var isp = (data.org || '').toLowerCase();
         var suspicious = DC.some(function (k) { return isp.indexOf(k) !== -1; });
         var tzMismatch = data.timezone && sysTZ && data.timezone !== sysTZ;
-        if (suspicious && tzMismatch) return 'High risk — datacenter ISP and timezone mismatch';
+        if (suspicious && tzMismatch) return 'High risk datacenter ISP and timezone mismatch';
         if (suspicious)  return 'Likely VPN or datacenter IP detected';
-        if (tzMismatch)  return 'Timezone mismatch — system: ' + sysTZ + ', IP: ' + data.timezone;
+        if (tzMismatch)  return 'Timezone mismatch system: ' + sysTZ + ', IP: ' + data.timezone;
         return 'Not detected';
     }
 

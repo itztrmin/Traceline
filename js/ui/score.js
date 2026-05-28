@@ -10,7 +10,7 @@ TL.score = (function () {
         var pts = 0;
         var bd  = [];
 
-        var adBlocked = d.adblock && (d.adblock.indexOf('Yes') !== -1 || d.adblock.indexOf('blocked') !== -1);
+        var adBlocked = d.adblock && (d.adblock.indexOf('Yes') !== -1 || d.adblock.indexOf('blocked') !== -1 || d.adblock.indexOf('hidden') !== -1);
         if (adBlocked) { pts += 1.5; bd.push(row('Ad / Tracker Blocker',   'ACTIVE',      '+1.5', true));  }
         else           {             bd.push(row('Ad / Tracker Blocker',   'NOT FOUND',   '+0.0', false)); }
 
@@ -80,7 +80,9 @@ TL.score = (function () {
         var battSpoofed = d.battery && (
             d.battery.indexOf('fake') !== -1 ||
             d.battery.indexOf('spoof') !== -1 ||
-            d.battery.indexOf('Spoofed') !== -1
+            d.battery.indexOf('Spoofed') !== -1 ||
+            d.battery.indexOf('Possibly spoofed') !== -1 ||
+            d.battery.indexOf('Returning fake') !== -1
         );
         if (battSpoofed) { pts += 0.5; bd.push(row('Battery API Privacy',    'SHIELDED',    '+0.5', true));  }
         else             {             bd.push(row('Battery API Privacy',    'EXPOSED',     '+0.0', false)); }
@@ -91,12 +93,12 @@ TL.score = (function () {
 
         var score = Math.min(10, Math.round(pts * 10) / 10);
         var grade, verdict;
-        if      (score >= 8.5) { grade = 'A+'; verdict = 'Excellent — nearly invisible to trackers.'; }
-        else if (score >= 7.0) { grade = 'A';  verdict = 'Strong — well-hardened browser.'; }
-        else if (score >= 5.5) { grade = 'B';  verdict = 'Moderate — visible but partially shielded.'; }
-        else if (score >= 4.0) { grade = 'C';  verdict = 'Weak — meaningful exposure to fingerprinting.'; }
-        else if (score >= 2.5) { grade = 'D';  verdict = 'Poor — highly trackable profile.'; }
-        else                   { grade = 'F';  verdict = 'Critical — you are wide open.'; }
+        if      (score >= 8.5) { grade = 'A+'; verdict = 'Excellent nearly invisible to trackers.'; }
+        else if (score >= 7.0) { grade = 'A';  verdict = 'Strong well-hardened browser.'; }
+        else if (score >= 5.5) { grade = 'B';  verdict = 'Moderate visible but partially shielded.'; }
+        else if (score >= 4.0) { grade = 'C';  verdict = 'Weak meaningful exposure to fingerprinting.'; }
+        else if (score >= 2.5) { grade = 'D';  verdict = 'Poor highly trackable profile.'; }
+        else                   { grade = 'F';  verdict = 'Critical you are wide open.'; }
 
         return { score: score, max: 10, grade: grade, verdict: verdict, breakdown: bd };
     }

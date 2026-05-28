@@ -33,7 +33,7 @@ TL.privacy = (function () {
             var s = window.getComputedStyle(el);
             if (el.offsetHeight === 0 || el.offsetWidth === 0 ||
                 s.display === 'none' || s.visibility === 'hidden' || s.opacity === '0') {
-                return 'Yes — ad element hidden by extension';
+                return 'Yes ad element hidden by extension';
             }
         }
 
@@ -54,9 +54,9 @@ TL.privacy = (function () {
         };
 
         for (var i = 0; i < baits.length; i++) {
-            if (await check(baits[i])) return 'Yes — ad network request blocked';
+            if (await check(baits[i])) return 'Yes, ad network request was blocked';
         }
-        return 'No — ad requests went through';
+        return 'No, ad requests went through unblocked';
     }
 
     async function battery() {
@@ -66,13 +66,13 @@ TL.privacy = (function () {
 
             if (b.level === 1.0 && b.charging === true &&
                 b.chargingTime === 0 && !isFinite(b.dischargingTime)) {
-                return 'API returning fake values — 100% charging is a known Brave/Firefox privacy spoof';
+                return 'Returning fake values. 100% charging is a known Brave/Firefox privacy spoof';
             }
             if (b.level === 1.0 && b.charging === true) {
-                return 'Possibly spoofed — 100% charging is the default fake state used by privacy browsers';
+                return 'Possibly spoofed. 100% charging is the default fake state used by privacy browsers';
             }
             if (b.dischargingTime && isFinite(b.dischargingTime) && b.dischargingTime > 259200) {
-                return 'Possibly spoofed — reported discharge time is unrealistically long';
+                return 'Possibly spoofed. Reported discharge time is unrealistically long';
             }
 
             var level = Math.round(b.level * 100);
@@ -81,11 +81,11 @@ TL.privacy = (function () {
 
             if (!b.charging && b.dischargingTime && isFinite(b.dischargingTime)) {
                 var dm = Math.round(b.dischargingTime / 60);
-                if (dm < 1440) extra = ' — about ' + Math.floor(dm/60) + 'h ' + (dm%60) + 'm left';
+                if (dm < 1440) extra = ', about ' + Math.floor(dm/60) + 'h ' + (dm%60) + 'm left';
             }
             if (b.charging && b.chargingTime && isFinite(b.chargingTime) && b.chargingTime > 0) {
                 var cm = Math.round(b.chargingTime / 60);
-                if (cm < 600) extra = ' — full in about ' + Math.floor(cm/60) + 'h ' + (cm%60) + 'm';
+                if (cm < 600) extra = ', full in about ' + Math.floor(cm/60) + 'h ' + (cm%60) + 'm';
             }
 
             return level + '% (' + state + ')' + extra;

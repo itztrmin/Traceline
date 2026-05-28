@@ -51,7 +51,7 @@ TL.canvas = (function () {
 
             if (a.url !== b.url || b.url !== c.url) {
                 var kind = (a.url !== b.url && b.url !== c.url) ? 'per-render' : 'intermittent';
-                return 'Protected — browser injects ' + kind + ' noise into canvas. Session: ' + TL.hash(a.url).slice(0, 8);
+                return 'Protected browser injects ' + kind + ' noise into canvas. Session: ' + TL.hash(a.url).slice(0, 8);
             }
 
             var pxA = a.ctx.getImageData(0, 0, w, h).data;
@@ -61,12 +61,12 @@ TL.canvas = (function () {
                 if (pxA[i] !== pxB[i] || pxA[i+1] !== pxB[i+1] || pxA[i+2] !== pxB[i+2]) diff++;
             }
             if (diff > 0) {
-                return 'Protected — pixel noise across ' + diff + ' pixel(s). Session: ' + TL.hash(a.url).slice(0, 8);
+                return 'Protected pixel noise across ' + diff + ' pixel(s). Session: ' + TL.hash(a.url).slice(0, 8);
             }
 
             return TL.hash(a.url);
         } catch (_) {
-            return 'Blocked — canvas execution prevented';
+            return 'Blocked canvas execution prevented';
         }
     }
 

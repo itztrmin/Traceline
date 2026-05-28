@@ -4,7 +4,7 @@ TL.terminal = (function () {
     var isTyping = false;
     var aborted  = false;
     var el       = null;
-    var lastScrollTime = 0;
+    var lastScroll = 0;
 
     function init(element) { el = element; }
 
@@ -24,20 +24,20 @@ TL.terminal = (function () {
     function getCols() {
         if (!el) return 60;
         var style = window.getComputedStyle(el);
-        var canvas = document.createElement('canvas');
-        var ctx = canvas.getContext('2d');
-        ctx.font = style.fontSize + ' ' + style.fontFamily;
-        var charW = ctx.measureText('M').width || 8;
+        var c     = document.createElement('canvas');
+        var ctx   = c.getContext('2d');
+        ctx.font  = style.fontSize + ' ' + style.fontFamily;
+        var cw    = ctx.measureText('M').width || 8;
         var padL  = parseFloat(style.paddingLeft)  || 0;
         var padR  = parseFloat(style.paddingRight) || 0;
-        return Math.floor((el.clientWidth - padL - padR) / charW);
+        return Math.floor((el.clientWidth - padL - padR) / cw);
     }
 
     function scrollThrottle() {
         var now = Date.now();
-        if (now - lastScrollTime > 40) {
+        if (now - lastScroll > 40) {
             el.scrollTop = el.scrollHeight;
-            lastScrollTime = now;
+            lastScroll = now;
         }
     }
 
@@ -45,10 +45,10 @@ TL.terminal = (function () {
         for (var i = 0; i < text.length; i++) {
             if (aborted) return false;
             el.textContent += text[i];
-            var ch = text[i];
-            var delay = ch === '\n' ? 10 + Math.random() * 15
+            var ch    = text[i];
+            var delay = ch === '\n' ? 10 + Math.random() * 12
                       : ch === ' ' ? 2  + Math.random() * 4
-                      :              4  + Math.random() * 10;
+                      :              3  + Math.random() * 8;
             scrollThrottle();
             await TL.sleep(delay);
         }
@@ -56,12 +56,12 @@ TL.terminal = (function () {
         return true;
     }
 
-    async function typeLine(text, pauseAfter) {
+    async function typeLine(text, pause) {
         if (aborted) return false;
         var ok = await typeText((text || '') + '\n');
         if (!ok) return false;
         el.scrollTop = el.scrollHeight;
-        if (pauseAfter > 0) await TL.sleep(pauseAfter);
+        if (pause > 0) await TL.sleep(pause);
         return true;
     }
 
@@ -77,33 +77,27 @@ TL.terminal = (function () {
 
     async function header() {
         if (aborted) return false;
-        var cols  = getCols();
-        var label = 'TRACELINE // DIAGNOSTIC SHELL';
-        var lineLen = Math.min(Math.max(label.length + 4, 45), cols - 2);
-        var line  = '━'.repeat(lineLen);
-        var pad   = Math.floor((cols - (label.length + 2)) / 2);
-        var mid   = ' '.repeat(Math.max(0, pad)) + '  ' + label;
-
-        for (var i = 0; i < 3; i++) {
+        var line  = 'TRACELINE // DIAGNOSTIC SHELL';
+        var rule  = '-'.repeat(line.length);
+        var lines = [rule, line, rule, ''];
+        for (var i = 0; i < lines.length; i++) {
             if (aborted) return false;
-            el.textContent += (i === 1 ? mid : line) + '\n';
-            el.scrollTop = el.scrollHeight;
-            await TL.sleep(40);
+            el.textContent += lines[i] + '\n';
+            el.scrollTop    = el.scrollHeight;
+            await TL.sleep(35);
         }
-        el.textContent += '\n';
-        el.scrollTop = el.scrollHeight;
         return true;
     }
 
     async function divider(label) {
         if (aborted) return false;
-        var cols    = getCols();
-        var lineLen = Math.min(Math.max((label || '').length + 4, 45), cols - 2);
-        var line    = '━'.repeat(lineLen);
-        if (!(await typeLine(line, 90))) return false;
+        var cols = getCols();
+        var len  = Math.min(Math.max((label || '').length + 4, 40), cols - 2);
+        var rule = '-'.repeat(len);
+        if (!(await typeLine(rule, 80)))  return false;
         if (label) {
-            if (!(await typeLine('  ' + label, 110))) return false;
-            if (!(await typeLine(line, 0)))           return false;
+            if (!(await typeLine('  ' + label, 100))) return false;
+            if (!(await typeLine(rule, 0)))            return false;
         }
         return true;
     }

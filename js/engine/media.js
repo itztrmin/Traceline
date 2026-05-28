@@ -79,7 +79,7 @@ TL.media = (function () {
             ];
 
             var found = list.filter(installed);
-            if (found.length === 0) return 'None detected — canvas may be sandboxed';
+            if (found.length === 0) return 'None detected canvas may be sandboxed';
             return found.join(', ') + ' (' + found.length + ' fonts)';
         } catch (_) { return 'Detection blocked'; }
     }
@@ -92,7 +92,7 @@ TL.media = (function () {
                     var v = window.speechSynthesis.getVoices();
                     if (!v || !v.length) { resolve(null); return; }
                     var names = Array.prototype.slice.call(v, 0, 6).map(function (x) { return x.name; }).join(', ');
-                    resolve(v.length + ' voices — ' + names + (v.length > 6 ? '...' : ''));
+                    resolve(v.length + ' voices ' + names + (v.length > 6 ? '...' : ''));
                 };
                 var v = window.speechSynthesis.getVoices();
                 if (v && v.length) { read(); return; }
@@ -105,7 +105,7 @@ TL.media = (function () {
     async function devices() {
         try {
             if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
-                return 'Restricted — enumeration API unavailable';
+                return 'Restricted enumeration API unavailable';
             }
             var list    = await navigator.mediaDevices.enumerateDevices();
             var video   = list.filter(function (d) { return d.kind === 'videoinput';  }).length;

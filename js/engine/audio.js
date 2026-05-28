@@ -29,12 +29,12 @@ TL.audio = (function () {
     async function get() {
         try {
             var Ctx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-            if (!Ctx) return 'Not available — Web Audio API unsupported';
+            if (!Ctx) return 'Not available Web Audio API unsupported';
 
             var t = new Promise(function (r) { setTimeout(function () { r(null); }, 4000); });
 
             var buf1 = await Promise.race([buildGraph(Ctx).startRendering(), t]);
-            if (!buf1) return 'Blocked — audio rendering timed out';
+            if (!buf1) return 'Blocked audio rendering timed out';
 
             var ch1  = buf1.getChannelData(0);
             var sums = [
@@ -45,14 +45,14 @@ TL.audio = (function () {
             ];
 
             if (sums.every(function (s) { return s === 0; })) {
-                return 'Protected — audio output zeroed by browser';
+                return 'Protected audio output zeroed by browser';
             }
 
             var buf2 = await Promise.race([buildGraph(Ctx).startRendering(), t]);
             if (buf2) {
                 var ref = sumRegion(buf2.getChannelData(0), 4000, 5000);
                 if (Math.abs(ref - sums[1]) > 1e-9) {
-                    return 'Protected — values shift between renders (noise injection). Session: ' +
+                    return 'Protected values shift between renders (noise injection). Session: ' +
                         sums[1].toFixed(8).replace('.','').replace(/^0+/,'').slice(0, 8);
                 }
             }
@@ -62,7 +62,7 @@ TL.audio = (function () {
             }).join('');
 
         } catch (_) {
-            return 'Restricted — audio fingerprinting blocked';
+            return 'Restricted audio fingerprinting blocked';
         }
     }
 

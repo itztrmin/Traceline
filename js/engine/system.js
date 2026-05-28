@@ -50,10 +50,10 @@ TL.system = (function () {
             }
             times.sort(function (a, b) { return a - b; });
             var med = times[2];
-            if (med < 3)  return 'Very fast (' + med.toFixed(2) + 'ms) — likely native hardware';
+            if (med < 3)  return 'Very fast (' + med.toFixed(2) + 'ms) likely native hardware';
             if (med < 10) return 'Fast (' + med.toFixed(2) + 'ms)';
-            if (med < 25) return 'Moderate (' + med.toFixed(2) + 'ms) — possible throttling';
-            return 'Slow (' + med.toFixed(2) + 'ms) — timer resolution may be clamped';
+            if (med < 25) return 'Moderate (' + med.toFixed(2) + 'ms) possible throttling';
+            return 'Slow (' + med.toFixed(2) + 'ms) timer resolution may be clamped';
         } catch (_) { return 'Could not measure'; }
     }
 
@@ -66,7 +66,7 @@ TL.system = (function () {
         }
         if (navigator.hardwareConcurrency === 1) signals.push('CPU masked to 1 core');
         if (!navigator.deviceMemory)             signals.push('RAM suppressed');
-        return signals.length ? 'Likely Tor Browser — ' + signals.join(', ') : null;
+        return signals.length ? 'Likely Tor Browser ' + signals.join(', ') : null;
     }
 
     function connection() {

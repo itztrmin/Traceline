@@ -103,7 +103,7 @@ TL.gpu = (function () {
     function accel() {
         try {
             var gl = getGL();
-            if (!gl) return 'Disabled — WebGL unavailable';
+            if (!gl) return 'Disabled WebGL unavailable';
 
             var ext = gl.getExtension('WEBGL_debug_renderer_info');
             var r   = ext
@@ -111,15 +111,15 @@ TL.gpu = (function () {
                 : (gl.getParameter(gl.RENDERER) || '').toLowerCase();
 
             var soft = ['swiftshader','llvmpipe','softpipe','software','mesa offscreen','indirect','angle (software','cpu'];
-            if (soft.some(function (s) { return r.indexOf(s) !== -1; })) return 'Disabled — software renderer detected';
+            if (soft.some(function (s) { return r.indexOf(s) !== -1; })) return 'Disabled software renderer detected';
 
             var t = performance.now();
             for (var i = 0; i < 300; i++) gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
             var ms = performance.now() - t;
 
             return ms > 100
-                ? 'Possibly disabled — 300 clears took ' + ms.toFixed(1) + 'ms'
-                : 'Yes — 300 GPU clears in ' + ms.toFixed(1) + 'ms';
+                ? 'Possibly disabled 300 clears took ' + ms.toFixed(1) + 'ms'
+                : 'Yes 300 GPU clears in ' + ms.toFixed(1) + 'ms';
         } catch (_) { return 'Could not determine'; }
     }
 
