@@ -8,7 +8,7 @@ var TL = window.TL || {};
     var docsEl    = document.getElementById('documentation-section');
     var scoreEl   = document.getElementById('score-section');
     var termEl    = document.getElementById('terminal-output');
-    var toolbar   = document.getElementById('terminal-toolbar');
+    var titlebar  = document.getElementById('terminal-titlebar');
     var term      = TL.terminal;
 
     term.init(termEl);
@@ -28,7 +28,7 @@ var TL = window.TL || {};
                 navigator.clipboard.writeText(raw).then(ok).catch(function () { fallbackCopy(raw, ok, err); });
             } else { fallbackCopy(raw, ok, err); }
         });
-        toolbar.appendChild(btn);
+        titlebar.appendChild(btn);
     }
 
     function fallbackCopy(text, ok, err) {
