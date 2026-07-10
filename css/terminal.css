@@ -1,10 +1,10 @@
 #terminal-wrapper {
     position: relative;
     width: 100%;
-    margin-bottom: 24px;
+    margin-bottom: 40px;
     border-radius: var(--radius-lg);
     overflow: hidden;
-    box-shadow: 0 0 0 1px var(--border-color), 0 16px 48px rgba(0,0,0,0.35);
+    box-shadow: 0 0 0 1px var(--border-color), 0 16px 48px rgba(0,0,0,0.4);
 }
 
 #terminal-titlebar {
@@ -80,7 +80,6 @@ body.light-mode #terminal-title-text {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
     word-break: break-all;
-    font-family: var(--font-mono);
     font-size: clamp(10px, 2.2vw, 13px);
     line-height: 1.7;
     color: var(--term-text);
