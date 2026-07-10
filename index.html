@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="What happens behind the scenes when you visit a website? Run this audit to see your exact digital footprint and how to stop trackers.">
-    <meta property="og:title" content="TraceLine - Security Audit">
-    <meta property="og:description" content="What happens behind the scenes when you visit a website? Run this audit to see your exact digital footprint and how to stop trackers.">
+    <meta name="description" content="See exactly what your browser leaks to every site you visit, then get a real score for how well it is locked down.">
+    <meta property="og:title" content="TraceLine, browser security audit">
+    <meta property="og:description" content="See exactly what your browser leaks to every site you visit, then get a real score for how well it is locked down.">
     <meta property="og:type" content="website">
-    <meta name="theme-color" content="#0d0d0d">
-    <title>TraceLine - Security Audit</title>
+    <meta name="theme-color" content="#0a0b0d">
+    <title>TraceLine, browser security audit</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Goldman:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/terminal.css">
@@ -21,8 +21,8 @@
 <div id="ad-trap" class="ad-trap ad-banner ad-sponsor adsbox doubleclick ad-placeholder"></div>
 
 <nav>
-    <div class="brand">TraceLine</div>
-    <button class="theme-toggle" id="theme-btn" aria-label="Toggle Theme">
+    <div class="brand">Trace<span>Line</span></div>
+    <button class="theme-toggle" id="theme-btn" aria-label="Toggle theme">
         <svg class="icon-moon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
         </svg>
@@ -38,20 +38,23 @@
 
 <main>
     <div id="hero-container">
-        <div class="title">What happens behind the scenes when you visit a website?</div>
+        <div class="eyebrow">Browser security audit</div>
+        <div class="title">What does your browser actually tell the sites you visit?</div>
+        <div class="subtitle">Run a live scan and see the exact data points that build a fingerprint of your device, then get a plain score for how exposed you are.</div>
 
-        <div class="about-section">
-            <strong>ABOUT TRACELINE</strong><br><br>
-            TraceLine is a 100% open-source project built to show you exactly how much data you're bleeding every time you click a damn link. We aren't trying to sell you a VPN, and we don't save your data. We just want you to see the reality of modern browser fingerprinting. The source code is out there for anyone to audit.
+        <div class="info-cards">
+            <div class="info-card info-card-about">
+                <div class="info-card-title">About this tool</div>
+                <p>TraceLine is open source and runs entirely in your browser. It pulls together the same signals real tracking scripts use, canvas and audio reads, GPU info, fonts, hardware specs, and shows you the full picture in one place.</p>
+            </div>
+            <div class="info-card info-card-warn">
+                <div class="info-card-title">Before you run it</div>
+                <p>Clicking the button below lets this page read your browser APIs the same way a tracking script would. That means hardware details, network info, and anything else a normal site could pull without asking.</p>
+                <div class="info-card-guarantee">Nothing here touches a server. Everything is read locally and gone the moment you close the tab.</div>
+            </div>
         </div>
 
-        <div class="disclaimer">
-            <strong>SECURITY DISCLAIMER</strong><br><br>
-            By clicking the button below, you are explicitly allowing this script to rip through your browser's APIs. It will extract your hardware identity, network footprint, and whatever else it can grab to show you what invisible trackers see every day.<br><br>
-            <em>Privacy Guarantee:</em> There is no backend database connected to this page. The data is pulled locally, and deleted the exact moment you close this tab.
-        </div>
-
-        <button class="cta-btn" id="trap-button">Run Security Audit</button>
+        <button class="cta-btn" id="trap-button">Run security audit</button>
     </div>
 
     <div id="results-container">
@@ -67,45 +70,8 @@
 
         <div id="score-section" style="display:none"></div>
 
-        <div class="docs" id="documentation-section" style="display:none">
-            <h2>The Post-Mortem: How We Got This &amp; How to Stop It</h2>
-            <p>That wall of text you just watched scroll by? That's your digital footprint. And honestly, it's a privacy shitshow. When you browse the web, you don't just politely ask a server for a webpage — your browser practically hands over a detailed dossier of your machine in exchange. Ad networks and data brokers don't even care about tracking cookies anymore. That's old bullshit. Instead, they look at the exact, hyper-specific combination of hardware, network settings, and system configurations you just exposed. Together, they form a "fingerprint" that is almost certainly unique to you.</p>
-            <p>Here is a breakdown of exactly how this script tricked your browser into coughing up that information, and more importantly, how you can lock this damn thing down.</p>
-
-            <hr>
-
-            <h3>1. VPN / Proxy Detection Heuristics</h3>
-            <p><strong>How we got it:</strong> Spotting a VPN just from the browser isn't easy, but your system gives it away if you aren't careful. We checked the local timezone of your operating system (via your browser's system clock) and compared it to the geographical timezone of your IP address. If you're physically sitting in London but your IP claims you're in New York, the clocks mismatch. You get flagged immediately. We also check your Internet Service Provider (ISP) against known datacenter hosts (like AWS or DigitalOcean) because regular people don't browse YouTube from a server farm.</p>
-            <p><strong>How to prevent it:</strong> Spoof your system timezone to match your VPN's server. Extensions like <em>Spoof Timezone</em> automate this. To beat the datacenter check, you need Residential Proxies, which route your traffic through actual household connections.</p>
-
-            <h3>2. The Canvas Fingerprint</h3>
-            <p><strong>How we got it:</strong> HTML5 includes a drawing tool called a <span class="highlight">&lt;canvas&gt;</span>. Websites use it for browser games and charts. In this script, we generated an invisible canvas and forced your browser to draw a very specific, layered image using different colors and text fonts. Because every computer has a slightly different combo of graphics drivers, fonts, and sub-pixel smoothing algorithms, the resulting image is microscopically unique. We snapped a picture of those invisible pixels and hashed it into an ID code.</p>
-            <p><strong>How to prevent it:</strong> Basic ad-blockers do literally nothing against this because canvas drawing is a core web feature. You need a browser that actually gives a shit, like <strong>Brave</strong> or the <strong>Tor Browser</strong>. Firefox users can install <strong>CanvasBlocker</strong>, which silently injects randomized digital "noise" into the math every time a site tries to draw a hidden image, completely ruining their tracking metrics.</p>
-
-            <h3>3. AudioContext Fingerprinting</h3>
-            <p><strong>How we got it:</strong> We used the Web Audio API to generate a high-frequency sine wave, pushed it through a digital audio compressor, and measured the result. We didn't even play the sound through your speakers. We just captured the internal audio buffer. Your specific sound card hardware dictates exactly how that floating-point math is processed. It's a ridiculously accurate, sneaky hardware ID.</p>
-            <p><strong>How to prevent it:</strong> Similar to canvas tracking, you're fighting native web tools here. Using the <strong>Brave</strong> browser is your best bet; it catches audio API requests and injects cryptographic noise into the output, breaking their algorithms.</p>
-
-            <h3>4. WebGL &amp; GPU Extraction</h3>
-            <p><strong>How we got it:</strong> WebGL is the engine your browser uses to render 3D graphics. We spun up a 3D environment in the background and simply asked it for the name of the hardware doing the heavy lifting using a debug extension (<span class="highlight">WEBGL_debug_renderer_info</span>). Your browser just gladly handed over the exact make and model of your graphics card. It's that easy.</p>
-            <p><strong>How to prevent it:</strong> You can disable WebGL entirely in your browser's advanced settings (in Firefox, type <code>about:config</code> and set <code>webgl.disabled</code> to <code>true</code>). Just keep in mind this will break 3D browser games and Google Earth.</p>
-
-            <h3>5. Silent Media Device Enumeration</h3>
-            <p><strong>How we got it:</strong> You know how websites have to ask permission to use your webcam and microphone? Yeah, well, they don't have to ask permission to <em>count</em> them. By querying <span class="highlight">navigator.mediaDevices.enumerateDevices()</span>, we asked your browser exactly how many audio inputs and lenses are plugged into your machine. Even without recording access, knowing you have exactly two cameras and three audio inputs adds another highly specific data point to your tracking profile.</p>
-            <p><strong>How to prevent it:</strong> Safari actually restricts this by default, which is a rare W for Apple. On Chrome and Firefox, you have to dig into advanced configuration flags to spoof it. Honestly? Just unplug your external mics and webcams when you aren't using them.</p>
-
-            <h3>6. Hardware &amp; Network Telemetry</h3>
-            <p><strong>How we got it:</strong> We didn't even have to hack anything for this part — your browser just broadcasted it like an idiot. Using standard commands, we asked your machine how many CPU cores it has, how much RAM is installed, and your screen's exact color-depth. Combined with your IP address, this telemetry is enough to track you across different websites even if you clear your cookies every ten minutes.</p>
-            <p><strong>How to prevent it:</strong> The best defense against general telemetry is blending in. The <strong>Tor Browser</strong> handles this by forcing every user to share the exact same screen size, hardware profile, and timezone, making it impossible to tell you apart from anyone else. For daily browsing, a strict privacy browser combined with a trusted VPN is the best way to stop the bleeding.</p>
-
-            <h3>7. Browser Security Score</h3>
-            <p><strong>How it works:</strong> After every audit, TraceLine grades your browser's privacy posture on a scale of <strong>0 to 10</strong>. The score weighs eleven signals gathered during the scan — whether an ad-blocker is running, whether canvas and audio fingerprinting are blocked, whether your GPU identity is masked, whether a VPN is in use, whether DNT and Global Privacy Control headers are sent, and more. Each signal contributes a weighted point value, and the total is normalised to a clean <code>/10</code> with a letter grade.</p>
-            <p><strong>How to improve your score:</strong> The breakdown in the terminal tells you exactly which checks failed. The fastest wins are: installing an ad-blocker like <strong>uBlock Origin</strong>, switching to <strong>Brave</strong> (blocks canvas, audio, and WebGL fingerprinting by default), and enabling a VPN. Turning on Do Not Track and Global Privacy Control in your browser settings is trivial and free. Masking hardware telemetry (CPU core count, RAM) requires a privacy-focused browser or extensions like <strong>CanvasBlocker</strong> on Firefox.</p>
-
-            <div class="bottom-actions">
-                <button class="back-btn" id="back-btn">Back To Main Page</button>
-                <div class="tagline">Stay safe. Stay paranoid.</div>
-            </div>
+        <div class="bottom-actions" id="bottom-actions" style="display:none">
+            <button class="back-btn" id="back-btn">Run again</button>
         </div>
     </div>
 </main>
@@ -123,6 +89,7 @@
 <script src="js/engine/media.js"></script>
 <script src="js/engine/system.js"></script>
 <script src="js/engine/privacy.js"></script>
+<script src="js/engine/bypass.js"></script>
 <script src="js/engine/collect.js"></script>
 <script src="js/ui/terminal.js"></script>
 <script src="js/ui/score.js"></script>

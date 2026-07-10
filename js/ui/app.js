@@ -1,15 +1,15 @@
 var TL = window.TL || {};
 
 (function () {
-    var trapBtn   = document.getElementById('trap-button');
-    var backBtn   = document.getElementById('back-btn');
-    var heroEl    = document.getElementById('hero-container');
-    var resultsEl = document.getElementById('results-container');
-    var docsEl    = document.getElementById('documentation-section');
-    var scoreEl   = document.getElementById('score-section');
-    var termEl    = document.getElementById('terminal-output');
-    var titlebar  = document.getElementById('terminal-titlebar');
-    var term      = TL.terminal;
+    var trapBtn    = document.getElementById('trap-button');
+    var backBtn    = document.getElementById('back-btn');
+    var heroEl     = document.getElementById('hero-container');
+    var resultsEl  = document.getElementById('results-container');
+    var scoreEl    = document.getElementById('score-section');
+    var actionsEl  = document.getElementById('bottom-actions');
+    var termEl     = document.getElementById('terminal-output');
+    var titlebar   = document.getElementById('terminal-titlebar');
+    var term       = TL.terminal;
 
     term.init(termEl);
 
@@ -17,13 +17,13 @@ var TL = window.TL || {};
         var old = document.getElementById('copy-log-btn');
         if (old) old.remove();
         var btn = document.createElement('button');
-        btn.id        = 'copy-log-btn';
-        btn.textContent = 'Copy Log';
+        btn.id = 'copy-log-btn';
+        btn.textContent = 'Copy log';
         btn.className = 'copy-log-btn';
         btn.addEventListener('click', function () {
             var raw = termEl.textContent.replace(/\u2588/g, '').trimEnd();
-            var ok  = function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy Log'; }, 2000); };
-            var err = function () { btn.textContent = 'Failed';  setTimeout(function () { btn.textContent = 'Copy Log'; }, 2000); };
+            var ok  = function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy log'; }, 2000); };
+            var err = function () { btn.textContent = 'Failed'; setTimeout(function () { btn.textContent = 'Copy log'; }, 2000); };
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(raw).then(ok).catch(function () { fallbackCopy(raw, ok, err); });
             } else { fallbackCopy(raw, ok, err); }
@@ -49,9 +49,9 @@ var TL = window.TL || {};
         resultsEl.style.display = 'none';
         scoreEl.style.display   = 'none';
         scoreEl.innerHTML       = '';
-        docsEl.style.display    = 'none';
+        actionsEl.style.display = 'none';
         heroEl.style.display    = 'flex';
-        trapBtn.textContent     = 'Run Security Audit';
+        trapBtn.textContent     = 'Run security audit';
         trapBtn.disabled        = false;
         var old = document.getElementById('copy-log-btn');
         if (old) old.remove();
@@ -64,13 +64,13 @@ var TL = window.TL || {};
         if (term.isRunning()) return;
 
         term.reset();
-        scoreEl.style.display      = 'none';
-        scoreEl.innerHTML          = '';
-        docsEl.style.display       = 'none';
-        trapBtn.textContent        = 'Running...';
-        trapBtn.disabled           = true;
-        heroEl.style.display       = 'none';
-        resultsEl.style.display    = 'block';
+        scoreEl.style.display   = 'none';
+        scoreEl.innerHTML       = '';
+        actionsEl.style.display = 'none';
+        trapBtn.textContent     = 'Running...';
+        trapBtn.disabled        = true;
+        heroEl.style.display    = 'none';
+        resultsEl.style.display = 'block';
         term.setTyping(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -196,6 +196,24 @@ var TL = window.TL || {};
         if (!await term.field('Do Not Track',  data.priv.dnt,     140)) return;
         if (!await term.field('GPC Header',    data.priv.gpc,     140)) return;
         if (!await term.field('Ad Blocker',    data.adblock,      480)) return;
+        if (!await term.blank(200)) return;
+
+        if (!await term.typeLine('[BYPASS] Running spoof and automation cross checks...', 130)) return;
+        if (!await term.blank(80)) return;
+
+        if (!await term.typeLine('[+] CROSS CHECKS', 60)) return;
+        if (data.checks.langTz) {
+            if (!await term.field('Lang / TZ', data.checks.langTz.detail, 140)) return;
+        }
+        if (data.checks.hardware) {
+            if (!await term.field('Spec check', data.checks.hardware.detail, 140)) return;
+        }
+        if (data.checks.privateMode) {
+            if (!await term.field('Private mode', data.checks.privateMode.detail, 140)) return;
+        }
+        if (data.checks.automation) {
+            if (!await term.field('Automation', data.checks.automation.detail, 140)) return;
+        }
         if (!await term.blank(140)) return;
 
         if (!await term.divider('SCAN COMPLETE')) return;
@@ -205,7 +223,7 @@ var TL = window.TL || {};
         if (!term.wasAborted()) {
             showCopyBtn();
             TL.score.render(scoreEl, TL.score.calculate(data));
-            docsEl.style.display = 'block';
+            actionsEl.style.display = 'flex';
             window.scrollBy({ top: 150, behavior: 'smooth' });
         }
     });

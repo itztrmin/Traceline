@@ -15,17 +15,25 @@ TL.collect = async function () {
         TL.privacy.battery(),
         TL.media.refreshRate(),
         Promise.resolve(TL.media.fonts()),
-        TL.media.voices()
+        TL.media.voices(),
+        TL.bypass.privateBrowsingHeuristic()
     ]);
 
-    var ipData  = results[0];
-    var vpn     = TL.geo.detectVPN(ipData, sysTZ);
-    var loc     = (ipData.city && ipData.city !== 'Unknown' && ipData.city !== '-')
+    var ipData = results[0];
+    var vpn    = TL.geo.detectVPN(ipData, sysTZ);
+    var loc    = (ipData.city && ipData.city !== 'Unknown' && ipData.city !== '-')
         ? ipData.city + ', ' + ipData.country
         : 'Hidden or shielded';
 
-    var sys = TL.system.get();
+    var sys  = TL.system.get();
     var priv = TL.privacy.get();
+    var gpu  = results[3];
+
+    var langTzCheck  = TL.bypass.langTimezoneConsistency(sysTZ);
+    var hwCheck      = TL.bypass.hardwarePlausibility(gpu, navigator.hardwareConcurrency, navigator.deviceMemory);
+    var fontCheck    = TL.bypass.fontEntropy(results[10]);
+    var privateCheck = results[12];
+    var lieCheck     = TL.bypass.lieDetector();
 
     return {
         network: {
@@ -38,7 +46,7 @@ TL.collect = async function () {
         },
         canvas:      results[1],
         audio:       results[2],
-        gpu:         results[3],
+        gpu:         gpu,
         webglFP:     results[4] || 'Unavailable',
         hwAccel:     results[5],
         devices:     results[6],
@@ -48,7 +56,14 @@ TL.collect = async function () {
         fonts:       results[10],
         voices:      results[11],
         sys:         sys,
-        priv:        priv
+        priv:        priv,
+        checks: {
+            langTz:      langTzCheck,
+            hardware:    hwCheck,
+            fontEntropy: fontCheck,
+            privateMode: privateCheck,
+            automation:  lieCheck
+        }
     };
 };
 
