@@ -112,8 +112,10 @@ TL.media = (function () {
             var audio   = list.filter(function (d) { return d.kind === 'audioinput';  }).length;
             var output  = list.filter(function (d) { return d.kind === 'audiooutput'; }).length;
             var labeled = list.filter(function (d) { return d.label && d.label !== ''; }).length;
-            return 'Cameras: ' + video + ' | Mics: ' + audio + ' | Speakers: ' + output +
-                   (labeled > 0 ? ' (names exposed)' : ' (names hidden)');
+            var genericSpoof = labeled === 0 && video <= 1 && audio <= 1 && output <= 1 && (video + audio + output) > 0;
+            var suffix = genericSpoof ? ' (generic device stubs spoofed by browser)' :
+                         (labeled > 0 ? ' (names exposed)' : ' (names hidden)');
+            return 'Cameras: ' + video + ' | Mics: ' + audio + ' | Speakers: ' + output + suffix;
         } catch (_) { return 'Blocked by browser'; }
     }
 

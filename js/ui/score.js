@@ -62,6 +62,7 @@ TL.score = (function () {
             d.devices.indexOf('Blocked') !== -1 ||
             d.devices.indexOf('blocked') !== -1 ||
             d.devices.indexOf('Restricted') !== -1 ||
+            d.devices.indexOf('spoofed') !== -1 ||
             /Cameras: 0 \| Mics: 0 \| Speakers: 0/.test(d.devices)
         );
         if (mediaOk) { pts += 0.5; bd.push(row('Media Device Privacy',   'PROTECTED',   '+0.5', true));  }
@@ -82,7 +83,9 @@ TL.score = (function () {
             d.battery.indexOf('spoof') !== -1 ||
             d.battery.indexOf('Spoofed') !== -1 ||
             d.battery.indexOf('Possibly spoofed') !== -1 ||
-            d.battery.indexOf('Returning fake') !== -1
+            d.battery.indexOf('Returning fake') !== -1 ||
+            d.battery.indexOf('Not available') !== -1 ||
+            d.battery.indexOf('Blocked') !== -1
         );
         if (battSpoofed) { pts += 0.5; bd.push(row('Battery API Privacy',    'SHIELDED',    '+0.5', true));  }
         else             {             bd.push(row('Battery API Privacy',    'EXPOSED',     '+0.0', false)); }

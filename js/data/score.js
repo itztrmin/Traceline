@@ -64,6 +64,7 @@ TL.score = (function () {
             data.mediaDevices.indexOf('Blocked') !== -1 ||
             data.mediaDevices.indexOf('blocked') !== -1 ||
             data.mediaDevices.indexOf('Restricted') !== -1 ||
+            data.mediaDevices.indexOf('spoofed') !== -1 ||
             /Cameras: 0 \| Mics: 0 \| Speakers: 0/.test(data.mediaDevices)
         );
         if (mediaOk) { pts += 0.5; bd.push({ label: 'Media Device Privacy',   status: 'PROTECTED',   pts: '+0.5', good: true  }); }
@@ -81,8 +82,10 @@ TL.score = (function () {
 
         var battSpoofed = data.battery && (
             data.battery.indexOf('blocked') !== -1 ||
+            data.battery.indexOf('Blocked') !== -1 ||
             data.battery.indexOf('spoof') !== -1 ||
-            data.battery.indexOf('fake') !== -1
+            data.battery.indexOf('fake') !== -1 ||
+            data.battery.indexOf('Not available') !== -1
         );
         if (battSpoofed) { pts += 0.5; bd.push({ label: 'Battery API Privacy',    status: 'SHIELDED',    pts: '+0.5', good: true  }); }
         else             {             bd.push({ label: 'Battery API Privacy',    status: 'EXPOSED',     pts: '+0.0', good: false }); }

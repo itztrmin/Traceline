@@ -124,7 +124,8 @@ TL.fingerprint = (function () {
                 var ch2 = buf2.getChannelData(0);
                 var ref = 0;
                 for (var i = 4000; i < 5000; i++) ref += Math.abs(ch2[i]);
-                if (Math.abs(ref - sums[1]) > 1e-9) {
+                var relDiff = sums[1] === 0 ? 0 : Math.abs(ref - sums[1]) / sums[1];
+                if (relDiff > 1e-6) {
                     return 'Protected — audio values shift between renders (noise injection active). Session token: ' +
                         sums[1].toFixed(8).replace('.','').replace(/^0+/,'').substring(0,8);
                 }
@@ -426,7 +427,14 @@ TL.fingerprint = (function () {
             var audio   = devices.filter(function (d) { return d.kind === 'audioinput';  }).length;
             var output  = devices.filter(function (d) { return d.kind === 'audiooutput'; }).length;
             var labeled = devices.filter(function (d) { return d.label && d.label !== ''; }).length;
-            var suffix  = labeled > 0 ? ' (device names exposed)' : ' (device names hidden)';
+            var noEmptyIds = devices.length > 0 && devices.every(function (d) { return !d.deviceId || d.deviceId === ''; });
+            var genericSpoof = labeled === 0 && video <= 1 && audio <= 1 && output <= 1 && (video + audio + output) > 0;
+            var suffix;
+            if (noEmptyIds === false && labeled === 0 && genericSpoof) {
+                suffix = ' (generic device stubs — spoofed by browser)';
+            } else {
+                suffix = labeled > 0 ? ' (device names exposed)' : ' (device names hidden)';
+            }
             return 'Cameras: ' + video + ' | Mics: ' + audio + ' | Speakers: ' + output + suffix;
         } catch (_) { return 'Blocked by browser'; }
     }
@@ -464,7 +472,7 @@ TL.fingerprint = (function () {
     }
 
     async function getBattery() {
-        if (!('getBattery' in navigator)) return null;
+        if (!('getBattery' in navigator)) return 'Not available — Battery Status API is unsupported or disabled by browser (best privacy outcome)';
         try {
             var b = await navigator.getBattery();
 

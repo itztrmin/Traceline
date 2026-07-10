@@ -51,7 +51,8 @@ TL.audio = (function () {
             var buf2 = await Promise.race([buildGraph(Ctx).startRendering(), t]);
             if (buf2) {
                 var ref = sumRegion(buf2.getChannelData(0), 4000, 5000);
-                if (Math.abs(ref - sums[1]) > 1e-9) {
+                var relDiff = sums[1] === 0 ? 0 : Math.abs(ref - sums[1]) / sums[1];
+                if (relDiff > 1e-6) {
                     return 'Protected values shift between renders (noise injection). Session: ' +
                         sums[1].toFixed(8).replace('.','').replace(/^0+/,'').slice(0, 8);
                 }

@@ -60,7 +60,7 @@ TL.privacy = (function () {
     }
 
     async function battery() {
-        if (!('getBattery' in navigator)) return null;
+        if (!('getBattery' in navigator)) return 'Not available. Battery Status API is unsupported or disabled by this browser (best privacy outcome)';
         try {
             var b = await navigator.getBattery();
 
@@ -89,7 +89,7 @@ TL.privacy = (function () {
             }
 
             return level + '% (' + state + ')' + extra;
-        } catch (_) { return null; }
+        } catch (_) { return 'Blocked. Battery Status API call was rejected by browser'; }
     }
 
     function get() {
