@@ -47,6 +47,12 @@ TL.browser = function () {
     return 'Unknown';
 };
 
+TL.isBrave = async function () {
+    try {
+        return !!(navigator.brave && await navigator.brave.isBrave());
+    } catch (_) { return false; }
+};
+
 TL.hash = function (data) {
     var h1 = 0x811c9dc5, h2 = 0xdeadbeef;
     for (var i = 0; i < data.length; i++) {

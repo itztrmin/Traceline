@@ -15,7 +15,9 @@ TL.collect = async function () {
         TL.privacy.battery(),
         TL.media.refreshRate(),
         Promise.resolve(TL.media.fonts()),
-        TL.media.voices()
+        TL.media.voices(),
+        TL.isBrave(),
+        TL.system.privateBrowsing()
     ]);
 
     var ipData  = results[0];
@@ -24,8 +26,10 @@ TL.collect = async function () {
         ? ipData.city + ', ' + ipData.country
         : 'Hidden or shielded';
 
-    var sys = TL.system.get();
-    var priv = TL.privacy.get();
+    var sys     = TL.system.get();
+    var priv    = TL.privacy.get();
+    var isBrave = results[12];
+    var extSignals = TL.privacy.extensionSignals();
 
     return {
         network: {
@@ -36,19 +40,22 @@ TL.collect = async function () {
             systemTimezone: sysTZ,
             ipTimezone:     ipData.timezone
         },
-        canvas:      results[1],
-        audio:       results[2],
-        gpu:         results[3],
-        webglFP:     results[4] || 'Unavailable',
-        hwAccel:     results[5],
-        devices:     results[6],
-        adblock:     results[7],
-        battery:     results[8],
-        refreshRate: results[9],
-        fonts:       results[10],
-        voices:      results[11],
-        sys:         sys,
-        priv:        priv
+        canvas:         results[1],
+        audio:          results[2],
+        gpu:            results[3],
+        webglFP:        results[4] || 'Unavailable',
+        hwAccel:        results[5],
+        devices:        results[6],
+        adblock:        results[7],
+        battery:        results[8],
+        refreshRate:    results[9],
+        fonts:          results[10],
+        voices:         results[11],
+        isBrave:        isBrave,
+        privateMode:    results[13],
+        extensions:     extSignals,
+        sys:            sys,
+        priv:           priv
     };
 };
 

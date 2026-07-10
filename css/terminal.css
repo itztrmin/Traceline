@@ -40,7 +40,7 @@ body.light-mode #terminal-titlebar {
     font-size: 11px;
     color: #666;
     letter-spacing: 0.5px;
-    font-family: monospace;
+    font-family: var(--font-mono);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -81,6 +81,7 @@ body.light-mode #terminal-title-text {
     overflow-wrap: anywhere;
     word-break: break-all;
     font-size: clamp(10px, 2.2vw, 13px);
+    font-family: var(--font-mono);
     line-height: 1.7;
     color: var(--term-text);
     min-height: 260px;

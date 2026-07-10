@@ -33,7 +33,7 @@ TL.privacy = (function () {
             var s = window.getComputedStyle(el);
             if (el.offsetHeight === 0 || el.offsetWidth === 0 ||
                 s.display === 'none' || s.visibility === 'hidden' || s.opacity === '0') {
-                return 'Yes ad element hidden by extension';
+                return 'Yes, ad element was hidden by an extension';
             }
         }
 
@@ -54,7 +54,7 @@ TL.privacy = (function () {
         };
 
         for (var i = 0; i < baits.length; i++) {
-            if (await check(baits[i])) return 'Yes, ad network request was blocked';
+            if (await check(baits[i])) return 'Yes, an ad network request was blocked';
         }
         return 'No, ad requests went through unblocked';
     }
@@ -92,6 +92,31 @@ TL.privacy = (function () {
         } catch (_) { return 'Blocked. Battery Status API call was rejected by browser'; }
     }
 
+    async function braveShields() {
+        var isBrave = await TL.isBrave();
+        if (!isBrave) return null;
+        return 'Brave detected via navigator.brave, fingerprinting resistance likely active';
+    }
+
+    function extensionSignals() {
+        var found = [];
+        try {
+            if (document.documentElement.getAttribute('darkreader') !== null ||
+                document.querySelector('style[class*="darkreader"]')) found.push('Dark Reader');
+        } catch (_) {}
+        try {
+            if (window.chrome && window.chrome.runtime && window.chrome.runtime.id) found.push('Chrome extension runtime exposed');
+        } catch (_) {}
+        try {
+            if (document.getElementById('grammarly-desktop-integration') ||
+                document.querySelector('grammarly-extension')) found.push('Grammarly');
+        } catch (_) {}
+        try {
+            if (document.documentElement.hasAttribute('data-lt-installed')) found.push('LanguageTool');
+        } catch (_) {}
+        return found;
+    }
+
     function get() {
         return {
             pdf:     navigator.pdfViewerEnabled ? 'Built-in viewer active' : 'No built-in PDF viewer',
@@ -105,7 +130,13 @@ TL.privacy = (function () {
         };
     }
 
-    return { get: get, adblock: adblock, battery: battery };
+    return {
+        get: get,
+        adblock: adblock,
+        battery: battery,
+        braveShields: braveShields,
+        extensionSignals: extensionSignals
+    };
 })();
 
 window.TL = TL;
