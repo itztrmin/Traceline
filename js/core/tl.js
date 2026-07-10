@@ -64,4 +64,9 @@ TL.hash = function (data) {
             ((h2 ^ (h2 >>> 16)) >>> 0).toString(16).padStart(8,'0'));
 };
 
+TL.isChromiumFamily = function () {
+    if (navigator.userAgentData) return true;
+    return /Chrome\/|Chromium\/|Edg\/|OPR\//.test(navigator.userAgent) && !/Firefox\//.test(navigator.userAgent);
+};
+
 window.TL = TL;

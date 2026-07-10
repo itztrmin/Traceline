@@ -29,7 +29,8 @@ nav {
 
 .brand-mark {
     display: block;
-    border-radius: 6px;
+    border-radius: 8px;
+    flex-shrink: 0;
 }
 
 .theme-toggle {

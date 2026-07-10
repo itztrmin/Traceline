@@ -78,8 +78,7 @@ body.light-mode #terminal-title-text {
     background-color: var(--term-bg);
     padding: 16px 18px 22px;
     white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    word-break: break-all;
+    overflow-wrap: break-word;
     font-size: clamp(10px, 2.2vw, 13px);
     font-family: var(--font-mono);
     line-height: 1.7;
@@ -88,11 +87,19 @@ body.light-mode #terminal-title-text {
     height: 60vh;
     max-height: 600px;
     overflow-y: auto;
+    overflow-x: auto;
     width: 100%;
     box-sizing: border-box;
     scrollbar-width: thin;
     scrollbar-color: var(--border-color) transparent;
     transition: background-color var(--transition-med), color var(--transition-med);
+}
+
+#terminal-output .tl-banner {
+    display: block;
+    white-space: pre;
+    overflow-x: auto;
+    max-width: 100%;
 }
 
 #terminal-output::-webkit-scrollbar       { width: 6px; }

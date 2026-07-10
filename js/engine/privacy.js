@@ -60,7 +60,7 @@ TL.privacy = (function () {
     }
 
     async function battery() {
-        if (!('getBattery' in navigator)) return 'Not available. Battery Status API is unsupported or disabled by this browser (best privacy outcome)';
+        if (!('getBattery' in navigator)) return 'Not exposed. This browser never implemented the Battery Status API, no user action involved';
         try {
             var b = await navigator.getBattery();
 
@@ -89,13 +89,7 @@ TL.privacy = (function () {
             }
 
             return level + '% (' + state + ')' + extra;
-        } catch (_) { return 'Blocked. Battery Status API call was rejected by browser'; }
-    }
-
-    async function braveShields() {
-        var isBrave = await TL.isBrave();
-        if (!isBrave) return null;
-        return 'Brave detected via navigator.brave, fingerprinting resistance likely active';
+        } catch (_) { return 'Rejected. Battery Status API call was blocked, likely by an extension or browser policy'; }
     }
 
     function extensionSignals() {
@@ -117,11 +111,28 @@ TL.privacy = (function () {
         return found;
     }
 
+    async function geoPermission() {
+        try {
+            if (!navigator.permissions || !navigator.permissions.query) return 'Permissions API unavailable';
+            var status = await navigator.permissions.query({ name: 'geolocation' });
+            if (status.state === 'denied') return 'Blocked';
+            if (status.state === 'granted') return 'Granted';
+            return 'Not yet requested';
+        } catch (_) { return 'Permissions API unavailable'; }
+    }
+
     function get() {
+        var dntSupported = 'doNotTrack' in navigator || 'doNotTrack' in window;
+        var dntValue = navigator.doNotTrack || window.doNotTrack;
+        var dnt;
+        if (dntValue === '1') dnt = 'Sent';
+        else if (!dntSupported) dnt = 'Not supported, this browser dropped the deprecated DNT header';
+        else dnt = 'Not sent';
+
         return {
             pdf:     navigator.pdfViewerEnabled ? 'Built-in viewer active' : 'No built-in PDF viewer',
             cookies: navigator.cookieEnabled ? 'Accepted' : 'Rejected',
-            dnt:     navigator.doNotTrack === '1' || window.doNotTrack === '1' ? 'Sent' : 'Not sent',
+            dnt:     dnt,
             gpc:     navigator.globalPrivacyControl ? 'Active' : 'Not set',
             storage: storage(),
             idb:     idb(),
@@ -134,8 +145,8 @@ TL.privacy = (function () {
         get: get,
         adblock: adblock,
         battery: battery,
-        braveShields: braveShields,
-        extensionSignals: extensionSignals
+        extensionSignals: extensionSignals,
+        geoPermission: geoPermission
     };
 })();
 

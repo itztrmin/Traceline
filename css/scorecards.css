@@ -25,6 +25,14 @@
     letter-spacing: -0.01em;
 }
 
+.score-desc {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    max-width: 68ch;
+    margin: 10px 0 20px;
+}
+
 
 .overall-card {
     display: flex;
@@ -86,6 +94,7 @@
     font-weight: 700;
     line-height: 1.1;
     margin-bottom: 6px;
+    min-height: 1.1em;
 }
 
 .overall-verdict {
@@ -94,6 +103,7 @@
     color: var(--text-color);
     margin: 0;
     max-width: 40ch;
+    min-height: 1.55em;
 }
 
 
@@ -125,6 +135,28 @@
     border: 1px solid var(--border-soft);
     border-radius: var(--radius-lg);
     padding: 20px;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: cat-card-in 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.cat-card.is-pending .cat-score {
+    color: var(--text-dim);
+}
+
+@keyframes cat-card-in {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cat-card {
+        animation: none;
+        opacity: 1;
+        transform: none;
+    }
 }
 
 .cat-card-top {
@@ -138,10 +170,11 @@
     width: 34px;
     height: 34px;
     border-radius: var(--radius-sm);
-    background: var(--highlight-bg);
+    background: var(--accent-dim);
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #ffffff;
 }
 
 .cat-icon svg {

@@ -17,12 +17,20 @@ TL.terminal = (function () {
         }
     }
 
+    // Appends plain text as its own text node instead of using
+    // `el.textContent += x`, which replaces ALL of el's children with a
+    // single new text node and would destroy any element (like the banner
+    // span) already inside the terminal.
+    function appendText(str) {
+        el.appendChild(document.createTextNode(str));
+    }
+
     function abort()      { aborted = true; isTyping = false; }
     function isRunning()  { return isTyping; }
     function wasAborted() { return aborted; }
 
     function getCols() {
-        if (!el) return 60;
+        if (!el || !el.clientWidth) return 60;
         var style = window.getComputedStyle(el);
         var c     = document.createElement('canvas');
         var ctx   = c.getContext('2d');
@@ -30,7 +38,8 @@ TL.terminal = (function () {
         var cw    = ctx.measureText('M').width || 8;
         var padL  = parseFloat(style.paddingLeft)  || 0;
         var padR  = parseFloat(style.paddingRight) || 0;
-        return Math.floor((el.clientWidth - padL - padR) / cw);
+        var cols  = Math.floor((el.clientWidth - padL - padR) / cw);
+        return cols > 0 ? cols : 60;
     }
 
     function scrollThrottle() {
@@ -44,7 +53,7 @@ TL.terminal = (function () {
     async function typeText(text) {
         for (var i = 0; i < text.length; i++) {
             if (aborted) return false;
-            el.textContent += text[i];
+            appendText(text[i]);
             var ch    = text[i];
             var delay = ch === '\n' ? 10 + Math.random() * 12
                       : ch === ' ' ? 2  + Math.random() * 4
@@ -75,14 +84,37 @@ TL.terminal = (function () {
         return typeLine('  ' + TL.pad(label, 15) + ': ' + value);
     }
 
+    var BANNER =
+'  _____                   _     _            \n' +
+' |_   _| __ __ _  ___ ___| |   (_)_ __   ___ \n' +
+'   | || \'__/ _` |/ __/ _ \\ |   | | \'_ \\ / _ \\\n' +
+'   | || | | (_| | (_|  __/ |___| | | | |  __/\n' +
+'   |_||_|  \\__,_|\\___\\___|_____|_|_| |_|\\___|\n';
+
+    async function banner() {
+        if (aborted) return false;
+        var span = document.createElement('span');
+        span.className = 'tl-banner';
+        el.appendChild(span);
+        var lines = BANNER.split('\n');
+        for (var i = 0; i < lines.length; i++) {
+            if (aborted) return false;
+            span.textContent += lines[i] + (i < lines.length - 1 ? '\n' : '');
+            el.scrollTop = el.scrollHeight;
+            await TL.sleep(12);
+        }
+        return true;
+    }
+
     async function header() {
         if (aborted) return false;
+        if (!(await banner())) return false;
         var line  = 'TRACELINE // DIAGNOSTIC SHELL';
         var rule  = '-'.repeat(line.length);
         var lines = [rule, line, rule, ''];
         for (var i = 0; i < lines.length; i++) {
             if (aborted) return false;
-            el.textContent += lines[i] + '\n';
+            appendText(lines[i] + '\n');
             el.scrollTop    = el.scrollHeight;
             await TL.sleep(35);
         }
@@ -91,9 +123,10 @@ TL.terminal = (function () {
 
     async function divider(label) {
         if (aborted) return false;
-        var cols = getCols();
-        var len  = Math.min(Math.max((label || '').length + 4, 40), cols - 2);
-        var rule = '-'.repeat(len);
+        var cols   = getCols();
+        var maxLen = Math.max(cols - 2, 8);
+        var len    = Math.max(Math.min(Math.max((label || '').length + 4, 40), maxLen), 8);
+        var rule   = '-'.repeat(len);
         if (!(await typeLine(rule, 80)))  return false;
         if (label) {
             if (!(await typeLine('  ' + label, 100))) return false;

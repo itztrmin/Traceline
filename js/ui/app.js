@@ -72,6 +72,7 @@ var TL = window.TL || {};
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
         var dataPromise = TL.collect();
+        var scoreState  = TL.scorecards.start(scoreEl);
 
         if (!await term.header()) return;
         if (!await term.blank(160)) return;
@@ -85,6 +86,10 @@ var TL = window.TL || {};
         var data = await dataPromise;
         if (term.wasAborted()) return;
 
+        var result = TL.score.calculate(data);
+        var catByKey = {};
+        result.categories.forEach(function (c) { catByKey[c.key] = c; });
+
         var net = data.network;
         if (!await term.blank(160)) return;
         if (!await term.typeLine('[NET] Got a response. Here is what we found:', 90)) return;
@@ -97,6 +102,7 @@ var TL = window.TL || {};
         if (!await term.field('System TZ',   net.systemTimezone,           100)) return;
         if (!await term.field('IP TZ',       net.ipTimezone || 'Unknown',  100)) return;
         if (!await term.field('VPN / proxy', net.vpn,                      180)) return;
+        TL.scorecards.feed(scoreState, catByKey.network);
         if (!await term.blank(260)) return;
 
         if (!await term.typeLine('[FP] Starting hardware fingerprint extraction.', 90)) return;
@@ -136,6 +142,7 @@ var TL = window.TL || {};
 
         if (!await term.blank(240)) return;
         if (!await term.typeLine('[+] HARDWARE FINGERPRINT COMPLETE', 70)) return;
+        TL.scorecards.feed(scoreState, catByKey.fingerprint);
         if (!await term.blank(260)) return;
 
         if (!await term.typeLine('[TEL] Pulling system telemetry from navigator APIs...', 110)) return;
@@ -185,6 +192,7 @@ var TL = window.TL || {};
             if (!await term.blank(160)) return;
         }
 
+        TL.scorecards.feed(scoreState, catByKey.hardware);
         if (!await term.typeLine('[PRIV] Checking privacy signals and browser capabilities...', 110)) return;
         if (!await term.typeLine('[PRIV] Testing connectivity to known ad network endpoints...', 150)) return;
         if (!await term.blank(160)) return;
@@ -200,6 +208,7 @@ var TL = window.TL || {};
         if (!await term.field('GPC header',    data.priv.gpc,     140)) return;
         if (!await term.field('Ad blocker',    data.adblock,      480)) return;
         if (!await term.field('Private mode',  data.privateMode,  120)) return;
+        if (!await term.field('Geolocation',   data.geoPermission,120)) return;
 
         if (data.isBrave) {
             if (!await term.blank(90)) return;
@@ -211,6 +220,8 @@ var TL = window.TL || {};
             if (!await term.typeLine('[!] Browser extensions detected: ' + data.extensions.join(', '), 140)) return;
         }
 
+        TL.scorecards.feed(scoreState, catByKey.privacy);
+
         if (!await term.blank(140)) return;
 
         if (!await term.divider('SCAN COMPLETE')) return;
@@ -219,7 +230,7 @@ var TL = window.TL || {};
 
         if (!term.wasAborted()) {
             showCopyBtn();
-            TL.scorecards.render(scoreEl, TL.score.calculate(data));
+            TL.scorecards.finish(scoreState, result);
             window.scrollBy({ top: 150, behavior: 'smooth' });
         }
     });

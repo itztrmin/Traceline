@@ -75,15 +75,17 @@ TL.system = (function () {
     }
 
     function torSignals() {
-        var signals = [];
-        if (window.screen.width === 1000 && window.screen.height === 900) signals.push('standard Tor resolution');
-        if (window.innerWidth === 1000) signals.push('letterboxed to 1000px');
+        var strong = [];
+        var weak   = [];
+        if (window.screen.width === 1000 && window.screen.height === 900) strong.push('standard Tor resolution');
+        if (window.innerWidth === 1000 && window.innerWidth !== window.screen.width) strong.push('letterboxed to 1000px');
         if (navigator.languages && navigator.languages.length === 1 && navigator.languages[0] === 'en-US') {
-            signals.push('language forced to en-US');
+            weak.push('language forced to en-US');
         }
-        if (navigator.hardwareConcurrency === 1) signals.push('CPU masked to 1 core');
-        if (!navigator.deviceMemory)             signals.push('RAM suppressed');
-        return signals.length ? 'Likely Tor Browser, ' + signals.join(', ') : null;
+        if (navigator.hardwareConcurrency === 1) weak.push('CPU reported as 1 core');
+        if (strong.length === 0) return null;
+        var signals = strong.concat(weak);
+        return 'Likely Tor Browser, ' + signals.join(', ');
     }
 
     function connection() {
@@ -161,7 +163,7 @@ TL.system = (function () {
 
         var ram = navigator.deviceMemory
             ? '~' + navigator.deviceMemory + ' GB (API caps at 8)'
-            : 'Not exposed';
+            : 'Not exposed, this browser never implemented the Device Memory API';
 
         var cpu = navigator.hardwareConcurrency
             ? navigator.hardwareConcurrency + ' logical cores'
