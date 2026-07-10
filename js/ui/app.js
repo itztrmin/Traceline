@@ -58,6 +58,12 @@ var TL = window.TL || {};
 
     if (backBtn) backBtn.addEventListener('click', resetView);
 
+    var badgeMiku = document.getElementById('badge-miku');
+    var badgeCss  = document.getElementById('badge-css');
+    var reloadPage = function () { window.location.reload(); };
+    if (badgeMiku) badgeMiku.addEventListener('click', reloadPage);
+    if (badgeCss)  badgeCss.addEventListener('click', reloadPage);
+
     trapBtn.addEventListener('click', async function () {
         if (term.isRunning()) return;
 

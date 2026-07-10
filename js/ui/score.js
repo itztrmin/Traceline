@@ -24,11 +24,15 @@ TL.score = (function () {
 
     function calculate(d) {
         var vpnStr = d.network && d.network.vpn || '';
-        var vpnOn = vpnStr.indexOf('VPN') !== -1 || vpnStr.indexOf('datacenter') !== -1;
-        var tzMatch = d.network && !!d.network.ipTimezone && d.network.ipTimezone === d.network.systemTimezone;
+        var vpnOn = vpnStr.indexOf('VPN') !== -1 || vpnStr.indexOf('datacenter') !== -1 || vpnStr.indexOf('proxy') !== -1;
+
+        var hasIpTz = d.network && !!d.network.ipTimezone && d.network.ipTimezone !== 'Unknown';
+        var tzMatch = hasIpTz && d.network.ipTimezone === d.network.systemTimezone;
+        var tzMismatchGood = hasIpTz && vpnOn && !tzMatch;
+
         var network = categoryScore([
             check('VPN or proxy in use', vpnOn, 3),
-            check('IP and system timezone match', tzMatch, 1),
+            check('IP and system timezone consistent', hasIpTz ? (tzMatch || tzMismatchGood) : false, 1),
             check('Connection is encrypted (HTTPS)', window.location.protocol === 'https:' || window.location.hostname === 'localhost', 1)
         ]);
 
@@ -51,10 +55,13 @@ TL.score = (function () {
             d.devices.indexOf('Restricted') !== -1
         );
         var fontsBlocked = d.fonts && d.fonts.indexOf('Detection blocked') !== -1;
+        var webglFpMasked = !d.webglFP || d.webglFP === 'Unavailable' || gpuMasked;
+
         var fingerprint = categoryScore([
             check('Canvas fingerprint blocked or noised', canvasOk, 2.5),
             check('Audio fingerprint blocked or noised', audioOk, 2),
             check('GPU renderer masked', gpuMasked, 2),
+            check('WebGL fingerprint surface reduced', webglFpMasked, 1),
             check('Media device enumeration blocked', mediaOk, 1.5),
             check('Font probing blocked', fontsBlocked, 2)
         ]);
@@ -69,13 +76,17 @@ TL.score = (function () {
             d.battery.indexOf('Spoofed') !== -1 ||
             d.battery.indexOf('Possibly spoofed') !== -1 ||
             d.battery.indexOf('Returning fake') !== -1 ||
-            d.battery.indexOf('Rejected') !== -1
+            d.battery.indexOf('Rejected') !== -1 ||
+            d.battery.indexOf('Not exposed') === 0
         );
+        var timerRounded = d.sys && d.sys.timerRes && d.sys.timerRes.indexOf('rounded') !== -1;
+
         var hardware = categoryScore([
             check('CPU core count hidden', cpuMasked, 2),
             check('Device RAM hidden', ramMasked, 2),
-            check('Client Hints not exposed', hintsHidden, 2),
-            check('Battery API shielded', battShielded, 2),
+            check('Client Hints not exposed', hintsHidden, 1.5),
+            check('Battery API shielded', battShielded, 1.5),
+            check('High-resolution timer clamped', timerRounded, 1),
             check('No Tor or automation signals raised', !d.sys || !d.sys.tor, 2)
         ]);
 

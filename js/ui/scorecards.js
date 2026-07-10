@@ -34,6 +34,10 @@ TL.scorecards = (function () {
         return '#e85b47';
     }
 
+    function fmtPts(n) {
+        return (Math.round(n * 10) / 10).toString().replace(/\.0$/, '');
+    }
+
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function animateValue(from, to, duration, onFrame, onDone) {
@@ -95,7 +99,9 @@ TL.scorecards = (function () {
         var gradeEl   = card.querySelector('.overall-grade');
         var verdictEl = card.querySelector('.overall-verdict');
 
-        animateValue(0, result.score, duration, function (val) {
+        var fromVal = parseFloat(numberEl.textContent) || 0;
+
+        animateValue(fromVal, result.score, duration, function (val) {
             numberEl.textContent = val.toFixed(1);
             var livePct = (val / result.max) * 100;
             var liveColor = colorFor(livePct);
@@ -105,6 +111,18 @@ TL.scorecards = (function () {
             gradeEl.textContent = result.grade;
             gradeEl.style.color = color;
             verdictEl.textContent = result.verdict;
+        });
+    }
+
+    function bumpOverallCard(card, fromScore, toScore, maxScore, duration) {
+        var ringWrap = card.querySelector('.overall-ring-wrap');
+        var numberEl = card.querySelector('.overall-number');
+        animateValue(fromScore, toScore, duration, function (val) {
+            numberEl.textContent = val.toFixed(1);
+            var livePct = (val / maxScore) * 100;
+            var liveColor = colorFor(livePct);
+            numberEl.style.color = liveColor;
+            setRingPct(ringWrap, livePct, liveColor);
         });
     }
 
@@ -122,7 +140,10 @@ TL.scorecards = (function () {
                 ring(0, colorFor(0), 64) +
             '</div>' +
             '<div class="cat-label">' + cat.label + '</div>' +
-            '<div class="cat-score">--%</div>' +
+            '<div class="cat-score-row">' +
+                '<span class="cat-score">--%</span>' +
+                '<span class="cat-points">-- / --</span>' +
+            '</div>' +
             '<ul class="cat-checks"></ul>';
 
         return card;
@@ -132,23 +153,30 @@ TL.scorecards = (function () {
         var pct = cat.data.pct;
         var color = colorFor(pct);
         var scoreEl  = card.querySelector('.cat-score');
+        var pointsEl = card.querySelector('.cat-points');
         var checksEl = card.querySelector('.cat-checks');
 
         card.classList.remove('is-pending');
         card.classList.add('is-revealed');
+
+        pointsEl.textContent = '0 / ' + fmtPts(cat.data.max);
 
         animateValue(0, pct, duration, function (val) {
             var c = colorFor(val);
             setRingPct(card, val, c);
             scoreEl.textContent = Math.round(val) + '%';
             scoreEl.style.color = c;
+            var livePts = (val / 100) * cat.data.max;
+            pointsEl.textContent = fmtPts(livePts) + ' / ' + fmtPts(cat.data.max);
         }, function () {
             scoreEl.style.color = color;
+            pointsEl.textContent = fmtPts(cat.data.pts) + ' / ' + fmtPts(cat.data.max);
             checksEl.innerHTML = cat.data.checks.map(function (c) {
                 return (
                     '<li class="cat-check ' + (c.good ? 'is-good' : 'is-bad') + '">' +
                         '<span class="cat-check-dot"></span>' +
                         '<span class="cat-check-label">' + c.label + '</span>' +
+                        '<span class="cat-check-pts">' + (c.good ? '+' + fmtPts(c.pts) : fmtPts(0)) + '</span>' +
                     '</li>'
                 );
             }).join('');
@@ -194,11 +222,6 @@ TL.scorecards = (function () {
         });
     }
 
-    // Progressive API used while the audit is still streaming in the
-    // terminal: start() lays down the empty shell, feed() reveals and
-    // animates one category card at a time as its section of the audit
-    // completes, and finish() settles the overall ring once every
-    // category has reported in.
     function start(section) {
         section.innerHTML = '';
         section.style.display = 'block';
@@ -219,7 +242,7 @@ TL.scorecards = (function () {
         grid.className = 'cat-grid';
         section.appendChild(grid);
 
-        return { section: section, overall: overall, grid: grid, cards: {} };
+        return { section: section, overall: overall, grid: grid, cards: {}, runningScore: 0, runningMax: 0 };
     }
 
     function feed(state, cat) {
@@ -227,6 +250,20 @@ TL.scorecards = (function () {
         state.cards[cat.key] = card;
         state.grid.appendChild(card);
         animateCategoryCard(card, cat, 650);
+
+        var fromScore = state.runningScore;
+        var fromMax   = state.runningMax || 10;
+        var toScore   = state.runningScore + cat.data.pts;
+        var toMax     = state.runningMax + cat.data.max;
+
+        state.runningScore = toScore;
+        state.runningMax   = toMax;
+
+        var displayMax = toMax > 0 ? toMax : 10;
+        var normalizedTo = (toScore / displayMax) * 10;
+        var normalizedFrom = (fromScore / (fromMax || displayMax)) * 10;
+
+        bumpOverallCard(state.overall, normalizedFrom, normalizedTo, 10, 650);
     }
 
     function finish(state, result) {

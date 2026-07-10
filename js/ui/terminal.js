@@ -17,10 +17,6 @@ TL.terminal = (function () {
         }
     }
 
-    // Appends plain text as its own text node instead of using
-    // `el.textContent += x`, which replaces ALL of el's children with a
-    // single new text node and would destroy any element (like the banner
-    // span) already inside the terminal.
     function appendText(str) {
         el.appendChild(document.createTextNode(str));
     }
