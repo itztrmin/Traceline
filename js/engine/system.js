@@ -125,7 +125,13 @@ TL.system = (function () {
                 'us': ['America'], 'gb': ['Europe'], 'ca': ['America'], 'au': ['Australia'],
                 'de': ['Europe'], 'fr': ['Europe'], 'in': ['Asia'], 'jp': ['Asia'],
                 'cn': ['Asia'], 'br': ['America'], 'ru': ['Europe','Asia'], 'kr': ['Asia'],
-                'mx': ['America'], 'es': ['Europe'], 'it': ['Europe'], 'nl': ['Europe']
+                'mx': ['America'], 'es': ['Europe'], 'it': ['Europe'], 'nl': ['Europe'],
+                'se': ['Europe'], 'no': ['Europe'], 'pl': ['Europe'], 'pt': ['Europe'],
+                'ie': ['Europe'], 'ch': ['Europe'], 'at': ['Europe'], 'be': ['Europe'],
+                'za': ['Africa'], 'eg': ['Africa'], 'ng': ['Africa'], 'ke': ['Africa'],
+                'sg': ['Asia'], 'my': ['Asia'], 'th': ['Asia'], 'ph': ['Asia'],
+                'id': ['Asia'], 'vn': ['Asia'], 'pk': ['Asia'], 'bd': ['Asia'],
+                'nz': ['Pacific'], 'ae': ['Asia'], 'sa': ['Asia'], 'tr': ['Europe']
             };
             var expected = tzRegionMap[region];
             if (!expected) return null;

@@ -18,7 +18,8 @@ TL.collect = async function () {
         TL.media.voices(),
         TL.isBrave(),
         TL.system.privateBrowsing(),
-        TL.privacy.geoPermission()
+        TL.privacy.geoPermission(),
+        TL.gpu.webgpu()
     ]);
 
     var ipData  = results[0];
@@ -62,6 +63,7 @@ TL.collect = async function () {
         isBrave:        isBrave,
         privateMode:    results[13],
         geoPermission:  results[14],
+        webgpu:         results[15],
         extensions:     extSignals,
         sys:            sys,
         priv:           priv

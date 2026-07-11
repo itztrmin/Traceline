@@ -4,9 +4,18 @@ TL.media = (function () {
 
     function refreshRate() {
         return new Promise(function (resolve) {
-            var samples = [], last = null, handle;
+            var samples = [], last = null, handle, timer, settled = false;
+
+            function finish(value) {
+                if (settled) return;
+                settled = true;
+                if (handle) cancelAnimationFrame(handle);
+                if (timer) clearTimeout(timer);
+                resolve(value);
+            }
 
             function tick(ts) {
+                if (settled) return;
                 if (last !== null) {
                     var d = ts - last;
                     if (d > 1 && d < 100) samples.push(d);
@@ -14,24 +23,22 @@ TL.media = (function () {
                 last = ts;
                 if (samples.length < 60) {
                     handle = requestAnimationFrame(tick);
-                } else {
-                    cancelAnimationFrame(handle);
-                    samples.sort(function (a, b) { return a - b; });
-                    var trimmed = samples.slice(10, 50);
-                    var avg = trimmed.reduce(function (a, b) { return a + b; }, 0) / trimmed.length;
-                    var hz  = Math.round(1000 / avg);
-                    var std = [24,30,48,60,75,90,120,144,165,240,360];
-                    var closest = std.reduce(function (p, c) { return Math.abs(c-hz) < Math.abs(p-hz) ? c : p; });
-                    resolve(closest + ' Hz');
+                    return;
                 }
+                samples.sort(function (a, b) { return a - b; });
+                var trimmed = samples.slice(10, 50);
+                var avg = trimmed.reduce(function (a, b) { return a + b; }, 0) / trimmed.length;
+                var hz  = Math.round(1000 / avg);
+                var std = [24,30,48,60,75,90,120,144,165,240,360];
+                var closest = std.reduce(function (p, c) { return Math.abs(c-hz) < Math.abs(p-hz) ? c : p; });
+                finish(closest + ' Hz');
             }
             handle = requestAnimationFrame(tick);
 
-            setTimeout(function () {
-                cancelAnimationFrame(handle);
-                if (samples.length < 5) { resolve('Could not determine'); return; }
+            timer = setTimeout(function () {
+                if (samples.length < 5) { finish('Could not determine'); return; }
                 var avg = samples.reduce(function (a, b) { return a + b; }, 0) / samples.length;
-                resolve(Math.round(1000 / avg) + ' Hz (partial sample)');
+                finish(Math.round(1000 / avg) + ' Hz (partial sample)');
             }, 3500);
         });
     }

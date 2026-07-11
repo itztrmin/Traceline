@@ -123,7 +123,28 @@ TL.gpu = (function () {
         } catch (_) { return 'Could not determine'; }
     }
 
-    return { renderer: renderer, fingerprint: fingerprint, accel: accel };
+    async function webgpu() {
+        try {
+            if (!navigator.gpu || !navigator.gpu.requestAdapter) return 'Not supported by this browser';
+            var adapter = await navigator.gpu.requestAdapter();
+            if (!adapter) return 'Supported but no adapter available';
+            if (adapter.info) {
+                var info = adapter.info;
+                var parts = [info.vendor, info.architecture, info.device].filter(Boolean);
+                if (parts.length) return parts.join(' / ');
+            }
+            if (typeof adapter.requestAdapterInfo === 'function') {
+                var legacyInfo = await adapter.requestAdapterInfo();
+                var legacyParts = [legacyInfo.vendor, legacyInfo.architecture, legacyInfo.device].filter(Boolean);
+                if (legacyParts.length) return legacyParts.join(' / ');
+            }
+            return 'Adapter present, vendor details not exposed';
+        } catch (_) {
+            return 'Blocked or unavailable';
+        }
+    }
+
+    return { renderer: renderer, fingerprint: fingerprint, accel: accel, webgpu: webgpu };
 })();
 
 window.TL = TL;

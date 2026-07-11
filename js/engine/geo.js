@@ -82,7 +82,8 @@ TL.geo = (function () {
     function detectVPN(data, sysTZ) {
         var isp = (data.org || '').toLowerCase();
         var suspicious = DC.some(function (k) { return isp.indexOf(k) !== -1; });
-        var tzMismatch = data.timezone && sysTZ && data.timezone !== sysTZ;
+        var hasIpTz = !!data.timezone && data.timezone !== 'Unknown';
+        var tzMismatch = hasIpTz && !!sysTZ && data.timezone !== sysTZ;
         if (suspicious && tzMismatch) return 'High risk datacenter ISP and timezone mismatch';
         if (suspicious)  return 'Likely VPN or datacenter IP detected';
         if (tzMismatch)  return 'Timezone mismatch system: ' + sysTZ + ', IP: ' + data.timezone;
@@ -107,7 +108,7 @@ TL.geo = (function () {
 
     function approxRadiusKm(hasCity, org) {
         var base;
-        if (isMobileCarrier(org)) base = hasCity ? 100 : 100;
+        if (isMobileCarrier(org)) base = hasCity ? 60 : 100;
         else base = hasCity ? 40 : 75;
         return Math.min(base, 100);
     }

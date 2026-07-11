@@ -35,6 +35,8 @@
     border-radius: var(--radius-sm);
     overflow: hidden;
     border: 1px solid var(--border-soft);
+    position: relative;
+    isolation: isolate;
 }
 
 .geo-map {

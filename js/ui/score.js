@@ -28,11 +28,10 @@ TL.score = (function () {
 
         var hasIpTz = d.network && !!d.network.ipTimezone && d.network.ipTimezone !== 'Unknown';
         var tzMatch = hasIpTz && d.network.ipTimezone === d.network.systemTimezone;
-        var tzMismatchGood = hasIpTz && vpnOn && !tzMatch;
 
         var network = categoryScore([
             check('VPN or proxy in use', vpnOn, 3),
-            check('IP and system timezone consistent', hasIpTz ? (tzMatch || tzMismatchGood) : false, 1),
+            check('VPN masks true region from timezone leak', vpnOn ? (hasIpTz ? !tzMatch : true) : !hasIpTz || tzMatch, 1),
             check('Connection is encrypted (HTTPS)', window.location.protocol === 'https:' || window.location.hostname === 'localhost', 1)
         ]);
 
@@ -56,12 +55,17 @@ TL.score = (function () {
         );
         var fontsBlocked = d.fonts && d.fonts.indexOf('Detection blocked') !== -1;
         var webglFpMasked = !d.webglFP || d.webglFP === 'Unavailable' || gpuMasked;
+        var webgpuMasked = !d.webgpu ||
+            d.webgpu.indexOf('Not supported') !== -1 ||
+            d.webgpu.indexOf('Blocked') !== -1 ||
+            d.webgpu.indexOf('no adapter') !== -1;
 
         var fingerprint = categoryScore([
             check('Canvas fingerprint blocked or noised', canvasOk, 2.5),
             check('Audio fingerprint blocked or noised', audioOk, 2),
             check('GPU renderer masked', gpuMasked, 2),
             check('WebGL fingerprint surface reduced', webglFpMasked, 1),
+            check('WebGPU adapter details hidden', webgpuMasked, 1),
             check('Media device enumeration blocked', mediaOk, 1.5),
             check('Font probing blocked', fontsBlocked, 2)
         ]);
@@ -143,7 +147,7 @@ TL.score = (function () {
 
     function maxPossible() {
         var networkMax = 3 + 1 + 1;
-        var fingerprintMax = 2.5 + 2 + 2 + 1 + 1.5 + 2;
+        var fingerprintMax = 2.5 + 2 + 2 + 1 + 1 + 1.5 + 2;
         var hardwareMax = 2 + 2 + 1.5 + 1.5 + 1 + 2;
 
         var priv = TL.privacy.get();

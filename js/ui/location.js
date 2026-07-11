@@ -84,10 +84,18 @@ TL.locationSection = (function () {
             : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
     }
 
+    var activeThemeHandler = null;
+
     function paintMap(net) {
         loadLeaflet().then(function (L) {
             var mapEl = document.getElementById('geo-map');
             if (!mapEl || !L) return;
+
+            var themeBtn = document.getElementById('theme-btn');
+            if (themeBtn && activeThemeHandler) {
+                themeBtn.removeEventListener('click', activeThemeHandler);
+                activeThemeHandler = null;
+            }
 
             var isLight = document.body.classList.contains('light-mode');
             var map = L.map('geo-map', {
@@ -101,17 +109,17 @@ TL.locationSection = (function () {
                 attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
             }).addTo(map);
 
-            var themeBtn = document.getElementById('theme-btn');
             if (themeBtn) {
-                var onThemeToggle = function () {
+                activeThemeHandler = function () {
                     if (!document.body.contains(mapEl)) {
-                        themeBtn.removeEventListener('click', onThemeToggle);
+                        themeBtn.removeEventListener('click', activeThemeHandler);
+                        activeThemeHandler = null;
                         return;
                     }
                     var nowLight = document.body.classList.contains('light-mode');
                     tiles.setUrl(tileUrlFor(nowLight));
                 };
-                themeBtn.addEventListener('click', onThemeToggle);
+                themeBtn.addEventListener('click', activeThemeHandler);
             }
 
             var radiusM = (net.radiusKm || 40) * 1000;
@@ -137,6 +145,14 @@ TL.locationSection = (function () {
             var mapEl = document.getElementById('geo-map');
             if (mapEl) mapEl.outerHTML = '<div class="geo-map geo-map-empty">Map failed to load, check your connection</div>';
         });
+    }
+
+    function destroyActiveThemeHandler() {
+        var themeBtn = document.getElementById('theme-btn');
+        if (themeBtn && activeThemeHandler) {
+            themeBtn.removeEventListener('click', activeThemeHandler);
+        }
+        activeThemeHandler = null;
     }
 
     function reveal(state, data) {
@@ -189,7 +205,7 @@ TL.locationSection = (function () {
         reveal(state, data);
     }
 
-    return { start: start, reveal: reveal, render: render };
+    return { start: start, reveal: reveal, render: render, destroyActiveThemeHandler: destroyActiveThemeHandler };
 })();
 
 window.TL = TL;

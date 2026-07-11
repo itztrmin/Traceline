@@ -1,15 +1,14 @@
 <div align="center">
 
-<!-- LOGO -->
 <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="72" height="72" rx="16" fill="#0d0d0d"/>
-  <!-- Trace path lines -->
+
   <polyline points="12,60 12,36 36,36 36,12 60,12" stroke="#00ff88" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Nodes -->
+
   <circle cx="12" cy="60" r="3.5" fill="#00ff88"/>
   <circle cx="36" cy="36" r="3.5" fill="#00ff88"/>
   <circle cx="60" cy="12" r="3.5" fill="#00ff88"/>
-  <!-- Scan ring on center node -->
+
   <circle cx="36" cy="36" r="8" stroke="#00ff88" stroke-width="1" fill="none" stroke-dasharray="3 3"/>
 </svg>
 
@@ -42,7 +41,6 @@ This project exists to make the invisible visible. Ad networks, data brokers, an
 <tr>
 <td width="40">
 
-<!-- Network icon -->
 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
   <circle cx="14" cy="14" r="10" stroke="#00ff88" stroke-width="1.8" fill="none"/>
   <ellipse cx="14" cy="14" rx="4.5" ry="10" stroke="#00ff88" stroke-width="1.2" fill="none"/>
@@ -57,7 +55,6 @@ This project exists to make the invisible visible. Ad networks, data brokers, an
 <tr>
 <td>
 
-<!-- Shield icon -->
 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M14 3 L24 7 L24 15 C24 20.5 14 25 14 25 C14 25 4 20.5 4 15 L4 7 Z" stroke="#00ff88" stroke-width="1.8" fill="none" stroke-linejoin="round"/>
   <polyline points="9,14 12.5,17.5 19,11" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -69,7 +66,6 @@ This project exists to make the invisible visible. Ad networks, data brokers, an
 <tr>
 <td>
 
-<!-- Canvas icon -->
 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="4" y="4" width="20" height="20" rx="3" stroke="#00ff88" stroke-width="1.8" fill="none"/>
   <path d="M8 20 Q11 10 14 15 Q17 20 20 8" stroke="#00ff88" stroke-width="1.5" fill="none" stroke-linecap="round"/>
@@ -81,7 +77,6 @@ This project exists to make the invisible visible. Ad networks, data brokers, an
 <tr>
 <td>
 
-<!-- Audio waves icon -->
 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
   <line x1="5" y1="14" x2="8" y2="14" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round"/>
   <path d="M8 9 Q10 9 10 14 Q10 19 12 19 Q14 19 14 9 Q14 19 16 19 Q18 19 18 9 Q18 19 20 19 Q20 14 23 14" stroke="#00ff88" stroke-width="1.5" fill="none" stroke-linecap="round"/>
@@ -93,7 +88,6 @@ This project exists to make the invisible visible. Ad networks, data brokers, an
 <tr>
 <td>
 
-<!-- GPU icon -->
 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="5" y="8" width="18" height="12" rx="2.5" stroke="#00ff88" stroke-width="1.8" fill="none"/>
   <line x1="9" y1="20" x2="9" y2="23" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round"/>
@@ -104,12 +98,11 @@ This project exists to make the invisible visible. Ad networks, data brokers, an
 </svg>
 
 </td>
-<td><strong>GPU & WebGL Fingerprint</strong> — Reads unmasked GPU vendor and renderer strings via <code>WEBGL_debug_renderer_info</code>, detects hardware acceleration support, and generates a WebGL scene rendering hash that varies per graphics driver.</td>
+<td><strong>GPU & WebGL Fingerprint</strong> — Reads unmasked GPU vendor and renderer strings via <code>WEBGL_debug_renderer_info</code>, detects hardware acceleration support, generates a WebGL scene rendering hash that varies per graphics driver, and queries the newer WebGPU adapter API for vendor and architecture details where supported.</td>
 </tr>
 <tr>
 <td>
 
-<!-- System chip icon -->
 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="8" y="8" width="12" height="12" rx="2" stroke="#00ff88" stroke-width="1.8" fill="none"/>
   <line x1="11" y1="8" x2="11" y2="5" stroke="#00ff88" stroke-width="1.5" stroke-linecap="round"/>
@@ -128,7 +121,6 @@ This project exists to make the invisible visible. Ad networks, data brokers, an
 <tr>
 <td>
 
-<!-- Eye / tracking icon -->
 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M3 14 C6 8 10 5 14 5 C18 5 22 8 25 14 C22 20 18 23 14 23 C10 23 6 20 3 14Z" stroke="#00ff88" stroke-width="1.8" fill="none"/>
   <circle cx="14" cy="14" r="4" stroke="#00ff88" stroke-width="1.5" fill="none"/>
@@ -141,7 +133,6 @@ This project exists to make the invisible visible. Ad networks, data brokers, an
 <tr>
 <td>
 
-<!-- Media/camera icon -->
 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="3" y="8" width="16" height="12" rx="2.5" stroke="#00ff88" stroke-width="1.8" fill="none"/>
   <polyline points="19,12 25,9 25,19 19,16" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
@@ -153,7 +144,6 @@ This project exists to make the invisible visible. Ad networks, data brokers, an
 <tr>
 <td>
 
-<!-- Font/text icon -->
 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
   <line x1="7" y1="6" x2="21" y2="6" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round"/>
   <line x1="14" y1="6" x2="14" y2="22" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round"/>
@@ -166,7 +156,6 @@ This project exists to make the invisible visible. Ad networks, data brokers, an
 <tr>
 <td>
 
-<!-- Battery icon -->
 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="3" y="9" width="20" height="10" rx="2.5" stroke="#00ff88" stroke-width="1.8" fill="none"/>
   <rect x="23" y="12" width="3" height="4" rx="1" fill="#00ff88"/>
@@ -179,7 +168,6 @@ This project exists to make the invisible visible. Ad networks, data brokers, an
 <tr>
 <td>
 
-<!-- Tor / onion icon -->
 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
   <circle cx="14" cy="14" r="10" stroke="#00ff88" stroke-width="1.8" fill="none"/>
   <circle cx="14" cy="14" r="6.5" stroke="#00ff88" stroke-width="1.2" fill="none"/>
@@ -193,7 +181,6 @@ This project exists to make the invisible visible. Ad networks, data brokers, an
 <tr>
 <td>
 
-<!-- Clock/performance icon -->
 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
   <circle cx="14" cy="14" r="10" stroke="#00ff88" stroke-width="1.8" fill="none"/>
   <line x1="14" y1="8" x2="14" y2="14" stroke="#00ff88" stroke-width="2" stroke-linecap="round"/>
@@ -214,7 +201,6 @@ This project exists to make the invisible visible. Ad networks, data brokers, an
 <tr>
 <td>
 
-<!-- Lock icon -->
 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect x="4" y="9" width="12" height="9" rx="2" stroke="#00ff88" stroke-width="1.6" fill="none"/>
   <path d="M7 9 L7 6 C7 4.3 13 4.3 13 6 L13 9" stroke="#00ff88" stroke-width="1.6" fill="none" stroke-linecap="round"/>
@@ -306,22 +292,36 @@ theme.js  →  tl.js  →  engine/*  →  ui/terminal.js  →  ui/score.js  → 
 
 ## How the Scoring Works
 
-The privacy score runs from **0 to 10**. Each protection earns weighted points:
+The privacy score runs from **0 to 10**, built from four weighted categories that are each scored out of their own point pool and then combined.
 
-| Protection | Weight | Detection Method |
-|---|---|---|
-| Ad / Tracker Blocker | +1.5 | Hidden DOM trap element + real ad network fetch |
-| Canvas FP Protection | +1.5 | Noise/block keywords in canvas hash result |
-| VPN / Privacy Network | +1.0 | ISP vs. datacenter ASN + timezone mismatch |
-| Audio FP Protection | +1.0 | Protected/zeroed/shifted keywords in audio hash |
-| WebGL / GPU Masking | +1.0 | `masked: true` flag or locked vendor string |
-| WebRTC Leak Blocked | +0.5 | RTCPeerConnection availability check |
-| Do Not Track | +0.5 | `navigator.doNotTrack === '1'` |
-| Global Privacy Control | +0.5 | `navigator.globalPrivacyControl === true` |
-| Cookie Rejection | +0.5 | `navigator.cookieEnabled === false` |
-| Local Storage Blocked | +0.5 | Write/read test throws |
+| Category | Check | Weight | Detection Method |
+|---|---|---|---|
+| Network | VPN or proxy in use | 3.0 | ISP/org string matched against known datacenter and VPN providers |
+| Network | VPN masks true region from timezone leak | 1.0 | IP-derived timezone vs. system `Intl` timezone |
+| Network | Connection is encrypted (HTTPS) | 1.0 | `location.protocol === 'https:'` |
+| Fingerprint | Canvas fingerprint blocked or noised | 2.5 | Repeated canvas renders diffed for injected noise |
+| Fingerprint | Audio fingerprint blocked or noised | 2.0 | Repeated `OfflineAudioContext` renders diffed for injected noise |
+| Fingerprint | GPU renderer masked | 2.0 | `WEBGL_debug_renderer_info` unavailable or locked vendor string |
+| Fingerprint | WebGL fingerprint surface reduced | 1.0 | WebGL scene hash unavailable or GPU masked |
+| Fingerprint | WebGPU adapter details hidden | 1.0 | `navigator.gpu.requestAdapter()` unavailable or withholds vendor info |
+| Fingerprint | Media device enumeration blocked | 1.5 | `enumerateDevices()` blocked or restricted |
+| Fingerprint | Font probing blocked | 2.0 | Canvas-based font metric probing fails |
+| Hardware | CPU core count hidden | 2.0 | `navigator.hardwareConcurrency` unavailable on Chromium |
+| Hardware | Device RAM hidden | 2.0 | `navigator.deviceMemory` unavailable on Chromium |
+| Hardware | Client Hints not exposed | 1.5 | `navigator.userAgentData` unavailable on Chromium |
+| Hardware | Battery API shielded | 1.5 | Battery API blocked, rejected, or returning spoofed values |
+| Hardware | High-resolution timer clamped | 1.0 | `performance.now()` resolution rounded |
+| Hardware | No Tor or automation signals raised | 2.0 | Screen/letterboxing heuristics |
+| Privacy | Ad and tracker requests blocked | 2.5 | Hidden DOM trap element + real ad network fetch |
+| Privacy | Do Not Track sent | 0.5 | `navigator.doNotTrack === '1'` (only scored if the header is supported) |
+| Privacy | Global Privacy Control active | 1.5 | `navigator.globalPrivacyControl === true` |
+| Privacy | Cookies rejected | 1.0 | `navigator.cookieEnabled === false` |
+| Privacy | Local storage blocked | 1.0 | Write/read test throws |
+| Privacy | WebRTC leak shield active | 1.5 | `RTCPeerConnection` unavailable |
+| Privacy | Geolocation permission blocked | 1.0 | Permissions API reports `denied` |
+| Privacy | No fingerprintable extensions detected | 1.0 | DOM signatures for Dark Reader, Grammarly, LanguageTool, etc. |
 
-Scores are classified as **Critical** (0–3), **Exposed** (3–5), **Partial** (5–7), or **Protected** (7–10).
+Scores are classified as **Critical** (0–3), **Exposed** (3–5), **Partial** (5–7), or **Protected** (7–10). Letter grades (F through A+) are derived from the same percentage and shown per category and overall.
 
 ---
 
@@ -388,7 +388,6 @@ Copyright © 2026 Trmin°ᶻ𝗓𐰁.ᐟ
 
 <div align="center">
 
-<!-- Footer trace icon -->
 <svg width="40" height="12" viewBox="0 0 40 12" fill="none" xmlns="http://www.w3.org/2000/svg">
   <polyline points="0,10 10,10 10,2 30,2 30,10 40,10" stroke="#555" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
   <circle cx="10" cy="10" r="2" fill="#555"/>

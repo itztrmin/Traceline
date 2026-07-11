@@ -26,14 +26,34 @@ TL.audio = (function () {
         return s;
     }
 
+    function withTimeout(promise, ms) {
+        return new Promise(function (resolve) {
+            var done = false;
+            var timer = setTimeout(function () {
+                if (done) return;
+                done = true;
+                resolve(null);
+            }, ms);
+            promise.then(function (v) {
+                if (done) return;
+                done = true;
+                clearTimeout(timer);
+                resolve(v);
+            }, function () {
+                if (done) return;
+                done = true;
+                clearTimeout(timer);
+                resolve(null);
+            });
+        });
+    }
+
     async function get() {
         try {
             var Ctx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
             if (!Ctx) return 'Not available Web Audio API unsupported';
 
-            var t = new Promise(function (r) { setTimeout(function () { r(null); }, 4000); });
-
-            var buf1 = await Promise.race([buildGraph(Ctx).startRendering(), t]);
+            var buf1 = await withTimeout(buildGraph(Ctx).startRendering(), 4000);
             if (!buf1) return 'Blocked audio rendering timed out';
 
             var ch1  = buf1.getChannelData(0);
@@ -48,7 +68,7 @@ TL.audio = (function () {
                 return 'Protected audio output zeroed by browser';
             }
 
-            var buf2 = await Promise.race([buildGraph(Ctx).startRendering(), t]);
+            var buf2 = await withTimeout(buildGraph(Ctx).startRendering(), 4000);
             if (buf2) {
                 var ref = sumRegion(buf2.getChannelData(0), 4000, 5000);
                 var relDiff = sums[1] === 0 ? 0 : Math.abs(ref - sums[1]) / sums[1];
