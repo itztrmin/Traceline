@@ -31,54 +31,51 @@ TL.locationSection = (function () {
         return typeof v === 'number' ? v.toFixed(4) + '\u00b0' : 'Unknown';
     }
 
-    function buildShell(net) {
+    var DESC =
+        'This data is derived entirely from your public IP address\u2019 routing and registration records, ' +
+        'not GPS, so it only ever narrows you down to a rough operational radius, never an exact address. ' +
+        'Any site you visit, even a malicious one, can pull this same rough area and your service provider ' +
+        'the instant you load a page, with no permission prompt and nothing you can block from JavaScript alone.';
+
+    function skeletonStat(label) {
+        return '<div class="geo-stat is-loading">' +
+            '<span class="geo-stat-label">' + label + '</span>' +
+            '<span class="geo-stat-value geo-skel"></span>' +
+        '</div>';
+    }
+
+    function start(section) {
+        section.innerHTML = '';
+        section.style.display = 'block';
+
         var wrap = document.createElement('div');
         wrap.className = 'geo-card';
-
-        var hasCoords = typeof net.lat === 'number' && typeof net.lon === 'number';
-        var areaName = [net.city, net.region, net.country].filter(Boolean).join(', ') || 'Unknown area';
-        var radius = net.radiusKm || 50;
-
-        var desc =
-            'This data is derived entirely from your public IP address\u2019 routing and registration records, ' +
-            'not GPS, so it only ever narrows you down to a rough operational radius, never an exact address. ' +
-            'Any site you visit, even a malicious one, can pull this same rough area and your service provider ' +
-            'the instant you load a page, with no permission prompt and nothing you can block from JavaScript alone.';
-
-        var carrierNote = net.isMobileCarrier
-            ? '<p class="geo-note">' +
-                'Your ISP, ' + (net.org || 'this provider') + ', looks like a mobile or cellular carrier. ' +
-                'Carriers route traffic through a small number of regional hubs, so the marker below often lands ' +
-                'on that hub city rather than the town you are actually in, sometimes well outside the shaded circle. ' +
-                'The radius has been widened to reflect that extra uncertainty.' +
-              '</p>'
-            : '';
-
         wrap.innerHTML =
             '<div class="score-heading">' +
-                '<div class="score-heading-eyebrow">Result</div>' +
-                '<h2 class="score-heading-title">Your location on Earth</h2>' +
+                '<div class="score-heading-eyebrow">Live</div>' +
+                '<h2 class="score-heading-title">Resolving your location on Earth</h2>' +
             '</div>' +
-            '<p class="score-desc">' + desc + '</p>' +
-            carrierNote +
+            '<p class="score-desc">' + DESC + '</p>' +
             '<div class="geo-body">' +
                 '<div class="geo-map-wrap">' +
-                    (hasCoords
-                        ? '<div id="geo-map" class="geo-map"></div>'
-                        : '<div class="geo-map geo-map-empty">Map unavailable, your IP location could not be resolved</div>') +
+                    '<div class="geo-map geo-map-loading">' +
+                        '<div class="geo-map-pulse"></div>' +
+                        '<span class="geo-map-loading-text">Contacting IP geolocation resolvers...</span>' +
+                    '</div>' +
                 '</div>' +
                 '<div class="geo-stats">' +
-                    '<div class="geo-stat"><span class="geo-stat-label">Area name</span><span class="geo-stat-value">' + areaName + '</span></div>' +
+                    skeletonStat('Area name') +
                     '<div class="geo-stat-pair">' +
-                        '<div class="geo-stat"><span class="geo-stat-label">Latitude</span><span class="geo-stat-value">' + fmtCoord(net.lat) + '</span></div>' +
-                        '<div class="geo-stat"><span class="geo-stat-label">Longitude</span><span class="geo-stat-value">' + fmtCoord(net.lon) + '</span></div>' +
+                        skeletonStat('Latitude') +
+                        skeletonStat('Longitude') +
                     '</div>' +
-                    '<div class="geo-stat"><span class="geo-stat-label">Operational radius</span><span class="geo-stat-value">~' + radius + ' km' + (net.isMobileCarrier ? ' (mobile network, widened)' : '') + '</span></div>' +
-                    '<div class="geo-stat"><span class="geo-stat-label">Service provider</span><span class="geo-stat-value">' + (net.org || 'Unknown') + '</span></div>' +
+                    skeletonStat('Operational radius') +
+                    skeletonStat('Service provider') +
                 '</div>' +
             '</div>';
 
-        return { el: wrap, hasCoords: hasCoords };
+        section.appendChild(wrap);
+        return { section: section, card: wrap };
     }
 
     function tileUrlFor(isLight) {
@@ -117,12 +114,12 @@ TL.locationSection = (function () {
                 themeBtn.addEventListener('click', onThemeToggle);
             }
 
-            var radiusM = (net.radiusKm || 50) * 1000;
+            var radiusM = (net.radiusKm || 40) * 1000;
 
             L.circle([net.lat, net.lon], {
                 radius: radiusM,
-                color: '#9aa5ac',
-                fillColor: '#9aa5ac',
+                color: '#3ddc84',
+                fillColor: '#3ddc84',
                 fillOpacity: 0.14,
                 weight: 1.5
             }).addTo(map);
@@ -142,18 +139,57 @@ TL.locationSection = (function () {
         });
     }
 
-    function render(section, data) {
+    function reveal(state, data) {
         var net = data.network || {};
-        section.innerHTML = '';
-        section.style.display = 'block';
+        var card = state.card;
 
-        var shell = buildShell(net);
-        section.appendChild(shell.el);
+        var heading = card.querySelector('.score-heading-eyebrow');
+        var title   = card.querySelector('.score-heading-title');
+        if (heading) heading.textContent = 'Result';
+        if (title)   title.textContent   = 'Your location on Earth';
 
-        if (shell.hasCoords) paintMap(net);
+        var hasCoords = typeof net.lat === 'number' && typeof net.lon === 'number';
+        var areaName = [net.city, net.region, net.country].filter(Boolean).join(', ') || 'Unknown area';
+        var radius = net.radiusKm || 40;
+
+        var carrierNote = net.isMobileCarrier
+            ? '<p class="geo-note">' +
+                'Your ISP, ' + (net.org || 'this provider') + ', looks like a mobile or cellular carrier. ' +
+                'Carriers route traffic through a small number of regional hubs, so the marker below often lands ' +
+                'on that hub city rather than the town you are actually in, sometimes well outside the shaded circle. ' +
+                'The radius has been widened to reflect that extra uncertainty.' +
+              '</p>'
+            : '';
+
+        var existingNote = card.querySelector('.geo-note');
+        if (existingNote) existingNote.remove();
+        var descEl = card.querySelector('.score-desc');
+        if (descEl && carrierNote) descEl.insertAdjacentHTML('afterend', carrierNote);
+
+        var mapWrap = card.querySelector('.geo-map-wrap');
+        mapWrap.innerHTML = hasCoords
+            ? '<div id="geo-map" class="geo-map"></div>'
+            : '<div class="geo-map geo-map-empty">Map unavailable, your IP location could not be resolved</div>';
+
+        var statsWrap = card.querySelector('.geo-stats');
+        statsWrap.innerHTML =
+            '<div class="geo-stat"><span class="geo-stat-label">Area name</span><span class="geo-stat-value">' + areaName + '</span></div>' +
+            '<div class="geo-stat-pair">' +
+                '<div class="geo-stat"><span class="geo-stat-label">Latitude</span><span class="geo-stat-value">' + fmtCoord(net.lat) + '</span></div>' +
+                '<div class="geo-stat"><span class="geo-stat-label">Longitude</span><span class="geo-stat-value">' + fmtCoord(net.lon) + '</span></div>' +
+            '</div>' +
+            '<div class="geo-stat"><span class="geo-stat-label">Operational radius</span><span class="geo-stat-value">~' + radius + ' km' + (net.isMobileCarrier ? ' (mobile network, widened)' : '') + '</span></div>' +
+            '<div class="geo-stat"><span class="geo-stat-label">Service provider</span><span class="geo-stat-value">' + (net.org || 'Unknown') + '</span></div>';
+
+        if (hasCoords) paintMap(net);
     }
 
-    return { render: render };
+    function render(section, data) {
+        var state = start(section);
+        reveal(state, data);
+    }
+
+    return { start: start, reveal: reveal, render: render };
 })();
 
 window.TL = TL;

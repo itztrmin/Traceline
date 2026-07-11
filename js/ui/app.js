@@ -84,6 +84,7 @@ var TL = window.TL || {};
 
         var dataPromise = TL.collect();
         var scoreState  = TL.scorecards.start(scoreEl, TL.score.maxPossible());
+        var locState    = TL.locationSection.start(locEl);
 
         if (!await term.header()) return;
         if (!await term.blank(160)) return;
@@ -114,6 +115,7 @@ var TL = window.TL || {};
         if (!await term.field('IP TZ',       net.ipTimezone || 'Unknown',  100)) return;
         if (!await term.field('VPN / proxy', net.vpn,                      180)) return;
         TL.scorecards.feed(scoreState, catByKey.network);
+        TL.locationSection.reveal(locState, data);
         if (!await term.blank(260)) return;
 
         if (!await term.typeLine('[FP] Starting hardware fingerprint extraction.', 90)) return;
@@ -242,7 +244,6 @@ var TL = window.TL || {};
         if (!term.wasAborted()) {
             showCopyBtn();
             TL.scorecards.finish(scoreState, result);
-            TL.locationSection.render(locEl, data);
             window.scrollBy({ top: 150, behavior: 'smooth' });
         }
     });

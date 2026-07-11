@@ -106,8 +106,10 @@ TL.geo = (function () {
     }
 
     function approxRadiusKm(hasCity, org) {
-        if (isMobileCarrier(org)) return hasCity ? 100 : 150;
-        return hasCity ? 50 : 120;
+        var base;
+        if (isMobileCarrier(org)) base = hasCity ? 100 : 100;
+        else base = hasCity ? 40 : 75;
+        return Math.min(base, 100);
     }
 
     return { lookup: lookup, detectVPN: detectVPN, approxRadiusKm: approxRadiusKm, isMobileCarrier: isMobileCarrier };
