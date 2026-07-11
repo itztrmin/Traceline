@@ -45,7 +45,8 @@ TL.collect = async function () {
             ipTimezone:     ipData.timezone,
             lat:            typeof ipData.lat === 'number' ? ipData.lat : null,
             lon:            typeof ipData.lon === 'number' ? ipData.lon : null,
-            radiusKm:       TL.geo.approxRadiusKm(!!(ipData.city && ipData.city !== 'Unknown'))
+            radiusKm:       TL.geo.approxRadiusKm(!!(ipData.city && ipData.city !== 'Unknown'), ipData.org),
+            isMobileCarrier: TL.geo.isMobileCarrier(ipData.org)
         },
         canvas:         results[1],
         audio:          results[2],

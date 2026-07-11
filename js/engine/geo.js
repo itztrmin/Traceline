@@ -89,11 +89,28 @@ TL.geo = (function () {
         return 'Not detected';
     }
 
-    function approxRadiusKm(hasCity) {
+    var MOBILE_CARRIERS = [
+        'grameenphone','robi','banglalink','airtel','jio','vodafone','vi india',
+        'idea cellular','airtel bharti','t-mobile','verizon wireless','at&t mobility',
+        'sprint','mtn','vodacom','safaricom','telenor','orange mobile','o2',
+        'ee limited','three uk','du telecom','etisalat','stc mobile','ptcl mobile',
+        'mobilink','zong','ufone','telkomsel','xl axiata','indosat','smart communications',
+        'globe telecom','china mobile','china unicom','china telecom','claro',
+        'movistar','telcel','tim mobile','wind tre','vodafone idea'
+    ];
+
+    function isMobileCarrier(org) {
+        var o = (org || '').toLowerCase();
+        return MOBILE_CARRIERS.some(function (k) { return o.indexOf(k) !== -1; }) ||
+            /\bmobile\b|\bcellular\b|\bwireless\b|\btelecom\b/.test(o);
+    }
+
+    function approxRadiusKm(hasCity, org) {
+        if (isMobileCarrier(org)) return hasCity ? 100 : 150;
         return hasCity ? 50 : 120;
     }
 
-    return { lookup: lookup, detectVPN: detectVPN, approxRadiusKm: approxRadiusKm };
+    return { lookup: lookup, detectVPN: detectVPN, approxRadiusKm: approxRadiusKm, isMobileCarrier: isMobileCarrier };
 })();
 
 window.TL = TL;

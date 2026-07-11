@@ -39,17 +39,28 @@ TL.locationSection = (function () {
         var areaName = [net.city, net.region, net.country].filter(Boolean).join(', ') || 'Unknown area';
         var radius = net.radiusKm || 50;
 
+        var desc =
+            'This data is derived entirely from your public IP address\u2019 routing and registration records, ' +
+            'not GPS, so it only ever narrows you down to a rough operational radius, never an exact address. ' +
+            'Any site you visit, even a malicious one, can pull this same rough area and your service provider ' +
+            'the instant you load a page, with no permission prompt and nothing you can block from JavaScript alone.';
+
+        var carrierNote = net.isMobileCarrier
+            ? '<p class="geo-note">' +
+                'Your ISP, ' + (net.org || 'this provider') + ', looks like a mobile or cellular carrier. ' +
+                'Carriers route traffic through a small number of regional hubs, so the marker below often lands ' +
+                'on that hub city rather than the town you are actually in, sometimes well outside the shaded circle. ' +
+                'The radius has been widened to reflect that extra uncertainty.' +
+              '</p>'
+            : '';
+
         wrap.innerHTML =
             '<div class="score-heading">' +
                 '<div class="score-heading-eyebrow">Result</div>' +
                 '<h2 class="score-heading-title">Your location on Earth</h2>' +
             '</div>' +
-            '<p class="score-desc">' +
-                'This comes from your IP address, not GPS, so for your safety we do not show your exact position. ' +
-                'What you see below is only accurate to roughly a ' + radius + ' km radius around the marker, ' +
-                'meaning your real address could be anywhere inside that shaded circle. Any site you visit can see ' +
-                'this same rough area without asking permission.' +
-            '</p>' +
+            '<p class="score-desc">' + desc + '</p>' +
+            carrierNote +
             '<div class="geo-body">' +
                 '<div class="geo-map-wrap">' +
                     (hasCoords
@@ -58,10 +69,12 @@ TL.locationSection = (function () {
                 '</div>' +
                 '<div class="geo-stats">' +
                     '<div class="geo-stat"><span class="geo-stat-label">Area name</span><span class="geo-stat-value">' + areaName + '</span></div>' +
-                    '<div class="geo-stat"><span class="geo-stat-label">Approx. latitude</span><span class="geo-stat-value">' + fmtCoord(net.lat) + '</span></div>' +
-                    '<div class="geo-stat"><span class="geo-stat-label">Approx. longitude</span><span class="geo-stat-value">' + fmtCoord(net.lon) + '</span></div>' +
-                    '<div class="geo-stat"><span class="geo-stat-label">Uncertainty radius</span><span class="geo-stat-value">~' + radius + ' km</span></div>' +
-                    '<div class="geo-stat"><span class="geo-stat-label">ISP / network</span><span class="geo-stat-value">' + (net.org || 'Unknown') + '</span></div>' +
+                    '<div class="geo-stat-pair">' +
+                        '<div class="geo-stat"><span class="geo-stat-label">Latitude</span><span class="geo-stat-value">' + fmtCoord(net.lat) + '</span></div>' +
+                        '<div class="geo-stat"><span class="geo-stat-label">Longitude</span><span class="geo-stat-value">' + fmtCoord(net.lon) + '</span></div>' +
+                    '</div>' +
+                    '<div class="geo-stat"><span class="geo-stat-label">Operational radius</span><span class="geo-stat-value">~' + radius + ' km' + (net.isMobileCarrier ? ' (mobile network, widened)' : '') + '</span></div>' +
+                    '<div class="geo-stat"><span class="geo-stat-label">Service provider</span><span class="geo-stat-value">' + (net.org || 'Unknown') + '</span></div>' +
                 '</div>' +
             '</div>';
 
@@ -108,9 +121,9 @@ TL.locationSection = (function () {
 
             L.circle([net.lat, net.lon], {
                 radius: radiusM,
-                color: '#3ddc84',
-                fillColor: '#3ddc84',
-                fillOpacity: 0.12,
+                color: '#9aa5ac',
+                fillColor: '#9aa5ac',
+                fillOpacity: 0.14,
                 weight: 1.5
             }).addTo(map);
 
@@ -120,7 +133,7 @@ TL.locationSection = (function () {
                 fillColor: '#e85b47',
                 fillOpacity: 0.9,
                 weight: 2
-            }).addTo(map).bindPopup('Approximate area, real location is fuzzed for your safety');
+            }).addTo(map).bindPopup('Approximate area, not your real address');
 
             setTimeout(function () { map.invalidateSize(); }, 60);
         }).catch(function () {
