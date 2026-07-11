@@ -36,10 +36,16 @@ TL.collect = async function () {
         network: {
             ip:             ipData.ip,
             loc:            loc,
+            city:           (ipData.city && ipData.city !== 'Unknown' && ipData.city !== '-') ? ipData.city : null,
+            region:         ipData.region || null,
+            country:        (ipData.country && ipData.country !== 'Unknown') ? ipData.country : null,
             org:            ipData.org || 'Unknown',
             vpn:            vpn,
             systemTimezone: sysTZ,
-            ipTimezone:     ipData.timezone
+            ipTimezone:     ipData.timezone,
+            lat:            typeof ipData.lat === 'number' ? ipData.lat : null,
+            lon:            typeof ipData.lon === 'number' ? ipData.lon : null,
+            radiusKm:       TL.geo.approxRadiusKm(!!(ipData.city && ipData.city !== 'Unknown'))
         },
         canvas:         results[1],
         audio:          results[2],

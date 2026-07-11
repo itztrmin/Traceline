@@ -2,19 +2,33 @@ var TL = window.TL || {};
 
 TL.geo = (function () {
 
-    var empty = { ip: 'Unknown', city: 'Unknown', country: 'Unknown', org: 'Unknown', timezone: '' };
+    var empty = { ip: 'Unknown', city: 'Unknown', region: '', country: 'Unknown', org: 'Unknown', timezone: '', lat: null, lon: null };
 
     var resolvers = [
         async function () {
             var r = await TL.fetch('https://ipapi.co/json/', 6000);
             var j = await r.json();
             if (j.error) throw new Error('rate limited');
-            return { ip: j.ip, city: j.city, country: j.country_name, org: j.org, timezone: j.timezone };
+            return {
+                ip: j.ip, city: j.city, region: j.region, country: j.country_name,
+                org: j.org, timezone: j.timezone,
+                lat: typeof j.latitude === 'number' ? j.latitude : null,
+                lon: typeof j.longitude === 'number' ? j.longitude : null
+            };
         },
         async function () {
             var r = await TL.fetch('https://ipinfo.io/json', 6000);
             var j = await r.json();
-            return { ip: j.ip, city: j.city, country: j.country, org: j.org, timezone: j.timezone };
+            var lat = null, lon = null;
+            if (j.loc && j.loc.indexOf(',') !== -1) {
+                var parts = j.loc.split(',');
+                lat = parseFloat(parts[0]); lon = parseFloat(parts[1]);
+            }
+            return {
+                ip: j.ip, city: j.city, region: j.region, country: j.country,
+                org: j.org, timezone: j.timezone,
+                lat: isNaN(lat) ? null : lat, lon: isNaN(lon) ? null : lon
+            };
         },
         async function () {
             var r = await TL.fetch('https://ipwho.is/', 5000);
@@ -23,15 +37,23 @@ TL.geo = (function () {
             return {
                 ip:       j.ip,
                 city:     j.city,
+                region:   j.region,
                 country:  j.country,
                 org:      (j.connection && j.connection.isp) || 'Unknown',
-                timezone: (j.timezone  && j.timezone.id)    || ''
+                timezone: (j.timezone  && j.timezone.id)    || '',
+                lat:      typeof j.latitude === 'number' ? j.latitude : null,
+                lon:      typeof j.longitude === 'number' ? j.longitude : null
             };
         },
         async function () {
             var r = await TL.fetch('https://api.seeip.org/geoip', 5000);
             var j = await r.json();
-            return { ip: j.ip, city: j.city, country: j.country, org: j.organization || 'Unknown', timezone: j.timezone || '' };
+            return {
+                ip: j.ip, city: j.city, region: j.region_name || '', country: j.country,
+                org: j.organization || 'Unknown', timezone: j.timezone || '',
+                lat: typeof j.latitude === 'number' ? j.latitude : null,
+                lon: typeof j.longitude === 'number' ? j.longitude : null
+            };
         },
         async function () {
             var r = await TL.fetch('https://api.ipify.org?format=json', 4000);
@@ -67,7 +89,11 @@ TL.geo = (function () {
         return 'Not detected';
     }
 
-    return { lookup: lookup, detectVPN: detectVPN };
+    function approxRadiusKm(hasCity) {
+        return hasCity ? 50 : 120;
+    }
+
+    return { lookup: lookup, detectVPN: detectVPN, approxRadiusKm: approxRadiusKm };
 })();
 
 window.TL = TL;
