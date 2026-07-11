@@ -3,8 +3,8 @@ var TL = window.TL || {};
 TL.media = (function () {
 
     function refreshRate() {
-        var target = 24;
-        var maxWait = 1200;
+        var target = 16;
+        var maxWait = 500;
         return new Promise(function (resolve) {
             var samples = [], last = null, handle, timer, settled = false;
 
@@ -119,7 +119,7 @@ TL.media = (function () {
                 var v = window.speechSynthesis.getVoices();
                 if (v && v.length) { read(); return; }
                 window.speechSynthesis.onvoiceschanged = read;
-                timer = setTimeout(function () { finish(null); }, 1500);
+                timer = setTimeout(function () { finish(null); }, 600);
             } catch (_) { resolve(null); }
         });
     }

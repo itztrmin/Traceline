@@ -6,7 +6,7 @@ TL.geo = (function () {
 
     var resolvers = [
         async function () {
-            var r = await TL.fetch('https://ipapi.co/json/', 6000);
+            var r = await TL.fetch('https://ipapi.co/json/', 4000);
             var j = await r.json();
             if (j.error) throw new Error('rate limited');
             return {
@@ -17,7 +17,7 @@ TL.geo = (function () {
             };
         },
         async function () {
-            var r = await TL.fetch('https://ipinfo.io/json', 6000);
+            var r = await TL.fetch('https://ipinfo.io/json', 4000);
             var j = await r.json();
             var lat = null, lon = null;
             if (j.loc && j.loc.indexOf(',') !== -1) {
@@ -66,37 +66,25 @@ TL.geo = (function () {
         return new Promise(function (resolve) {
             var pending = resolvers.length;
             var settled = false;
-            var fallback = null;
+            var errors  = [];
 
-            function succeed(val, isFallback) {
-                if (isFallback) {
-                    if (!fallback) fallback = val;
-                    pending--;
-                    if (pending === 0 && !settled) {
-                        settled = true;
-                        resolve(fallback);
-                    }
-                    return;
-                }
+            function succeed(val) {
                 if (settled) return;
                 settled = true;
                 resolve(val);
             }
 
-            function fail() {
+            function fail(err) {
+                errors.push(err);
                 pending--;
                 if (pending === 0 && !settled) {
                     settled = true;
-                    resolve(fallback || Object.assign({}, empty, { ip: 'All resolvers blocked' }));
+                    resolve(Object.assign({}, empty, { ip: 'All resolvers blocked' }));
                 }
             }
 
-            resolvers.forEach(function (resolver, i) {
-                var isFallback = i === resolvers.length - 1;
-                setTimeout(function () {
-                    if (settled) return;
-                    resolver().then(function (val) { succeed(val, isFallback); }, fail);
-                }, i * 250);
+            resolvers.forEach(function (resolver) {
+                resolver().then(succeed, fail);
             });
         });
     }

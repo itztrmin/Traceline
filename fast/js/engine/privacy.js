@@ -55,15 +55,15 @@ TL.privacy = (function () {
                     img.onerror = null;
                     resolve(blocked);
                 };
-                var timer = setTimeout(function () { settle(true); }, 1200);
+                var timer = setTimeout(function () { settle(true); }, 900);
                 img.onload  = function () { settle(false); };
                 img.onerror = function () { settle(true); };
                 img.src = url;
             });
         };
 
-        var results = await Promise.all(baits.map(check));
-        return results.some(Boolean)
+        var outcomes = await Promise.all(baits.map(check));
+        return outcomes.some(Boolean)
             ? 'Yes, an ad network request was blocked'
             : 'No, ad requests went through unblocked';
     }

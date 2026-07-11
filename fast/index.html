@@ -4,35 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="See exactly what a website can learn about your browser in one click. Real fingerprinting techniques, a live privacy score, and no data leaves your device.">
-
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://traceline.pages.dev/">
-    <meta property="og:site_name" content="TraceLine">
     <meta property="og:title" content="TraceLine, browser fingerprint audit">
     <meta property="og:description" content="See exactly what a website can learn about your browser in one click. Real fingerprinting techniques, a live privacy score, and no data leaves your device.">
-    <meta property="og:image" content="https://traceline.pages.dev/assets/icons/og-image.png">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="TraceLine, browser fingerprint audit">
-    <meta property="og:locale" content="en_US">
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="TraceLine, browser fingerprint audit">
-    <meta name="twitter:description" content="See exactly what a website can learn about your browser in one click. Real fingerprinting techniques, a live privacy score, and no data leaves your device.">
-    <meta name="twitter:image" content="https://traceline.pages.dev/assets/icons/og-image.png">
-    <meta name="twitter:image:alt" content="TraceLine, browser fingerprint audit">
-
+    <meta property="og:image" content="https://traceline.pages.dev/fast/assets/icons/favicon-512.png">
+    <meta property="og:type" content="website">
     <meta name="theme-color" content="#0a0d10">
-    <link rel="canonical" href="https://traceline.pages.dev/">
     <title>TraceLine, browser fingerprint audit</title>
 
-    <link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
-    <link rel="icon" type="image/png" sizes="48x48" href="assets/icons/favicon-48.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/favicon-180.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/favicon-192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="https://traceline.pages.dev/assets/icons/favicon-512.png">
-    <link rel="shortcut icon" href="https://traceline.pages.dev/assets/icons/favicon-512.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="https://traceline.pages.dev/fast/assets/icons/favicon-512.png">
+    <link rel="apple-touch-icon" href="https://traceline.pages.dev/fast/assets/icons/favicon-512.png">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,6 +20,7 @@
 
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/terminal.css">
     <link rel="stylesheet" href="css/scorecards.css">
     <link rel="stylesheet" href="css/location.css">
 </head>
@@ -49,7 +30,7 @@
 
 <nav>
     <div class="brand">
-        <img src="assets/icons/favicon-64.png" alt="" class="brand-mark" width="34" height="34">
+        <img src="https://traceline.pages.dev/fast/assets/icons/favicon-512.png" alt="" class="brand-mark" width="34" height="34">
         <span>TraceLine</span>
     </div>
     <button class="theme-toggle" id="theme-btn" aria-label="Toggle theme">
@@ -69,7 +50,7 @@
 <main>
     <div id="hero-container">
         <div class="hero-mark" aria-hidden="true">
-            <img src="assets/icons/favicon-192.png" alt="" width="56" height="56">
+            <img src="https://traceline.pages.dev/fast/assets/icons/favicon-512.png" alt="" width="56" height="56">
         </div>
 
         <h1 class="title">What does your browser hand over the moment you open a page?</h1>
@@ -98,6 +79,16 @@
     </div>
 
     <div id="results-container">
+        <div id="terminal-wrapper">
+            <div id="terminal-titlebar">
+                <span class="term-dot term-dot-red"></span>
+                <span class="term-dot term-dot-yellow"></span>
+                <span class="term-dot term-dot-green"></span>
+                <span id="terminal-title-text">traceline / diagnostic shell</span>
+            </div>
+            <div id="terminal-output" role="log" aria-live="polite" aria-label="Security audit output"></div>
+        </div>
+
         <div id="score-section" style="display:none"></div>
 
         <div id="location-section" style="display:none"></div>
@@ -131,6 +122,7 @@
 <script src="js/engine/system.js"></script>
 <script src="js/engine/privacy.js"></script>
 <script src="js/engine/collect.js"></script>
+<script src="js/ui/terminal.js"></script>
 <script src="js/ui/score.js"></script>
 <script src="js/ui/scorecards.js"></script>
 <script src="js/ui/location.js"></script>

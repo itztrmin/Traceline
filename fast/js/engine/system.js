@@ -41,7 +41,7 @@ TL.system = (function () {
 
     function timing() {
         try {
-            var N = 8000;
+            var N   = 8000;
             var reps = 3;
             var times = [];
             for (var t = 0; t < reps; t++) {
@@ -52,9 +52,9 @@ TL.system = (function () {
             }
             times.sort(function (a, b) { return a - b; });
             var med = times[1];
-            if (med < 1.2)  return 'Very fast (' + med.toFixed(2) + 'ms), likely native hardware';
-            if (med < 4)    return 'Fast (' + med.toFixed(2) + 'ms)';
-            if (med < 10)   return 'Moderate (' + med.toFixed(2) + 'ms), possible throttling';
+            if (med < 3)  return 'Very fast (' + med.toFixed(2) + 'ms), likely native hardware';
+            if (med < 10) return 'Fast (' + med.toFixed(2) + 'ms)';
+            if (med < 25) return 'Moderate (' + med.toFixed(2) + 'ms), possible throttling';
             return 'Slow (' + med.toFixed(2) + 'ms), timer resolution may be clamped';
         } catch (_) { return 'Could not measure'; }
     }
