@@ -49,7 +49,7 @@ TL.geo = (function () {
             var r = await TL.fetch('https://api.seeip.org/geoip', 5000);
             var j = await r.json();
             return {
-                ip: j.ip, city: j.city, region: j.region_name || '', country: j.country,
+                ip: j.ip, city: j.city, region: j.region || '', country: j.country,
                 org: j.organization || 'Unknown', timezone: j.timezone || '',
                 lat: typeof j.latitude === 'number' ? j.latitude : null,
                 lon: typeof j.longitude === 'number' ? j.longitude : null

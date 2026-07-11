@@ -141,7 +141,19 @@ TL.score = (function () {
         };
     }
 
-    return { calculate: calculate };
+    function maxPossible() {
+        var networkMax = 3 + 1 + 1;
+        var fingerprintMax = 2.5 + 2 + 2 + 1 + 1.5 + 2;
+        var hardwareMax = 2 + 2 + 1.5 + 1.5 + 1 + 2;
+
+        var priv = TL.privacy.get();
+        var dntSupported = priv && priv.dnt && priv.dnt.indexOf('Not supported') === -1;
+        var privacyMax = 2.5 + 1.5 + 1 + 1 + 1.5 + 1 + 1 + (dntSupported ? 0.5 : 0);
+
+        return networkMax + fingerprintMax + hardwareMax + privacyMax;
+    }
+
+    return { calculate: calculate, maxPossible: maxPossible };
 })();
 
 window.TL = TL;

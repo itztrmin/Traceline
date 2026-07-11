@@ -222,7 +222,7 @@ TL.scorecards = (function () {
         });
     }
 
-    function start(section) {
+    function start(section, totalMax) {
         section.innerHTML = '';
         section.style.display = 'block';
 
@@ -242,7 +242,11 @@ TL.scorecards = (function () {
         grid.className = 'cat-grid';
         section.appendChild(grid);
 
-        return { section: section, overall: overall, grid: grid, cards: {}, runningScore: 0, runningMax: 0 };
+        return {
+            section: section, overall: overall, grid: grid, cards: {},
+            runningScore: 0,
+            fixedMax: totalMax > 0 ? totalMax : null
+        };
     }
 
     function feed(state, cat) {
@@ -252,16 +256,13 @@ TL.scorecards = (function () {
         animateCategoryCard(card, cat, 650);
 
         var fromScore = state.runningScore;
-        var fromMax   = state.runningMax || 10;
         var toScore   = state.runningScore + cat.data.pts;
-        var toMax     = state.runningMax + cat.data.max;
-
         state.runningScore = toScore;
-        state.runningMax   = toMax;
 
-        var displayMax = toMax > 0 ? toMax : 10;
-        var normalizedTo = (toScore / displayMax) * 10;
-        var normalizedFrom = (fromScore / (fromMax || displayMax)) * 10;
+        if (!state.fixedMax) return;
+
+        var normalizedFrom = (fromScore / state.fixedMax) * 10;
+        var normalizedTo   = (toScore   / state.fixedMax) * 10;
 
         bumpOverallCard(state.overall, normalizedFrom, normalizedTo, 10, 650);
     }

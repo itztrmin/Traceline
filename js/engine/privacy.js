@@ -45,10 +45,19 @@ TL.privacy = (function () {
 
         var check = function (url) {
             return new Promise(function (resolve) {
-                var img   = new Image();
-                var timer = setTimeout(function () { img.src = ''; resolve(true); }, 1200);
-                img.onload  = function () { clearTimeout(timer); resolve(false); };
-                img.onerror = function () { clearTimeout(timer); resolve(true); };
+                var img = new Image();
+                var done = false;
+                var settle = function (blocked) {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    img.onload = null;
+                    img.onerror = null;
+                    resolve(blocked);
+                };
+                var timer = setTimeout(function () { settle(true); }, 1200);
+                img.onload  = function () { settle(false); };
+                img.onerror = function () { settle(true); };
                 img.src = url;
             });
         };

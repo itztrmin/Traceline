@@ -83,7 +83,7 @@ var TL = window.TL || {};
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
         var dataPromise = TL.collect();
-        var scoreState  = TL.scorecards.start(scoreEl);
+        var scoreState  = TL.scorecards.start(scoreEl, TL.score.maxPossible());
 
         if (!await term.header()) return;
         if (!await term.blank(160)) return;

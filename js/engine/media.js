@@ -88,16 +88,28 @@ TL.media = (function () {
         return new Promise(function (resolve) {
             try {
                 if (!window.speechSynthesis) { resolve(null); return; }
+                var settled = false;
+                var timer = null;
+
+                var finish = function (val) {
+                    if (settled) return;
+                    settled = true;
+                    if (timer) clearTimeout(timer);
+                    window.speechSynthesis.onvoiceschanged = null;
+                    resolve(val);
+                };
+
                 var read = function () {
                     var v = window.speechSynthesis.getVoices();
-                    if (!v || !v.length) { resolve(null); return; }
+                    if (!v || !v.length) { finish(null); return; }
                     var names = Array.prototype.slice.call(v, 0, 6).map(function (x) { return x.name; }).join(', ');
-                    resolve(v.length + ' voices ' + names + (v.length > 6 ? '...' : ''));
+                    finish(v.length + ' voices ' + names + (v.length > 6 ? '...' : ''));
                 };
+
                 var v = window.speechSynthesis.getVoices();
                 if (v && v.length) { read(); return; }
                 window.speechSynthesis.onvoiceschanged = read;
-                setTimeout(function () { resolve(null); }, 1500);
+                timer = setTimeout(function () { finish(null); }, 1500);
             } catch (_) { resolve(null); }
         });
     }

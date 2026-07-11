@@ -68,6 +68,12 @@ TL.locationSection = (function () {
         return { el: wrap, hasCoords: hasCoords };
     }
 
+    function tileUrlFor(isLight) {
+        return isLight
+            ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+            : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+    }
+
     function paintMap(net) {
         loadLeaflet().then(function (L) {
             var mapEl = document.getElementById('geo-map');
@@ -80,14 +86,23 @@ TL.locationSection = (function () {
                 scrollWheelZoom: false
             }).setView([net.lat, net.lon], 9);
 
-            var tileUrl = isLight
-                ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
-                : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-
-            L.tileLayer(tileUrl, {
+            var tiles = L.tileLayer(tileUrlFor(isLight), {
                 maxZoom: 18,
                 attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
             }).addTo(map);
+
+            var themeBtn = document.getElementById('theme-btn');
+            if (themeBtn) {
+                var onThemeToggle = function () {
+                    if (!document.body.contains(mapEl)) {
+                        themeBtn.removeEventListener('click', onThemeToggle);
+                        return;
+                    }
+                    var nowLight = document.body.classList.contains('light-mode');
+                    tiles.setUrl(tileUrlFor(nowLight));
+                };
+                themeBtn.addEventListener('click', onThemeToggle);
+            }
 
             var radiusM = (net.radiusKm || 50) * 1000;
 
