@@ -1,6 +1,6 @@
 var TL = window.TL || {};
 
-TL.collect = async function () {
+TL.collect = async function (fast) {
     var sysTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     var results = await Promise.all([
@@ -13,7 +13,7 @@ TL.collect = async function () {
         TL.media.devices(),
         TL.privacy.adblock(),
         TL.privacy.battery(),
-        TL.media.refreshRate(),
+        TL.media.refreshRate(fast),
         Promise.resolve(TL.media.fonts()),
         TL.media.voices(),
         TL.isBrave(),
@@ -28,7 +28,7 @@ TL.collect = async function () {
         ? ipData.city + ', ' + ipData.country
         : 'Hidden or shielded';
 
-    var sys     = TL.system.get();
+    var sys     = TL.system.get(fast);
     var priv    = TL.privacy.get();
     var isBrave = results[12];
     var extSignals = TL.privacy.extensionSignals();

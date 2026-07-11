@@ -39,9 +39,12 @@ TL.scorecards = (function () {
     }
 
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var fastMode = false;
+
+    function setFast(val) { fastMode = !!val; }
 
     function animateValue(from, to, duration, onFrame, onDone) {
-        if (reduceMotion || duration <= 0) {
+        if (reduceMotion || fastMode || duration <= 0) {
             onFrame(to);
             if (onDone) onDone();
             return;
@@ -275,7 +278,7 @@ TL.scorecards = (function () {
         animateOverallCard(state.overall, result, 800);
     }
 
-    return { render: render, start: start, feed: feed, finish: finish };
+    return { render: render, start: start, feed: feed, finish: finish, setFast: setFast };
 })();
 
 window.TL = TL;

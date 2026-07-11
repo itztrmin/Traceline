@@ -62,10 +62,10 @@ TL.privacy = (function () {
             });
         };
 
-        for (var i = 0; i < baits.length; i++) {
-            if (await check(baits[i])) return 'Yes, an ad network request was blocked';
-        }
-        return 'No, ad requests went through unblocked';
+        var results = await Promise.all(baits.map(check));
+        return results.some(Boolean)
+            ? 'Yes, an ad network request was blocked'
+            : 'No, ad requests went through unblocked';
     }
 
     async function battery() {

@@ -39,10 +39,10 @@ TL.system = (function () {
         return matched.length ? matched.join(', ') : 'No distinctive signals';
     }
 
-    function timing(fast) {
+    function timing() {
         try {
-            var N   = fast ? 8000 : 20000;
-            var reps = fast ? 3 : 3;
+            var N = 8000;
+            var reps = 3;
             var times = [];
             for (var t = 0; t < reps; t++) {
                 var s = performance.now(), x = 0;
@@ -52,9 +52,9 @@ TL.system = (function () {
             }
             times.sort(function (a, b) { return a - b; });
             var med = times[1];
-            if (med < 3)  return 'Very fast (' + med.toFixed(2) + 'ms), likely native hardware';
-            if (med < 10) return 'Fast (' + med.toFixed(2) + 'ms)';
-            if (med < 25) return 'Moderate (' + med.toFixed(2) + 'ms), possible throttling';
+            if (med < 1.2)  return 'Very fast (' + med.toFixed(2) + 'ms), likely native hardware';
+            if (med < 4)    return 'Fast (' + med.toFixed(2) + 'ms)';
+            if (med < 10)   return 'Moderate (' + med.toFixed(2) + 'ms), possible throttling';
             return 'Slow (' + med.toFixed(2) + 'ms), timer resolution may be clamped';
         } catch (_) { return 'Could not measure'; }
     }
@@ -161,7 +161,7 @@ TL.system = (function () {
         } catch (_) { return 'Not detected'; }
     }
 
-    function get(fast) {
+    function get() {
         var sc = window.screen;
         var display = sc.width + 'x' + sc.height;
         if (sc.availWidth && (sc.availWidth !== sc.width || sc.availHeight !== sc.height)) {
@@ -194,7 +194,7 @@ TL.system = (function () {
             languages:    langs,
             timezone:     Intl.DateTimeFormat().resolvedOptions().timeZone,
             connection:   connection(),
-            timing:       timing(fast),
+            timing:       timing(),
             timerRes:     timerResolution(),
             css:          cssMedia(),
             tor:          torSignals(),

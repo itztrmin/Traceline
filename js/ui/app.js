@@ -10,8 +10,30 @@ var TL = window.TL || {};
     var termEl    = document.getElementById('terminal-output');
     var titlebar  = document.getElementById('terminal-titlebar');
     var term      = TL.terminal;
+    var fastCheckbox = document.getElementById('fast-mode-checkbox');
 
     term.init(termEl);
+
+    var FAST_MODE_KEY = 'traceline-fast-mode';
+    function loadFastPref() {
+        try { return localStorage.getItem(FAST_MODE_KEY) === '1'; }
+        catch (_) { return false; }
+    }
+    function saveFastPref(val) {
+        try { localStorage.setItem(FAST_MODE_KEY, val ? '1' : '0'); }
+        catch (_) {}
+    }
+
+    if (fastCheckbox) {
+        fastCheckbox.checked = loadFastPref();
+        fastCheckbox.addEventListener('change', function () {
+            saveFastPref(fastCheckbox.checked);
+        });
+    }
+
+    function fastModeEnabled() {
+        return !!(fastCheckbox && fastCheckbox.checked);
+    }
 
     function showCopyBtn() {
         var old = document.getElementById('copy-log-btn');
@@ -71,6 +93,10 @@ var TL = window.TL || {};
     trapBtn.addEventListener('click', async function () {
         if (term.isRunning()) return;
 
+        var fast = fastModeEnabled();
+        term.setFast(fast);
+        TL.scorecards.setFast(fast);
+
         term.reset();
         scoreEl.style.display      = 'none';
         scoreEl.innerHTML          = '';
@@ -84,7 +110,19 @@ var TL = window.TL || {};
         term.setTyping(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        var dataPromise = TL.collect();
+        try {
+            await runAudit(fast);
+        } catch (err) {
+            if (!term.wasAborted()) {
+                term.setTyping(false);
+                trapBtn.textContent = 'Run the audit';
+                trapBtn.disabled    = false;
+            }
+        }
+    });
+
+    async function runAudit(fast) {
+        var dataPromise = TL.collect(fast);
         var scoreState  = TL.scorecards.start(scoreEl, TL.score.maxPossible());
         var locState    = TL.locationSection.start(locEl);
 
@@ -249,5 +287,5 @@ var TL = window.TL || {};
             TL.scorecards.finish(scoreState, result);
             window.scrollBy({ top: 150, behavior: 'smooth' });
         }
-    });
+    }
 })();

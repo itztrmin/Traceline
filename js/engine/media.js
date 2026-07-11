@@ -2,7 +2,9 @@ var TL = window.TL || {};
 
 TL.media = (function () {
 
-    function refreshRate() {
+    function refreshRate(fast) {
+        var target = fast ? 24 : 60;
+        var maxWait = fast ? 1200 : 3500;
         return new Promise(function (resolve) {
             var samples = [], last = null, handle, timer, settled = false;
 
@@ -21,12 +23,13 @@ TL.media = (function () {
                     if (d > 1 && d < 100) samples.push(d);
                 }
                 last = ts;
-                if (samples.length < 60) {
+                if (samples.length < target) {
                     handle = requestAnimationFrame(tick);
                     return;
                 }
                 samples.sort(function (a, b) { return a - b; });
-                var trimmed = samples.slice(10, 50);
+                var trimStart = Math.round(target / 6);
+                var trimmed = samples.slice(trimStart, samples.length - trimStart);
                 var avg = trimmed.reduce(function (a, b) { return a + b; }, 0) / trimmed.length;
                 var hz  = Math.round(1000 / avg);
                 var std = [24,30,48,60,75,90,120,144,165,240,360];
@@ -39,7 +42,7 @@ TL.media = (function () {
                 if (samples.length < 5) { finish('Could not determine'); return; }
                 var avg = samples.reduce(function (a, b) { return a + b; }, 0) / samples.length;
                 finish(Math.round(1000 / avg) + ' Hz (partial sample)');
-            }, 3500);
+            }, maxWait);
         });
     }
 

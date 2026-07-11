@@ -66,27 +66,36 @@ TL.geo = (function () {
         return new Promise(function (resolve) {
             var pending = resolvers.length;
             var settled = false;
-            var errors  = [];
+            var fallback = null;
 
-            function succeed(val) {
+            function succeed(val, isFallback) {
+                if (isFallback) {
+                    if (!fallback) fallback = val;
+                    pending--;
+                    if (pending === 0 && !settled) {
+                        settled = true;
+                        resolve(fallback);
+                    }
+                    return;
+                }
                 if (settled) return;
                 settled = true;
                 resolve(val);
             }
 
-            function fail(err) {
-                errors.push(err);
+            function fail() {
                 pending--;
                 if (pending === 0 && !settled) {
                     settled = true;
-                    resolve(Object.assign({}, empty, { ip: 'All resolvers blocked' }));
+                    resolve(fallback || Object.assign({}, empty, { ip: 'All resolvers blocked' }));
                 }
             }
 
             resolvers.forEach(function (resolver, i) {
+                var isFallback = i === resolvers.length - 1;
                 setTimeout(function () {
                     if (settled) return;
-                    resolver().then(succeed, fail);
+                    resolver().then(function (val) { succeed(val, isFallback); }, fail);
                 }, i * 250);
             });
         });

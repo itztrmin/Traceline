@@ -3,10 +3,14 @@ var TL = window.TL || {};
 TL.terminal = (function () {
     var isTyping = false;
     var aborted  = false;
+    var fast     = false;
     var el       = null;
     var lastScroll = 0;
 
     function init(element) { el = element; }
+
+    function setFast(val) { fast = !!val; }
+    function isFast() { return fast; }
 
     function reset() {
         aborted  = false;
@@ -47,6 +51,12 @@ TL.terminal = (function () {
     }
 
     async function typeText(text) {
+        if (aborted) return false;
+        if (fast) {
+            appendText(text);
+            el.scrollTop = el.scrollHeight;
+            return true;
+        }
         for (var i = 0; i < text.length; i++) {
             if (aborted) return false;
             appendText(text[i]);
@@ -66,7 +76,7 @@ TL.terminal = (function () {
         var ok = await typeText((text || '') + '\n');
         if (!ok) return false;
         el.scrollTop = el.scrollHeight;
-        if (pause > 0) await TL.sleep(pause);
+        if (!fast && pause > 0) await TL.sleep(pause);
         return true;
     }
 
@@ -76,7 +86,7 @@ TL.terminal = (function () {
 
     async function field(label, value, preDelay) {
         if (aborted) return false;
-        if (preDelay) await TL.sleep(preDelay);
+        if (!fast && preDelay) await TL.sleep(preDelay);
         return typeLine('  ' + TL.pad(label, 15) + ': ' + value);
     }
 
@@ -93,6 +103,11 @@ TL.terminal = (function () {
         span.className = 'tl-banner';
         el.appendChild(span);
         var lines = BANNER.split('\n');
+        if (fast) {
+            span.textContent = BANNER;
+            el.scrollTop = el.scrollHeight;
+            return true;
+        }
         for (var i = 0; i < lines.length; i++) {
             if (aborted) return false;
             span.textContent += lines[i] + (i < lines.length - 1 ? '\n' : '');
@@ -108,6 +123,11 @@ TL.terminal = (function () {
         var line  = 'TRACELINE // DIAGNOSTIC SHELL';
         var rule  = '-'.repeat(line.length);
         var lines = [rule, line, rule, ''];
+        if (fast) {
+            appendText(lines.join('\n') + '\n');
+            el.scrollTop = el.scrollHeight;
+            return true;
+        }
         for (var i = 0; i < lines.length; i++) {
             if (aborted) return false;
             appendText(lines[i] + '\n');
@@ -123,9 +143,9 @@ TL.terminal = (function () {
         var maxLen = Math.max(cols - 2, 8);
         var len    = Math.max(Math.min(Math.max((label || '').length + 4, 40), maxLen), 8);
         var rule   = '-'.repeat(len);
-        if (!(await typeLine(rule, 80)))  return false;
+        if (!(await typeLine(rule, fast ? 0 : 80)))  return false;
         if (label) {
-            if (!(await typeLine('  ' + label, 100))) return false;
+            if (!(await typeLine('  ' + label, fast ? 0 : 100))) return false;
             if (!(await typeLine(rule, 0)))            return false;
         }
         return true;
@@ -144,7 +164,7 @@ TL.terminal = (function () {
         typeLine: typeLine, blank: blank, field: field,
         header: header, divider: divider,
         markComplete: markComplete, setTyping: setTyping,
-        getCols: getCols
+        getCols: getCols, setFast: setFast, isFast: isFast
     };
 })();
 

@@ -2,9 +2,9 @@ var TL = window.TL || {};
 
 TL.media = (function () {
 
-    function refreshRate(fast) {
-        var target = fast ? 24 : 60;
-        var maxWait = fast ? 1200 : 3500;
+    function refreshRate() {
+        var target = 24;
+        var maxWait = 1200;
         return new Promise(function (resolve) {
             var samples = [], last = null, handle, timer, settled = false;
 

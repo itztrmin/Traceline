@@ -39,18 +39,19 @@ TL.system = (function () {
         return matched.length ? matched.join(', ') : 'No distinctive signals';
     }
 
-    function timing() {
+    function timing(fast) {
         try {
-            var N   = 60000;
+            var N   = fast ? 8000 : 20000;
+            var reps = fast ? 3 : 3;
             var times = [];
-            for (var t = 0; t < 5; t++) {
+            for (var t = 0; t < reps; t++) {
                 var s = performance.now(), x = 0;
                 for (var i = 0; i < N; i++) x += Math.sqrt(i) * Math.sin(i);
                 times.push(performance.now() - s);
                 void x;
             }
             times.sort(function (a, b) { return a - b; });
-            var med = times[2];
+            var med = times[1];
             if (med < 3)  return 'Very fast (' + med.toFixed(2) + 'ms), likely native hardware';
             if (med < 10) return 'Fast (' + med.toFixed(2) + 'ms)';
             if (med < 25) return 'Moderate (' + med.toFixed(2) + 'ms), possible throttling';
@@ -160,7 +161,7 @@ TL.system = (function () {
         } catch (_) { return 'Not detected'; }
     }
 
-    function get() {
+    function get(fast) {
         var sc = window.screen;
         var display = sc.width + 'x' + sc.height;
         if (sc.availWidth && (sc.availWidth !== sc.width || sc.availHeight !== sc.height)) {
@@ -193,7 +194,7 @@ TL.system = (function () {
             languages:    langs,
             timezone:     Intl.DateTimeFormat().resolvedOptions().timeZone,
             connection:   connection(),
-            timing:       timing(),
+            timing:       timing(fast),
             timerRes:     timerResolution(),
             css:          cssMedia(),
             tor:          torSignals(),

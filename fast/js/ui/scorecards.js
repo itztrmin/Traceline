@@ -38,100 +38,42 @@ TL.scorecards = (function () {
         return (Math.round(n * 10) / 10).toString().replace(/\.0$/, '');
     }
 
-    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var fastMode = false;
-
-    function setFast(val) { fastMode = !!val; }
-
-    function animateValue(from, to, duration, onFrame, onDone) {
-        if (reduceMotion || fastMode || duration <= 0) {
-            onFrame(to);
-            if (onDone) onDone();
-            return;
-        }
-        var start = null;
-        function step(ts) {
-            if (start === null) start = ts;
-            var t = Math.min((ts - start) / duration, 1);
-            var eased = 1 - Math.pow(1 - t, 3);
-            var val = from + (to - from) * eased;
-            onFrame(val);
-            if (t < 1) {
-                requestAnimationFrame(step);
-            } else if (onDone) {
-                onDone();
-            }
-        }
-        requestAnimationFrame(step);
-    }
-
-    function setRingPct(scopeEl, pct, color) {
-        var fill = scopeEl.querySelector('.ring-fill');
-        if (!fill) return;
-        var r = parseFloat(fill.getAttribute('r'));
-        var c = 2 * Math.PI * r;
-        fill.setAttribute('stroke-dasharray', c);
-        fill.setAttribute('stroke-dashoffset', c * (1 - pct / 100));
-        if (color) fill.setAttribute('stroke', color);
-    }
-
     function overallCard(result) {
+        var pct = result.max > 0 ? (result.score / result.max) * 100 : 0;
+        var color = colorFor(pct);
         var wrap = document.createElement('div');
         wrap.className = 'overall-card';
         wrap.innerHTML =
             '<div class="overall-ring-wrap">' +
-                ring(0, colorFor(0), 148) +
+                ring(pct, color, 148) +
                 '<div class="overall-ring-center">' +
-                    '<span class="overall-number" style="color:' + colorFor(0) + '">0.0</span>' +
+                    '<span class="overall-number" style="color:' + color + '">' + result.score.toFixed(1) + '</span>' +
                     '<span class="overall-denom">/ 10</span>' +
                 '</div>' +
             '</div>' +
             '<div class="overall-info">' +
                 '<div class="overall-eyebrow">Overall reading</div>' +
-                '<div class="overall-grade">&nbsp;</div>' +
-                '<p class="overall-verdict"></p>' +
+                '<div class="overall-grade" style="color:' + color + '">' + result.grade + '</div>' +
+                '<p class="overall-verdict">' + result.verdict + '</p>' +
             '</div>';
         return wrap;
     }
 
-    function animateOverallCard(card, result, duration) {
-        var pct = (result.score / result.max) * 100;
-        var color = colorFor(pct);
-        var ringWrap  = card.querySelector('.overall-ring-wrap');
-        var numberEl  = card.querySelector('.overall-number');
-        var gradeEl   = card.querySelector('.overall-grade');
-        var verdictEl = card.querySelector('.overall-verdict');
-
-        var fromVal = parseFloat(numberEl.textContent) || 0;
-
-        animateValue(fromVal, result.score, duration, function (val) {
-            numberEl.textContent = val.toFixed(1);
-            var livePct = (val / result.max) * 100;
-            var liveColor = colorFor(livePct);
-            numberEl.style.color = liveColor;
-            setRingPct(ringWrap, livePct, liveColor);
-        }, function () {
-            gradeEl.textContent = result.grade;
-            gradeEl.style.color = color;
-            verdictEl.textContent = result.verdict;
-        });
-    }
-
-    function bumpOverallCard(card, fromScore, toScore, maxScore, duration) {
-        var ringWrap = card.querySelector('.overall-ring-wrap');
-        var numberEl = card.querySelector('.overall-number');
-        animateValue(fromScore, toScore, duration, function (val) {
-            numberEl.textContent = val.toFixed(1);
-            var livePct = (val / maxScore) * 100;
-            var liveColor = colorFor(livePct);
-            numberEl.style.color = liveColor;
-            setRingPct(ringWrap, livePct, liveColor);
-        });
-    }
-
     function categoryCard(cat) {
+        var pct = cat.data.pct;
+        var color = colorFor(pct);
         var card = document.createElement('div');
-        card.className = 'cat-card is-pending';
+        card.className = 'cat-card is-revealed';
+
+        var checksHtml = cat.data.checks.map(function (c) {
+            return (
+                '<li class="cat-check ' + (c.good ? 'is-good' : 'is-bad') + '">' +
+                    '<span class="cat-check-dot"></span>' +
+                    '<span class="cat-check-label">' + c.label + '</span>' +
+                    '<span class="cat-check-pts">' + (c.good ? '+' + fmtPts(c.pts) : fmtPts(0)) + '</span>' +
+                '</li>'
+            );
+        }).join('');
 
         card.innerHTML =
             '<div class="cat-card-top">' +
@@ -140,56 +82,22 @@ TL.scorecards = (function () {
                         (ICONS[cat.icon] || '') +
                     '</svg>' +
                 '</div>' +
-                ring(0, colorFor(0), 64) +
+                ring(pct, color, 64) +
             '</div>' +
             '<div class="cat-label">' + cat.label + '</div>' +
             '<div class="cat-score-row">' +
-                '<span class="cat-score">--%</span>' +
-                '<span class="cat-points">-- / --</span>' +
+                '<span class="cat-score" style="color:' + color + '">' + Math.round(pct) + '%</span>' +
+                '<span class="cat-points">' + fmtPts(cat.data.pts) + ' / ' + fmtPts(cat.data.max) + '</span>' +
             '</div>' +
-            '<ul class="cat-checks"></ul>';
+            '<ul class="cat-checks">' + checksHtml + '</ul>';
 
         return card;
-    }
-
-    function animateCategoryCard(card, cat, duration) {
-        var pct = cat.data.pct;
-        var color = colorFor(pct);
-        var scoreEl  = card.querySelector('.cat-score');
-        var pointsEl = card.querySelector('.cat-points');
-        var checksEl = card.querySelector('.cat-checks');
-
-        card.classList.remove('is-pending');
-        card.classList.add('is-revealed');
-
-        pointsEl.textContent = '0 / ' + fmtPts(cat.data.max);
-
-        animateValue(0, pct, duration, function (val) {
-            var c = colorFor(val);
-            setRingPct(card, val, c);
-            scoreEl.textContent = Math.round(val) + '%';
-            scoreEl.style.color = c;
-            var livePts = (val / 100) * cat.data.max;
-            pointsEl.textContent = fmtPts(livePts) + ' / ' + fmtPts(cat.data.max);
-        }, function () {
-            scoreEl.style.color = color;
-            pointsEl.textContent = fmtPts(cat.data.pts) + ' / ' + fmtPts(cat.data.max);
-            checksEl.innerHTML = cat.data.checks.map(function (c) {
-                return (
-                    '<li class="cat-check ' + (c.good ? 'is-good' : 'is-bad') + '">' +
-                        '<span class="cat-check-dot"></span>' +
-                        '<span class="cat-check-label">' + c.label + '</span>' +
-                        '<span class="cat-check-pts">' + (c.good ? '+' + fmtPts(c.pts) : fmtPts(0)) + '</span>' +
-                    '</li>'
-                );
-            }).join('');
-        });
     }
 
     function scoreDescription() {
         var p = document.createElement('p');
         p.className = 'score-desc';
-        p.textContent = 'Each category is scored out of its own point pool based on the checks run during the audit, then combined into the overall 0-10 rating. Points come from real signals: a VPN in use, a blocked canvas or audio fingerprint, a masked GPU, hidden hardware details, and active privacy tools all add points. Anything left exposed earns nothing for that check. The score fills in live as each stage of the audit finishes above.';
+        p.textContent = 'Each category is scored out of its own point pool based on the checks run during the audit, then combined into the overall 0-10 rating. Points come from real signals: a VPN in use, a blocked canvas or audio fingerprint, a masked GPU, hidden hardware details, and active privacy tools all add points. Anything left exposed earns nothing for that check.';
         return p;
     }
 
@@ -205,80 +113,17 @@ TL.scorecards = (function () {
         section.appendChild(heading);
 
         section.appendChild(scoreDescription());
-
-        var overall = overallCard(result);
-        section.appendChild(overall);
+        section.appendChild(overallCard(result));
 
         var grid = document.createElement('div');
         grid.className = 'cat-grid';
-        var cardMap = {};
         result.categories.forEach(function (cat) {
-            var c = categoryCard(cat);
-            cardMap[cat.key] = c;
-            grid.appendChild(c);
+            grid.appendChild(categoryCard(cat));
         });
         section.appendChild(grid);
-
-        animateOverallCard(overall, result, 900);
-        result.categories.forEach(function (cat) {
-            animateCategoryCard(cardMap[cat.key], cat, 700);
-        });
     }
 
-    function start(section, totalMax) {
-        section.innerHTML = '';
-        section.style.display = 'block';
-
-        var heading = document.createElement('div');
-        heading.className = 'score-heading';
-        heading.innerHTML =
-            '<div class="score-heading-eyebrow">Live</div>' +
-            '<h2 class="score-heading-title">Privacy score, updating as the audit runs</h2>';
-        section.appendChild(heading);
-
-        section.appendChild(scoreDescription());
-
-        var overall = overallCard({ score: 0, max: 10, grade: '', verdict: '' });
-        section.appendChild(overall);
-
-        var grid = document.createElement('div');
-        grid.className = 'cat-grid';
-        section.appendChild(grid);
-
-        return {
-            section: section, overall: overall, grid: grid, cards: {},
-            runningScore: 0,
-            fixedMax: totalMax > 0 ? totalMax : null
-        };
-    }
-
-    function feed(state, cat) {
-        var card = categoryCard(cat);
-        state.cards[cat.key] = card;
-        state.grid.appendChild(card);
-        animateCategoryCard(card, cat, 650);
-
-        var fromScore = state.runningScore;
-        var toScore   = state.runningScore + cat.data.pts;
-        state.runningScore = toScore;
-
-        if (!state.fixedMax) return;
-
-        var normalizedFrom = (fromScore / state.fixedMax) * 10;
-        var normalizedTo   = (toScore   / state.fixedMax) * 10;
-
-        bumpOverallCard(state.overall, normalizedFrom, normalizedTo, 10, 650);
-    }
-
-    function finish(state, result) {
-        var heading = state.section.querySelector('.score-heading-eyebrow');
-        var title   = state.section.querySelector('.score-heading-title');
-        if (heading) heading.textContent = 'Result';
-        if (title)   title.textContent   = 'Your privacy score';
-        animateOverallCard(state.overall, result, 800);
-    }
-
-    return { render: render, start: start, feed: feed, finish: finish, setFast: setFast };
+    return { render: render, colorFor: colorFor };
 })();
 
 window.TL = TL;

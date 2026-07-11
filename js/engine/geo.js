@@ -63,10 +63,33 @@ TL.geo = (function () {
     ];
 
     async function lookup() {
-        for (var i = 0; i < resolvers.length; i++) {
-            try { return await resolvers[i](); } catch (_) {}
-        }
-        return Object.assign({}, empty, { ip: 'All resolvers blocked' });
+        return new Promise(function (resolve) {
+            var pending = resolvers.length;
+            var settled = false;
+            var errors  = [];
+
+            function succeed(val) {
+                if (settled) return;
+                settled = true;
+                resolve(val);
+            }
+
+            function fail(err) {
+                errors.push(err);
+                pending--;
+                if (pending === 0 && !settled) {
+                    settled = true;
+                    resolve(Object.assign({}, empty, { ip: 'All resolvers blocked' }));
+                }
+            }
+
+            resolvers.forEach(function (resolver, i) {
+                setTimeout(function () {
+                    if (settled) return;
+                    resolver().then(succeed, fail);
+                }, i * 250);
+            });
+        });
     }
 
     var DC = [

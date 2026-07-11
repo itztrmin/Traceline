@@ -31,6 +31,12 @@ TL.locationSection = (function () {
         return typeof v === 'number' ? v.toFixed(4) + '\u00b0' : 'Unknown';
     }
 
+    function esc(str) {
+        var d = document.createElement('div');
+        d.textContent = String(str);
+        return d.innerHTML;
+    }
+
     var DESC =
         'This data is derived entirely from your public IP address\u2019 routing and registration records, ' +
         'not GPS, so it only ever narrows you down to a rough operational radius, never an exact address. ' +
@@ -170,7 +176,7 @@ TL.locationSection = (function () {
 
         var carrierNote = net.isMobileCarrier
             ? '<p class="geo-note">' +
-                'Your ISP, ' + (net.org || 'this provider') + ', looks like a mobile or cellular carrier. ' +
+                'Your ISP, ' + esc(net.org || 'this provider') + ', looks like a mobile or cellular carrier. ' +
                 'Carriers route traffic through a small number of regional hubs, so the marker below often lands ' +
                 'on that hub city rather than the town you are actually in, sometimes well outside the shaded circle. ' +
                 'The radius has been widened to reflect that extra uncertainty.' +
@@ -189,13 +195,13 @@ TL.locationSection = (function () {
 
         var statsWrap = card.querySelector('.geo-stats');
         statsWrap.innerHTML =
-            '<div class="geo-stat"><span class="geo-stat-label">Area name</span><span class="geo-stat-value">' + areaName + '</span></div>' +
+            '<div class="geo-stat"><span class="geo-stat-label">Area name</span><span class="geo-stat-value">' + esc(areaName) + '</span></div>' +
             '<div class="geo-stat-pair">' +
                 '<div class="geo-stat"><span class="geo-stat-label">Latitude</span><span class="geo-stat-value">' + fmtCoord(net.lat) + '</span></div>' +
                 '<div class="geo-stat"><span class="geo-stat-label">Longitude</span><span class="geo-stat-value">' + fmtCoord(net.lon) + '</span></div>' +
             '</div>' +
             '<div class="geo-stat"><span class="geo-stat-label">Operational radius</span><span class="geo-stat-value">~' + radius + ' km' + (net.isMobileCarrier ? ' (mobile network, widened)' : '') + '</span></div>' +
-            '<div class="geo-stat"><span class="geo-stat-label">Service provider</span><span class="geo-stat-value">' + (net.org || 'Unknown') + '</span></div>';
+            '<div class="geo-stat"><span class="geo-stat-label">Service provider</span><span class="geo-stat-value">' + esc(net.org || 'Unknown') + '</span></div>';
 
         if (hasCoords) paintMap(net);
     }

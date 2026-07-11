@@ -140,10 +140,6 @@
     animation: cat-card-in 0.45s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-.cat-card.is-pending .cat-score {
-    color: var(--text-dim);
-}
-
 @keyframes cat-card-in {
     to {
         opacity: 1;
