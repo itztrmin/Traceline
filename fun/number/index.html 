@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>e<3</title>
+
+  <meta name="description" content="THE NUMBER IS +8801308668603">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Null — Cats">
+  <meta property="og:description" content="THE NUMBER IS +8801308668603">
+  <meta property="og:site_name" content="Null — Cats">
+  <meta property="og:url" content="https://example.com">
+  <meta property="og:image" content="https://example.com/image.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Null — Cats">
+  <meta name="twitter:description" content="THE NUMBER IS +8801308668603">
+  <meta name="twitter:image" content="https://example.com/image.png">
+
+  <meta name="theme-color" content="#000000">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      font-size: 4rem;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <h1>+8801308668603</h1>
+</body>
+</html>
